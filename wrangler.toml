@@ -1,4 +1,10 @@
-# Cloudflare Pages — deploy the `dist` folder (see npm run build).
-# CLI: npx wrangler pages deploy dist --project-name=YOUR_PROJECT_NAME
-name = "ciencia-catastrofes"
+# Cloudflare Workers — Git-connected builds (dashboard: Build + Deploy).
+# `npm run build` must run first so ./dist exists.
+# Docs: https://developers.cloudflare.com/workers/static-assets/
+name = "science-project-kid"
 compatibility_date = "2025-05-01"
+
+[assets]
+directory = "./dist"
+# Client-side app: unknown paths still serve index.html (optional but safe).
+not_found_handling = "single-page-application"

@@ -1,6 +1,14 @@
-# Cloudflare Pages
+# Cloudflare (Pages ou Workers)
 
 Este projeto é **estático** (HTML + CSS + JS/JSX servidos tal como estão). O `npm run build` copia só o necessário para `dist/`.
+
+## Workers com Git (o teu ecrã)
+
+Se no Cloudflare vês **Deploy command:** `npx wrangler deploy` e **Version command:** `wrangler versions upload`, estás num projeto **Worker** ligado ao Git — não em **Pages**. Isso é válido: o `wrangler.toml` define `[assets] directory = "./dist"` para o Wrangler publicar o site estático gerado pelo build.
+
+Fluxo: `npm install` → `npm run build` (cria `dist/`) → `npx wrangler deploy` (envia os assets de `dist/`).
+
+## Cloudflare Pages (alternativa mais simples)
 
 ## Painel (recomendado)
 
