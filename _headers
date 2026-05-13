@@ -1,0 +1,6 @@
+# Cloudflare Pages — https://developers.cloudflare.com/pages/configuration/headers/
+/*
+  Referrer-Policy: strict-origin-when-cross-origin
+
+/*.jsx
+  Content-Type: text/javascript; charset=utf-8

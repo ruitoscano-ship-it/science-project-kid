@@ -1,0 +1,4 @@
+# Cloudflare Pages — deploy the `dist` folder (see npm run build).
+# CLI: npx wrangler pages deploy dist --project-name=YOUR_PROJECT_NAME
+name = "ciencia-catastrofes"
+compatibility_date = "2025-05-01"

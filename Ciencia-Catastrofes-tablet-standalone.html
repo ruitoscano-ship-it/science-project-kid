@@ -1,0 +1,3344 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="theme-color" content="#FFF6E0" />
+  <title>Ciência vs. Catástrofes — Simulador (standalone)</title>
+  <!-- Ficheiro único: copia para o tablet e abre no Safari/Chrome com Wi‑Fi (carrega React e Babel da Internet). -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@600;700;800;900&display=swap" />
+  <style>
+/* ===== Reset / base ===== */
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; height: 100%; }
+body {
+  font-family: 'Nunito', system-ui, sans-serif;
+  background: #FFF6E0;
+  color: #2C2A4A;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+button { font-family: inherit; cursor: pointer; border: none; background: none; }
+:root {
+  --cream: #FFF6E0;
+  --sky: #9FD9F0;
+  --sky-deep: #7FC8E8;
+  --sun: #FFD23F;
+  --grass: #6BBE5E;
+  --grass-deep: #5B8F4A;
+  --dirt: #C9A06B;
+  --terracotta: #E8845C;
+  --roof: #A85439;
+  --ink: #2C2A4A;
+  --ink-soft: #6B6890;
+  --paper: #FFFDF7;
+  --water: #4A9FD9;
+  --fire: #FF6B3D;
+  --shadow: 0 6px 0 rgba(44, 42, 74, 0.12), 0 12px 28px rgba(44, 42, 74, 0.10);
+  --shadow-sm: 0 3px 0 rgba(44, 42, 74, 0.10), 0 6px 14px rgba(44, 42, 74, 0.08);
+}
+
+/* ===== Layout ===== */
+#root { min-height: 100vh; }
+.app {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 24px;
+}
+.h-title {
+  font-family: 'Fredoka', system-ui, sans-serif;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  margin: 0;
+}
+
+/* ===== Home ===== */
+.home-hero {
+  position: relative;
+  background: linear-gradient(180deg, #9FD9F0 0%, #B8E5F5 60%, #FFF6E0 100%);
+  border-radius: 32px;
+  padding: 32px 32px 40px;
+  overflow: hidden;
+  box-shadow: var(--shadow);
+  border: 4px solid #fff;
+}
+.home-hero .sun {
+  position: absolute; top: 28px; right: 60px;
+  width: 90px; height: 90px; border-radius: 50%;
+  background: radial-gradient(circle, #FFE066 0%, #FFD23F 60%, #FFC107 100%);
+  box-shadow: 0 0 60px rgba(255, 210, 63, 0.6);
+}
+.home-hero .cloud {
+  position: absolute; background: #fff; border-radius: 50px;
+  opacity: 0.9;
+}
+.home-hero .cloud.c1 { top: 50px; left: 8%; width: 110px; height: 28px; }
+.home-hero .cloud.c1::before, .home-hero .cloud.c1::after { content:''; position:absolute; background:#fff; border-radius:50%; }
+.home-hero .cloud.c1::before { width:40px; height:40px; top:-14px; left:18px; }
+.home-hero .cloud.c1::after { width:32px; height:32px; top:-10px; left:55px; }
+.home-hero .cloud.c2 { top: 110px; left: 38%; width: 80px; height: 20px; }
+.home-hero .cloud.c2::before { content:''; position:absolute; background:#fff; border-radius:50%; width:30px; height:30px; top:-10px; left:22px; }
+
+.home-header {
+  display: flex; align-items: center; gap: 18px; flex-wrap: wrap;
+  position: relative; z-index: 2;
+}
+.home-badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: #fff; border: 3px solid var(--ink);
+  border-radius: 100px; padding: 6px 14px;
+  font-weight: 800; font-size: 13px; color: var(--ink);
+  box-shadow: var(--shadow-sm);
+}
+.home-badge .dot { width: 10px; height: 10px; border-radius: 50%; background: #6BBE5E; }
+.home-title {
+  font-family: 'Fredoka', sans-serif;
+  font-weight: 600;
+  font-size: clamp(36px, 5vw, 64px);
+  line-height: 1;
+  margin: 16px 0 6px;
+  color: var(--ink);
+  max-width: 900px;
+  letter-spacing: -0.02em;
+  position: relative; z-index: 2;
+}
+.home-title .accent { color: var(--terracotta); }
+.home-subtitle {
+  font-size: clamp(16px, 1.6vw, 20px);
+  color: var(--ink-soft);
+  max-width: 720px;
+  margin: 0;
+  position: relative; z-index: 2;
+  line-height: 1.45;
+}
+
+/* Tabs na página inicial */
+.home-tabs {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin: 22px 0 8px;
+  padding: 0 8px;
+}
+.home-tab {
+  font-family: 'Fredoka', sans-serif;
+  font-weight: 600;
+  font-size: 17px;
+  padding: 12px 28px;
+  border-radius: 100px;
+  border: 3px solid var(--ink);
+  background: #fff;
+  color: var(--ink-soft);
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.12s ease, box-shadow 0.12s ease, background 0.12s ease;
+}
+.home-tab:hover {
+  transform: translateY(-2px);
+  color: var(--ink);
+}
+.home-tab.on {
+  background: var(--ink);
+  color: #FFD23F;
+  box-shadow: var(--shadow-sm);
+}
+.home-tab-panel {
+  margin-top: 8px;
+}
+
+/* Aprender mais */
+.learn-more {
+  margin-top: 8px;
+  padding: 8px 4px 0;
+}
+.learn-more-title {
+  font-family: 'Fredoka', sans-serif;
+  font-weight: 600;
+  font-size: clamp(24px, 3vw, 32px);
+  margin: 0 0 12px;
+  color: var(--ink);
+  text-align: center;
+  letter-spacing: -0.02em;
+}
+.learn-more-lead {
+  font-size: clamp(15px, 1.45vw, 17px);
+  font-weight: 700;
+  color: var(--ink-soft);
+  line-height: 1.55;
+  max-width: 820px;
+  margin: 0 auto 28px;
+  text-align: center;
+}
+.learn-more-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  max-width: 900px;
+  margin: 0 auto;
+}
+.learn-card {
+  background: var(--paper);
+  border: 4px solid var(--ink);
+  border-radius: 24px;
+  overflow: hidden;
+  box-shadow: var(--shadow);
+}
+.learn-card-head {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 20px;
+  border-bottom: 3px solid var(--ink);
+}
+.learn-card-emoji {
+  font-size: 40px;
+  line-height: 1;
+}
+.learn-card-title {
+  font-family: 'Fredoka', sans-serif;
+  font-weight: 600;
+  font-size: 26px;
+  margin: 0;
+  color: var(--ink);
+}
+.learn-card-body {
+  padding: 18px 22px 22px;
+}
+.learn-card-intro {
+  margin: 0 0 18px;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--ink);
+  line-height: 1.55;
+}
+.learn-subhead {
+  font-family: 'Fredoka', sans-serif;
+  font-weight: 600;
+  font-size: 17px;
+  margin: 16px 0 8px;
+  color: var(--terracotta);
+}
+.learn-list {
+  margin: 0 0 4px;
+  padding-left: 22px;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--ink-soft);
+  line-height: 1.55;
+}
+.learn-list li + li {
+  margin-top: 8px;
+}
+.learn-remember {
+  margin: 18px 0 0;
+  padding: 14px 16px;
+  background: #FFF1B8;
+  border: 3px solid var(--ink);
+  border-radius: 16px;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--ink);
+  line-height: 1.5;
+}
+
+/* ===== Home — pedagogical block (4.º ano) ===== */
+.home-edu {
+  margin-top: 28px;
+  padding: 24px 22px 8px;
+  background: var(--paper);
+  border: 3px solid var(--ink);
+  border-radius: 24px;
+  box-shadow: var(--shadow-sm);
+}
+.home-edu-title {
+  font-family: 'Fredoka', sans-serif;
+  font-weight: 600;
+  font-size: clamp(22px, 2.5vw, 28px);
+  margin: 0 0 10px;
+  color: var(--ink);
+  letter-spacing: -0.01em;
+}
+.home-edu-lead {
+  font-size: clamp(15px, 1.4vw, 17px);
+  color: var(--ink);
+  font-weight: 700;
+  line-height: 1.5;
+  margin: 0 0 18px;
+  max-width: 900px;
+}
+.home-edu-grid {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+}
+.home-edu-card {
+  background: #fff;
+  border: 3px solid var(--ink);
+  border-radius: 18px;
+  padding: 14px 16px 16px;
+  box-shadow: var(--shadow-sm);
+}
+.home-edu-card-title {
+  font-family: 'Fredoka', sans-serif;
+  font-weight: 600;
+  font-size: 17px;
+  margin: 0 0 8px;
+  color: var(--terracotta);
+}
+.home-edu-card-text {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink-soft);
+  line-height: 1.5;
+}
+
+/* ===== Disaster grid ===== */
+.section-h {
+  display: flex; align-items: baseline; justify-content: space-between;
+  margin: 36px 0 18px; padding: 0 8px;
+}
+.section-h h2 {
+  font-family: 'Fredoka', sans-serif; font-weight: 600;
+  font-size: 28px; margin: 0; color: var(--ink);
+  letter-spacing: -0.01em;
+}
+.section-h p { color: var(--ink-soft); margin: 0; font-size: 15px; }
+
+.cards {
+  display: grid; gap: 18px;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+}
+.card {
+  background: var(--paper);
+  border: 3px solid var(--ink);
+  border-radius: 24px;
+  overflow: hidden;
+  box-shadow: var(--shadow);
+  transition: transform .15s ease, box-shadow .15s ease;
+  cursor: pointer;
+  position: relative;
+  display: flex; flex-direction: column;
+}
+.card:hover:not(.disabled) {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 0 rgba(44, 42, 74, 0.12), 0 18px 36px rgba(44, 42, 74, 0.12);
+}
+.card:active:not(.disabled) { transform: translateY(0); }
+.card.disabled { opacity: 0.65; cursor: not-allowed; }
+.card .preview {
+  height: 160px; position: relative; overflow: hidden;
+  border-bottom: 3px solid var(--ink);
+}
+.card .preview svg { display: block; width: 100%; height: 100%; }
+.card-body {
+  padding: 16px 18px 18px;
+  display: flex; flex-direction: column; gap: 6px;
+}
+.card-title {
+  font-family: 'Fredoka', sans-serif; font-weight: 600;
+  font-size: 22px; color: var(--ink); margin: 0;
+  letter-spacing: -0.01em;
+}
+.card-desc { font-size: 14px; color: var(--ink-soft); margin: 0; line-height: 1.4; }
+.card-foot {
+  display: flex; align-items: center; gap: 10px; margin-top: 10px;
+  font-size: 13px; font-weight: 800; color: var(--ink);
+}
+.card-foot .chip {
+  background: #FFF1B8; border: 2px solid var(--ink);
+  border-radius: 100px; padding: 3px 10px;
+}
+.card-foot .chip.green { background: #C9F0B4; }
+.card-foot .chip.muted { background: #EDEAFF; }
+.card .ribbon {
+  position: absolute; top: 12px; right: 12px;
+  background: var(--ink); color: #fff;
+  font-weight: 800; font-size: 11px; letter-spacing: 0.05em;
+  padding: 4px 10px; border-radius: 100px;
+}
+
+/* ===== Simulator screen ===== */
+.sim-top {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 16px; margin-bottom: 18px; flex-wrap: wrap;
+}
+.back-btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: #fff; border: 3px solid var(--ink);
+  border-radius: 100px; padding: 8px 16px;
+  font-weight: 800; color: var(--ink); font-size: 14px;
+  box-shadow: var(--shadow-sm);
+}
+.back-btn:hover { transform: translateY(-2px); }
+.mode-switch {
+  display: inline-flex; background: #fff; border: 3px solid var(--ink);
+  border-radius: 100px; padding: 4px;
+  box-shadow: var(--shadow-sm);
+}
+.mode-switch button {
+  padding: 8px 18px; border-radius: 100px;
+  font-weight: 800; font-size: 14px; color: var(--ink-soft);
+}
+.mode-switch button.on {
+  background: var(--ink); color: #FFD23F;
+}
+
+.sim-grid {
+  display: grid; gap: 18px;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
+}
+@media (max-width: 960px) { .sim-grid { grid-template-columns: 1fr; } }
+
+.panel {
+  background: var(--paper);
+  border: 3px solid var(--ink);
+  border-radius: 24px;
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+.panel-head {
+  padding: 16px 20px; border-bottom: 3px solid var(--ink);
+  background: #FFF1B8;
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 12px; flex-wrap: wrap;
+}
+.panel-head h3 {
+  font-family: 'Fredoka', sans-serif; font-weight: 600;
+  font-size: 22px; margin: 0; color: var(--ink);
+}
+.budget-strip {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 14px;
+  padding: 10px 20px;
+  background: #FFF1B8;
+  border-bottom: 3px solid var(--ink);
+}
+.budget-strip-total {
+  font-family: 'Fredoka', sans-serif;
+  font-weight: 600;
+  font-size: 15px;
+  color: var(--ink);
+}
+.budget-strip-hint {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--ink-soft);
+  max-width: 420px;
+  line-height: 1.35;
+}
+.var-pts {
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--ink-soft);
+  margin-left: 2px;
+}
+.panel-body { padding: 18px 20px; }
+
+/* Simulator — scenario intro */
+.sim-teach {
+  margin: 0;
+  padding: 14px 20px;
+  background: #E8F4FF;
+  border-bottom: 3px solid var(--ink);
+}
+.sim-teach-label {
+  margin: 0 0 6px;
+  font-family: 'Fredoka', sans-serif;
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--ink);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.sim-teach-text {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--ink-soft);
+  line-height: 1.5;
+}
+
+/* Variable — strand badge + prevention text */
+.strand {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 6px;
+  padding: 3px 10px;
+  border-radius: 100px;
+  border: 2px solid var(--ink);
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.02em;
+}
+.strand.ciencia { background: #E8F4FF; color: var(--ink); }
+.strand.tecnologia { background: #FFF1B8; color: var(--ink); }
+.strand.ambos { background: #C9F0B4; color: var(--ink); }
+.strand-emoji { font-size: 13px; line-height: 1; }
+
+.var-prevent {
+  margin-top: 10px;
+  padding: 10px 12px;
+  background: #F7F5FF;
+  border: 2px solid var(--ink);
+  border-radius: 14px;
+}
+.var-prevent-title {
+  margin: 0 0 6px;
+  font-family: 'Fredoka', sans-serif;
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--ink);
+}
+.var-prevent-text {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink-soft);
+  line-height: 1.45;
+}
+
+/* Scene */
+.scene-wrap { position: relative; aspect-ratio: 16/10; background:#9FD9F0; }
+.scene-wrap svg { width: 100%; height: 100%; display: block; }
+.scene-meter {
+  position: absolute; top: 14px; left: 14px;
+  display: flex; align-items: center; gap: 10px;
+  background: rgba(255,255,255,0.95); border: 3px solid var(--ink);
+  border-radius: 100px; padding: 6px 14px 6px 8px;
+  font-weight: 800; color: var(--ink); font-size: 13px;
+  box-shadow: var(--shadow-sm);
+}
+.scene-meter .mlabel { color: var(--ink-soft); margin-right: 4px; font-size: 12px; }
+.scene-meter .bar { width: 90px; height: 10px; background:#EDEAFF; border-radius: 100px; overflow:hidden; border:2px solid var(--ink); }
+.scene-meter .bar > div { height: 100%; transition: width .35s ease, background .35s ease; }
+.timer-pill {
+  position: absolute; top: 14px; right: 14px;
+  display: inline-flex; align-items: center; gap: 8px;
+  background: var(--ink); color: #FFD23F;
+  border-radius: 100px; padding: 8px 16px;
+  font-weight: 900; font-size: 15px;
+  font-variant-numeric: tabular-nums;
+}
+.timer-pill.warn { background: var(--terracotta); color: #fff; }
+.timer-pill .pulse {
+  width: 10px; height: 10px; background: #FFD23F; border-radius: 50%;
+  animation: pulse 1s infinite;
+}
+.timer-pill.warn .pulse { background: #fff; }
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+/* Mascot bubble */
+.mascot-row {
+  display: flex; align-items: flex-end; gap: 12px;
+  padding: 14px 20px 0;
+}
+.mascot-row .bubble {
+  background: #FFF1B8; border: 3px solid var(--ink);
+  border-radius: 18px 18px 18px 4px;
+  padding: 10px 14px; font-size: 14px; font-weight: 700; color: var(--ink);
+  flex: 1; min-width: 0;
+  box-shadow: var(--shadow-sm);
+}
+
+/* Variables (sliders) */
+.var {
+  border: 3px solid var(--ink);
+  background: #fff;
+  border-radius: 18px;
+  padding: 12px 14px;
+  margin-bottom: 12px;
+  box-shadow: var(--shadow-sm);
+}
+.var-top {
+  display: flex; align-items: center; gap: 10px;
+  margin-bottom: 8px;
+}
+.var-icon {
+  width: 40px; height: 40px; border-radius: 12px;
+  border: 3px solid var(--ink);
+  display: grid; place-items: center;
+  flex-shrink: 0;
+}
+.var-icon svg { width: 24px; height: 24px; }
+.var-text { flex: 1; min-width: 0; }
+.var-name {
+  font-family: 'Fredoka', sans-serif; font-weight: 600;
+  font-size: 16px; margin: 0; color: var(--ink); line-height: 1.1;
+}
+.var-hint { font-size: 12px; color: var(--ink-soft); margin: 2px 0 0; line-height: 1.3; }
+.var-val {
+  font-weight: 900; color: var(--ink);
+  background: #FFF1B8; border: 2px solid var(--ink);
+  border-radius: 100px; padding: 4px 10px;
+  font-size: 13px; min-width: 48px; text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+input[type=range].chunky {
+  -webkit-appearance: none; appearance: none;
+  width: 100%; height: 22px; background: transparent;
+  cursor: pointer;
+}
+input[type=range].chunky::-webkit-slider-runnable-track {
+  height: 14px; background: #EDEAFF;
+  border: 3px solid var(--ink); border-radius: 100px;
+}
+input[type=range].chunky::-moz-range-track {
+  height: 14px; background: #EDEAFF;
+  border: 3px solid var(--ink); border-radius: 100px;
+}
+input[type=range].chunky::-webkit-slider-thumb {
+  -webkit-appearance: none; appearance: none;
+  width: 28px; height: 28px; border-radius: 50%;
+  background: var(--terracotta); border: 3px solid var(--ink);
+  margin-top: -10px;
+  box-shadow: 0 3px 0 rgba(44,42,74,0.2);
+}
+input[type=range].chunky::-moz-range-thumb {
+  width: 28px; height: 28px; border-radius: 50%;
+  background: var(--terracotta); border: 3px solid var(--ink);
+  box-shadow: 0 3px 0 rgba(44,42,74,0.2);
+}
+
+/* Stats card */
+.stats {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
+  padding: 14px 20px 0;
+}
+.stat {
+  border: 3px solid var(--ink); border-radius: 18px;
+  background: #fff; padding: 10px 14px;
+  display: flex; align-items: center; gap: 10px;
+  box-shadow: var(--shadow-sm);
+}
+.stat .ico {
+  width: 38px; height: 38px; border-radius: 50%;
+  border: 3px solid var(--ink);
+  display: grid; place-items: center; flex-shrink: 0;
+}
+.stat .label { font-size: 12px; color: var(--ink-soft); font-weight: 700; }
+.stat .val {
+  font-family: 'Fredoka', sans-serif; font-weight: 600;
+  font-size: 22px; line-height: 1; color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+
+/* CTA buttons */
+.cta {
+  display: inline-flex; align-items: center; gap: 10px;
+  background: var(--terracotta); color: #fff;
+  border: 3px solid var(--ink); border-radius: 100px;
+  padding: 12px 22px; font-weight: 900; font-size: 16px;
+  box-shadow: 0 5px 0 var(--ink);
+  transition: transform .1s ease, box-shadow .1s ease;
+}
+.cta:hover { transform: translateY(-2px); box-shadow: 0 7px 0 var(--ink); }
+.cta:active { transform: translateY(3px); box-shadow: 0 2px 0 var(--ink); }
+.cta.green { background: var(--grass); }
+.cta.ghost { background: #fff; color: var(--ink); }
+.cta.big { font-size: 18px; padding: 14px 26px; }
+
+.sim-actions { padding: 14px 20px 20px; display: flex; gap: 10px; flex-wrap: wrap; }
+
+/* ===== Results modal ===== */
+.modal-bg {
+  position: fixed; inset: 0; background: rgba(44, 42, 74, 0.55);
+  display: grid; place-items: center; z-index: 100;
+  padding: 20px;
+  animation: fadeIn .2s ease;
+}
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+.modal {
+  background: var(--paper);
+  border: 4px solid var(--ink);
+  border-radius: 28px;
+  max-width: 560px; width: 100%;
+  box-shadow: 0 14px 0 rgba(44,42,74,0.18), 0 30px 50px rgba(0,0,0,0.3);
+  overflow: hidden;
+  animation: popIn .25s cubic-bezier(.34,1.56,.64,1);
+}
+@keyframes popIn { from { transform: scale(.85); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+.modal-head {
+  padding: 26px 26px 20px;
+  background: #FFF1B8;
+  border-bottom: 4px solid var(--ink);
+  text-align: center;
+}
+.modal-head h2 {
+  font-family: 'Fredoka', sans-serif; font-weight: 600;
+  font-size: 32px; margin: 0 0 4px; color: var(--ink);
+}
+.modal-head p { margin: 0; color: var(--ink-soft); font-weight: 700; }
+.stars {
+  display: flex; gap: 6px; justify-content: center; margin: 14px 0 4px;
+}
+.stars .star {
+  width: 44px; height: 44px;
+  filter: drop-shadow(0 3px 0 rgba(44,42,74,0.2));
+}
+.stars .star.off { opacity: 0.25; filter: grayscale(0.8); }
+.modal-body { padding: 22px 26px 26px; max-height: min(62vh, 520px); overflow-y: auto; }
+.modal-reflect {
+  margin-top: 14px;
+  padding: 14px 16px;
+  border-radius: 16px;
+  border: 3px solid var(--ink);
+  text-align: left;
+}
+.result-stats + .modal-reflect { margin-top: 16px; }
+.modal-reflect + .modal-reflect { margin-top: 12px; }
+.modal-reflect.good { background: #E3F5DE; }
+.modal-reflect.improve { background: #FFE8E0; }
+.modal-reflect.tips { background: #EDE9FF; }
+.modal-reflect-title {
+  font-family: 'Fredoka', sans-serif;
+  font-weight: 600;
+  font-size: 15px;
+  margin: 0 0 10px;
+  color: var(--ink);
+  letter-spacing: -0.01em;
+}
+.modal-reflect-list {
+  margin: 0;
+  padding-left: 18px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink-soft);
+  line-height: 1.5;
+}
+.modal-reflect-list li + li { margin-top: 8px; }
+.result-stats {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+  margin-bottom: 16px;
+}
+.fact {
+  background: #E8F4FF; border: 3px solid var(--ink);
+  border-radius: 18px; padding: 14px 16px;
+  display: flex; gap: 12px; align-items: flex-start;
+  margin-top: 14px;
+}
+.fact .ico {
+  width: 38px; height: 38px; border-radius: 50%;
+  background: #FFD23F; border: 3px solid var(--ink);
+  display: grid; place-items: center; flex-shrink: 0;
+}
+.fact .title {
+  font-family: 'Fredoka', sans-serif; font-weight: 600;
+  font-size: 14px; color: var(--ink);
+  text-transform: uppercase; letter-spacing: 0.05em;
+  margin: 0 0 4px;
+}
+.fact p { margin: 0; font-size: 14px; line-height: 1.45; color: var(--ink); }
+.modal-actions {
+  display: flex; gap: 10px; padding: 0 26px 26px; flex-wrap: wrap;
+}
+
+/* Floating mascot on home */
+.floating-mascot {
+  position: absolute; right: 5%; bottom: 24px;
+  width: 180px; height: 180px;
+  z-index: 2;
+}
+@media (max-width: 720px) {
+  .floating-mascot { width: 120px; height: 120px; right: 4%; bottom: 8px; }
+  .home-hero { padding: 24px 20px 30px; }
+  .home-hero .sun { width: 60px; height: 60px; top: 18px; right: 24px; }
+}
+
+/* Wobble for mascot */
+@keyframes wobble {
+  0%, 100% { transform: rotate(-3deg); }
+  50% { transform: rotate(3deg); }
+}
+.wobble { animation: wobble 3s ease-in-out infinite; transform-origin: center bottom; }
+
+/* Soft shake for disaster on mission end */
+@keyframes shudder {
+  0%, 100% { transform: translate(0,0); }
+  25% { transform: translate(-2px, 1px); }
+  50% { transform: translate(2px, -1px); }
+  75% { transform: translate(-1px, 2px); }
+}
+.shudder { animation: shudder 0.35s ease-in-out 3; }
+
+/* Rain droplets */
+@keyframes droplet {
+  0% { transform: translateY(-20px); opacity: 0; }
+  10% { opacity: 1; }
+  100% { transform: translateY(420px); opacity: 0; }
+}
+.raindrop {
+  fill: #4A9FD9;
+  animation: droplet 1.1s linear infinite;
+}
+
+/* Flame flicker */
+@keyframes flick {
+  0%, 100% { transform: scaleY(1); }
+  50% { transform: scaleY(1.12); }
+}
+.flame { transform-origin: center bottom; animation: flick 0.45s ease-in-out infinite; }
+
+/* Ground shake */
+@keyframes quakeMove {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-3px); }
+  40% { transform: translateX(2px); }
+  60% { transform: translateX(-2px); }
+  80% { transform: translateX(3px); }
+}
+.quake { animation: quakeMove 0.2s linear infinite; }
+
+
+/* Standalone / tablet: toques mais confortáveis */
+@media (pointer: coarse) {
+  .cta, .back-btn, .home-tab, .mode-switch button { min-height: 48px; align-items: center; }
+  .card { -webkit-tap-highlight-color: transparent; }
+  input[type=range].chunky { min-height: 44px; }
+  input[type=range].chunky::-webkit-slider-thumb { width: 36px; height: 36px; margin-top: -14px; }
+  input[type=range].chunky::-moz-range-thumb { width: 36px; height: 36px; }
+}
+
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script crossorigin src="https://unpkg.com/react@18.3.1/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js"></script>
+
+  <script>
+// Disaster definitions for the simulator (pt-PT)
+// Each variable has weight (importance to outcome). Mission mode adds an "intensity" multiplier.
+// strand: papel principal — ciência | tecnologia | ambos (para o trabalho de 4.º ano)
+
+window.HOME_EDUCATION = {
+  lead:
+    'Este simulador faz parte de um trabalho de Ciência e Tecnologia: perceber como a ciência e a tecnologia ajudam a prevenir desastres e a salvar vidas.',
+  blocks: [
+    {
+      title: 'O que vais fazer aqui?',
+      text:
+        'Vais escolher uma catástrofe natural (cheias, fogo, terramoto, tempestade, seca ou deslizamento de terras). Depois, repartes 150 pontos por quatro controlos — não dá para estar tudo no máximo ao mesmo tempo, como na vida real com orçamentos e equipas. Cada controlo representa algo que a sociedade pode fazer melhor quando investe em conhecimento e em ferramentas. No fim, vês se as casas e as pessoas ficaram mais protegidas. Não é um jogo de adivinhar: é para perceberes que prevenir também é ciência!'
+    },
+    {
+      title: 'Ciência — perceber o mundo',
+      text:
+        'Ciência é fazer perguntas, observar, medir e aprender regras sobre a Natureza. Por exemplo: perceber como cai a chuva, como o fogo se alastra ou como se propagam as ondas de um terramoto. Quanto mais sabemos, melhor escolhemos o que fazer antes do perigo chegar.'
+    },
+    {
+      title: 'Tecnologia — ferramentas que ajudam',
+      text:
+        'Tecnologia são as invenções que usamos na prática: sensores, computadores, telemóveis, aviões bombeiros, barragens bem geridas, escolas preparadas… A tecnologia aplica o conhecimento científico para avisar, proteger e resgatar pessoas mais depressa.'
+    },
+    {
+      title: 'Porque é que isto importa?',
+      text:
+        'Muitas vidas se salvam quando há estudos, planeamento e equipamentos adequados. Não existe uma alavanca mágica: cada defesa funciona melhor em conjunto. Por isso, lê com atenção a explicação de cada cenário e de cada controlo — lá percebes em que medida o saber e o desenvolvimento técnico fazem a diferença.'
+    }
+  ]
+};
+
+window.DISASTERS = [
+  {
+    id: 'cheias',
+    name: 'Cheias',
+    emoji: '🌊',
+    short: 'Quando os rios transbordam.',
+    population: 12000,
+    buildings: 850,
+    enabled: true,
+    accent: '#4A9FD9',
+    factTitle: 'Sabias que?',
+    facts: [
+      'Os satélites conseguem ver as nuvens de cima e prever chuvas fortes com dias de antecedência!',
+      'Plantar árvores junto aos rios ajuda a "beber" a água da chuva e evita que ela chegue toda ao rio de uma vez.',
+      'Em Portugal há uma rede de mais de 800 estações meteorológicas que medem a chuva todos os dias.',
+      'As barragens não servem só para fazer eletricidade — também guardam água para evitar cheias!'
+    ],
+    intro: 'Está a chover muito! Ajusta a ciência para proteger a vila do rio.',
+    teachIntro:
+      'Nas cheias, a água desce em grande quantidade e pode inundar campos, estradas e casas. A ciência ajuda-nos a prever e a perceber rios e solos; a tecnologia ajuda-nos a medir, a comunicar e a segurar água de forma segura. Quanto melhor estivermos preparados, menos danos há e mais pessoas ficam a salvo.',
+    variables: [
+      {
+        id: 'meteo',
+        name: 'Estações meteorológicas',
+        hint: 'Medem chuva e vento em tempo real',
+        icon: 'meteo',
+        color: '#7FC8E8',
+        weight: 1.0,
+        default: 30,
+        strand: 'ambos',
+        preventExplain:
+          'Estas estações são tecnologia à nossa volta: pluviómetros, anemómetros e computadores que recolhem dados. Com base na ciência meteorológica, os especialistas interpretam números e nuvens e dizem “vai chover muito em breve”. Quanto mais cedo sabemos, mais tempo há para fechar portas, tirar carros da baixa e acionar planos de emergência. Sem medições fiáveis, a previsão fica turva e a proteção desce.'
+      },
+      {
+        id: 'barragem',
+        name: 'Controlo de barragens',
+        hint: 'Liberta água aos poucos antes da tempestade',
+        icon: 'dam',
+        color: '#4A9FD9',
+        weight: 1.2,
+        default: 40,
+        strand: 'ambos',
+        preventExplain:
+          'Uma barragem é uma grande obra de engenharia (tecnologia) desenhada com conhecimento de física e de materiais (ciência). O controlo inteligente significa libertar água com antecedência quando se prevê chuva forte, para a represa não ficar “demasiado cheia” de repente. Quando o controlo falha ou chega tarde, o risco de cheias à jusante aumenta muito. Por isso, saber + decidir a tempo salva aldeias inteiras.'
+      },
+      {
+        id: 'arvores',
+        name: 'Florestas e árvores',
+        hint: 'As raízes absorvem a chuva como uma esponja',
+        icon: 'tree',
+        color: '#6BBE5E',
+        weight: 0.9,
+        default: 50,
+        strand: 'ciencia',
+        preventExplain:
+          'Aqui o destaque é a ciência da Natureza: o solo com raízes e matéria orgânica absorve e retém água como uma esponja gigante. Isto desacelera o escoamento para o rio e reduz picos de cheia. Plantar e cuidar de florestas ribeirinas é uma estratégia de prevenção baseada em ecologia — não substitui alertas nem barragens, mas alivia o “choque” da chuva. Quanto mais verde e saudável for a bacia hidrográfica, mais ajuda a proteger pessoas e pontes lá em baixo.'
+      },
+      {
+        id: 'alerta',
+        name: 'Alertas no telemóvel',
+        hint: 'Avisa as pessoas em minutos',
+        icon: 'phone',
+        color: '#E8845C',
+        weight: 1.0,
+        default: 40,
+        strand: 'tecnologia',
+        preventExplain:
+          'Os alertas são tecnologia de comunicação: redes, aplicações e mensagens automáticas que levam a informação da ciência até à tua família em segundos. Mesmo com boa previsão, se ninguém souber, ninguém se protege. Avisos claros (“subir bens”, “não atravessar pontes”, “ir para sítio seguro”) dão tempo para reagir. Em cheias, alguns minutos a mais podem evitar acidentes e perdas enormes.'
+      }
+    ]
+  },
+  {
+    id: 'incendios',
+    name: 'Incêndios florestais',
+    emoji: '🔥',
+    short: 'Quando o fogo se espalha na floresta.',
+    population: 8500,
+    buildings: 620,
+    enabled: true,
+    accent: '#FF6B3D',
+    factTitle: 'Sabias que?',
+    facts: [
+      'Há torres de vigia e satélites que vêem o fumo em segundos e chamam os bombeiros!',
+      'Os "aceiros" são caminhos sem árvores que cortam o fogo — são como muralhas vazias.',
+      'Os aviões dos bombeiros podem largar 6000 litros de água de uma só vez. É como 30 banheiras!',
+      'Limpar os matos perto das casas é uma das coisas mais importantes que uma família pode fazer.'
+    ],
+    intro: 'O verão está quente e seco. Prepara as defesas contra o fogo!',
+    teachIntro:
+      'Nos incêndios florestais, o fogo precisa de calor, oxigénio e “combustível” (mato seco). A ciência explica como o fogo se propaga com o vento e a topografia; a tecnologia ajuda a detetar, a cortar caminhos às chamas e a apagar depressa. Prevenir é limpar a tempo, planejar a floresta e ter equipas e meios prontos a agir.',
+    variables: [
+      {
+        id: 'vigia',
+        name: 'Torres e satélites de vigia',
+        hint: 'Detetam fumo em segundos',
+        icon: 'tower',
+        color: '#FFD23F',
+        weight: 1.1,
+        default: 30,
+        strand: 'ambos',
+        preventExplain:
+          'Torres com pessoas atentas e satélites com câmaras térmicas são tecnologia de vigilância. Funcionam melhor quando há ciência por trás: treino para reconhecer fumo, mapas de risco e meteorologia (vento muda tudo!). Detetar cedo significa bombeiros a caminho mais cedo, menos frente de fogo gigante e mais hipóteses de salvar casas e animais. Sem vigilância, o fogo cresce “às escondidas” até ser tarde demais.'
+      },
+      {
+        id: 'aceiros',
+        name: 'Aceiros (corta-fogos)',
+        hint: 'Faixas sem mato que travam as chamas',
+        icon: 'firebreak',
+        color: '#C9A06B',
+        weight: 1.0,
+        default: 35,
+        strand: 'ambos',
+        preventExplain:
+          'Aceiros são faixas sem vegetação que partem a continuidade do combustível — é uma ideia da ciência do fogo aplicada no terreno. Construir e manter aceiros exige planeamento, máquinas e trabalho humano (tecnologia e organização). Cortam o “caminho” das chamas e dão segurança a equipas que defendem aldeias. Sozinhos não chegam se o mato voltar a crescer por todo o lado: por isso a limpeza regular também conta.'
+      },
+      {
+        id: 'avioes',
+        name: 'Aviões e drones bombeiros',
+        hint: 'Atacam o fogo com água do céu',
+        icon: 'plane',
+        color: '#4A9FD9',
+        weight: 1.0,
+        default: 40,
+        strand: 'tecnologia',
+        preventExplain:
+          'Aviões-canadair, helicópteros e drones são tecnologia aérea que leva água ou espuma para sítios difíceis no relevo. A ciência entra na meteorologia (vento forte pode impedir voos seguros) e na estratégia de onde atacar primeiro. Quando estes meios chegam a tempo, o fogo arrefece e perde força antes de chegar às casas. São caros e precisam de manutenção e pilotos treinados — por isso a prevenção no chão continua essencial.'
+      },
+      {
+        id: 'limpeza',
+        name: 'Limpeza dos matos',
+        hint: 'Menos combustível = menos fogo',
+        icon: 'broom',
+        color: '#6BBE5E',
+        weight: 1.1,
+        default: 35,
+        strand: 'ciencia',
+        preventExplain:
+          'Limpar mato junto a casas e estradas é prevenção baseada na ciência do combustível: menos mato seco significa chamas mais baixas e mais lentas. Famílias e autarquias usam ferramentas simples ou máquinas — é tecnologia leve, mas o mais importante é o hábito e o conhecimento de “até onde limpar”. Este controlo mostra que pequenas ações repetidas todas as primaveras podem evitar tragédias no verão.'
+      }
+    ]
+  },
+  {
+    id: 'terramotos',
+    name: 'Terramotos',
+    emoji: '🌍',
+    short: 'Quando a Terra treme.',
+    population: 25000,
+    buildings: 1400,
+    enabled: true,
+    accent: '#A85439',
+    factTitle: 'Sabias que?',
+    facts: [
+      'Os sismógrafos sentem tremores de terra do outro lado do mundo!',
+      'No Japão, há um alerta que avisa o telemóvel 10 segundos antes do terramoto chegar. Esses segundos salvam vidas!',
+      'Edifícios modernos têm "amortecedores" gigantes na base que abanam em vez do edifício.',
+      'Em Portugal, há um plano chamado "Terra Segura" e simulacros nas escolas — para as crianças saberem o que fazer.'
+    ],
+    intro: 'A Terra pode tremer a qualquer momento. Quão preparada está a tua cidade?',
+    teachIntro:
+      'Nos terramotos, a energia libertada na crosta propaga-se em ondas. A ciência permite estudar sismos, solos e materiais; a tecnologia permite medir ondas, enviar alertas e construir edifícios mais seguros. Não dá para “parar” o terramoto, mas dá para reduzir muito os danos e salvar vidas com preparação e engenharia.',
+    variables: [
+      {
+        id: 'sensores',
+        name: 'Sensores sísmicos',
+        hint: 'Detetam ondas no subsolo',
+        icon: 'sensor',
+        color: '#E8845C',
+        weight: 1.0,
+        default: 35,
+        strand: 'ambos',
+        preventExplain:
+          'Os sismógrafos e redes de sensores são instrumentos (tecnologia) que transformam vibrações em dados. Geólogos e engenheiros usam ciência para localizar falhas e perceber o risco de uma região. Em tempo real, sensores próximos do epicentro podem avisar cidades mais longe alguns segundos antes das ondas mais fortes chegarem — pouco tempo, mas suficiente para parar comboios ou avisar escolas. Sem rede de sensores, vamos “às cegas”.'
+      },
+      {
+        id: 'antissismico',
+        name: 'Edifícios antissísmicos',
+        hint: 'Construções que abanam sem partir',
+        icon: 'building',
+        color: '#C9A06B',
+        weight: 1.3,
+        default: 40,
+        strand: 'ambos',
+        preventExplain:
+          'Edifícios antissísmicos resultam de décadas de estudos (ciência dos materiais e das estruturas) e de normas de construção e fiscalização (tecnologia e organização). Fundações, vigas e ligações são desenhadas para abanar sem ruir. Isto não substitui o treino das pessoas, mas reduz esmagamento e ferimentos graves. Quanto mais antiga e frágil for uma cidade sem obras de reforço, maior é o perigo no mesmo terramoto.'
+      },
+      {
+        id: 'alerta_eq',
+        name: 'Alerta precoce',
+        hint: 'Avisa segundos antes do tremor chegar',
+        icon: 'phone',
+        color: '#FFD23F',
+        weight: 1.0,
+        default: 30,
+        strand: 'tecnologia',
+        preventExplain:
+          'O alerta no telemóvel é um sistema tecnológico que liga sensores, computadores e redes móveis. A ideia científica é simples de explicar: ondas diferentes viajam a velocidades diferentes, por isso dá para ganhar uns segundos. Nesses segundos, podes proteger a cabeça e afastar-te de janelas ou objetos que possam cair. O alerta só funciona bem se as pessoas souberem o que fazer — daí a importância dos simulacros.'
+      },
+      {
+        id: 'simulacro',
+        name: 'Simulacros nas escolas',
+        hint: 'Treinar saber o que fazer',
+        icon: 'school',
+        color: '#6BBE5E',
+        weight: 0.9,
+        default: 45,
+        strand: 'ciencia',
+        preventExplain:
+          'Simulacro é treino baseado no conhecimento: professores e alunos repetem passos seguros (cobrir a cabeça, agachar, sair com calma para o ponto de encontro). É “ciência em ação” na comunidade — aprendizagem, memória muscular e confiança. Mesmo com bons edifícios e alertas, o pânico e a confusão causam acidentes; treinar reduz isso. Quanto mais vezes se treina com sentido, melhor a escola protege crianças e adultos.'
+      }
+    ]
+  },
+  {
+    id: 'tempestades',
+    name: 'Tempestades',
+    emoji: '⛈️',
+    short: 'Vento forte, chuva torrencial e relâmpagos.',
+    population: 18000,
+    buildings: 920,
+    enabled: true,
+    accent: '#6B6890',
+    factTitle: 'Sabias que?',
+    facts: [
+      'Um raio pode aquecer o ar à volta mais depressa do que um forno industrial — por isso ouve-se um estrondo enorme!',
+      'Os meteorologistas usam supercomputadores para simular tempestades e avisar com horas de antecedência.',
+      'Janelas com proteção e portas bem fechadas ajudam a que o vento não empurre a chuva para dentro das casas.',
+      'Em muitos países existem “códigos de cores” no telemóvel: verde, amarelo, laranja, vermelho — para toda a gente perceber o perigo.'
+    ],
+    intro: 'O céu escureceu e o vento sopra forte. Prepara a cidade para a tempestade!',
+    teachIntro:
+      'Nas tempestades severas, o vento puxa telhados, a chuva entra pelas frestas e os relâmpagos podem danificar redes elétricas. A ciência explica como se formam nuvens carregadas e rajadas de vento; a tecnologia permite prever, reforçar edifícios e avisar pessoas a tempo. Prevenir é combinar boa informação, boas construções e planos claros de proteção.',
+    variables: [
+      {
+        id: 'previsao',
+        name: 'Previsão e radares',
+        hint: 'Avisar com antecedência',
+        icon: 'meteo',
+        color: '#7FC8E8',
+        weight: 1.0,
+        default: 35,
+        strand: 'ambos',
+        preventExplain:
+          'Radares, satélites e modelos no computador são tecnologia que “fotografam” as nuvens e a chuva à distância. Meteorologistas usam ciência da atmosfera para dizer quando a tempestade chega e onde será mais forte. Quanto mais cedo as famílias e as escolas sabem, mais tempo há para fixar objetos ao chão, fechar portas e ir para sítios seguros. Sem previsão fiável, a surpresa aumenta muito os acidentes.'
+      },
+      {
+        id: 'estruturas',
+        name: 'Casas e escolas mais seguras',
+        hint: 'Telhados e janelas reforçados',
+        icon: 'building',
+        color: '#C9A06B',
+        weight: 1.2,
+        default: 38,
+        strand: 'ambos',
+        preventExplain:
+          'Engenheiros estudam ventos extremos e materiais (ciência) e desenham telhados presos com parafusos especiais, vidros mais resistentes e escolas com salas de refúgio (tecnologia de construção). Edifícios bem preparados perdem menos telhas, entram menos infiltrações e protegem melhor quem lá está. Isto custa planeamento e manutenção — mas reduz ferimentos e estragos caros depois da tempestade.'
+      },
+      {
+        id: 'eletrica',
+        name: 'Proteção elétrica',
+        hint: 'Para-raios e redes mais seguras',
+        icon: 'bolt',
+        color: '#FFD23F',
+        weight: 1.0,
+        default: 32,
+        strand: 'tecnologia',
+        preventExplain:
+          'Para-raios e boa ligação à terra desviam a energia do relâmpago de forma controlada — é tecnologia que aplica física sobre eletricidade. Em tempestade, também importa isolar equipamentos sensíveis e seguir regras (não usar telefone fixo com raios, por exemplo). Redes elétricas preparadas falham menos e causam menos incêndios ou choques. Sem estas proteções, um raio pode destruir casas e ferir pessoas mesmo longe do impacto direto.'
+      },
+      {
+        id: 'rotas',
+        name: 'Avisos e rotas seguras',
+        hint: 'Saber para onde ir e quando',
+        icon: 'phone',
+        color: '#E8845C',
+        weight: 1.0,
+        default: 40,
+        strand: 'ambos',
+        preventExplain:
+          'Mensagens no telemóvel, sirenes e planos de evacuação são tecnologia e organização — mas só funcionam se toda a gente treinar e perceber os mapas (ciência cívica e educação). Rotas seguras evitam cruzar pontes ou vales inundados. Na tempestade, a confusão mata tanto como o vento: por isso avisos simples e repetidos salvam vidas.'
+      }
+    ]
+  },
+  {
+    id: 'secas',
+    name: 'Secas',
+    emoji: '☀️',
+    short: 'Quando chove pouco e a água falta.',
+    population: 14000,
+    buildings: 780,
+    enabled: true,
+    accent: '#E8B85C',
+    factTitle: 'Sabias que?',
+    facts: [
+      'Cerca de 97% da água do planeta é salgada — por isso a água doce é preciosa e deve ser bem gerida!',
+      'As plantas “suam” água para o ar: florestas ajudam a manter o clima mais húmido nas regiões à volta.',
+      'Em seca, engenheiros podem reutilizar água tratada para regar parques — com muita ciência para a tornar segura.',
+      'Medir o nível dos poços e rios com sensores ajuda autarquias a decidir quando pedir poupança à população.'
+    ],
+    intro: 'O sol não para e os rios baixam. Como vais proteger a comunidade?',
+    teachIntro:
+      'Na seca prolongada, falta água para beber, regar plantas e apagar fogos. A ciência estuda ciclos de chuva, solos e clima; a tecnologia ajuda a medir reservatórios, a poupar com contadores inteligentes e a reutilizar água. Ninguém inventa chuva de um dia para o outro — mas dá para sofrer menos com planeamento, florestas saudáveis e hábitos de poupança.',
+    variables: [
+      {
+        id: 'medicao',
+        name: 'Medir água nos rios e poços',
+        hint: 'Sensores e dados em tempo real',
+        icon: 'sensor',
+        color: '#4A9FD9',
+        weight: 1.0,
+        default: 36,
+        strand: 'ambos',
+        preventExplain:
+          'Sensores nos rios, barragens e poços enviam números para computadores (tecnologia). Hidrologistas interpretam tendências: “estamos a gastar mais do que a chuva repõe?” (ciência). Com dados honestos, a autarquia pode avisar cedo, racionar com justiça e evitar que os poços secuem de repente. Sem medição, só notamos o problema quando já é tarde demais.'
+      },
+      {
+        id: 'reuso',
+        name: 'Poupar e reutilizar água',
+        hint: 'Torneiras eficientes e água tratada',
+        icon: 'droplet',
+        color: '#7FC8E8',
+        weight: 1.1,
+        default: 34,
+        strand: 'tecnologia',
+        preventExplain:
+          'Redutores nas torneiras, rega por gotejamento e estações que tratam água cinzenta para regar são tecnologias de poupança. A ciência explica por que lavar a rua com mangueira desperdiça litros em segundos. Cada gota poupa alivia rios e aquíferos. Na seca, pequenos hábitos em milhares de casas somam um efeito enorme na comunidade.'
+      },
+      {
+        id: 'floresta',
+        name: 'Árvores e florestas saudáveis',
+        hint: 'Solo que retém humidade',
+        icon: 'tree',
+        color: '#6BBE5E',
+        weight: 1.0,
+        default: 42,
+        strand: 'ciencia',
+        preventExplain:
+          'Florestas e matos bem cuidados protegem o solo do sol direto e ajudam a água da chuva a infiltrar-se no subsolo em vez de evaporar logo (ciência do ciclo da água). Cortar árvores sem replantar ou deixar mato em monocultura frágil piora a seca local. Este controlo lembra que a Natureza, quando bem gerida, é uma aliada contra a falta de água.'
+      },
+      {
+        id: 'escolas',
+        name: 'Campanhas nas escolas',
+        hint: 'Aprender a fechar a torneira a tempo',
+        icon: 'school',
+        color: '#FFD23F',
+        weight: 0.9,
+        default: 38,
+        strand: 'ciencia',
+        preventExplain:
+          'Campanhas e projetos na escola ensinam crianças e famílias a fechar torneiras, a detetar fugas e a não desperdiçar comida (que também “gasta” água virtual). É educação científica na vida real: perceber que a água é finita e que todos têm um papel. Sem consciência coletiva, as melhores tecnologias sozinhas não chegam.'
+      }
+    ]
+  },
+  {
+    id: 'deslizamentos',
+    name: 'Deslizamentos',
+    emoji: '⛰️',
+    short: 'Quando a encosta desce com lama e pedras.',
+    population: 9500,
+    buildings: 540,
+    enabled: true,
+    accent: '#8B6B4A',
+    factTitle: 'Sabias que?',
+    facts: [
+      'Muitos deslizamentos acontecem depois de chuva forte em encostas já fragilizadas.',
+      'As raízes das árvores seguram a terra como uma rede invisível de cordas.',
+      'Drenagens ajudam a água a escorrer por caminhos seguros em vez de “empurrar” o solo.',
+      'Mapas de risco mostram em cor as zonas mais perigosas — para não se construir casas no sítio errado.'
+    ],
+    intro: 'A chuva molhou a montanha. Será que a encosta aguenta?',
+    teachIntro:
+      'Nos deslizamentos, solo e rochas descem a encosta por causa da água, do peso e da gravidade. Geólogos estudam tipos de rocha e inclinações (ciência); engenheiros constroem drenagens, muros e redes de alerta (tecnologia). Plantar e cuidar vegetação na encosta também freia a erosão. Prevenir é não ignorar sinais de risco e dar à água um caminho seguro.',
+    variables: [
+      {
+        id: 'chuva',
+        name: 'Sensores de chuva e movimento',
+        hint: 'Avisar quando a encosta se mexe',
+        icon: 'sensor',
+        color: '#E8845C',
+        weight: 1.0,
+        default: 33,
+        strand: 'ambos',
+        preventExplain:
+          'Pluviómetros e, em alguns sítios, instrumentos que detetam vibrações minúsculas avisam especialistas cedo (tecnologia). Geólogos cruzam estes dados com mapas de solos instáveis (ciência). Quando a chuva acumulada passa um limiar perigoso, pode haver ordem de evacuação. Sem monitorização, a primeira notícia é o barro à porta — tarde demais para muitas famílias.'
+      },
+      {
+        id: 'drenagem',
+        name: 'Drenagens e obras de estabilização',
+        hint: 'Canos e muros que guiam a água',
+        icon: 'dam',
+        color: '#4A9FD9',
+        weight: 1.2,
+        default: 36,
+        strand: 'ambos',
+        preventExplain:
+          'Drenagens levam a água da chuva para longe da encosta instável; muros e estacas seguram taludes em obras estudadas (engenharia = ciência + tecnologia). Mal feitas, as obras podem piorar o problema — por isso importa estudo de terreno e fiscalização. Este controlo mostra que “domar” a água com cuidado reduz o volume de lama que desce de uma vez.'
+      },
+      {
+        id: 'encosta',
+        name: 'Vegetação na encosta',
+        hint: 'Raízes que seguram a terra',
+        icon: 'tree',
+        color: '#6BBE5E',
+        weight: 1.0,
+        default: 44,
+        strand: 'ciencia',
+        preventExplain:
+          'Plantas com raízes profundas ligam partículas de solo como uma rede natural (ciência da erosão). Cortar tudo na encosta ou deixar o fogo destruir a vegetação aumenta muito o risco. Reflorestar com espécies adequadas e manter herbáceas é prevenção lenta, mas muito eficaz a médio prazo — sobretudo em zonas com chuvas fortes.'
+      },
+      {
+        id: 'alertas_risco',
+        name: 'Alertas e mapas de risco',
+        hint: 'Não construir no sítio errado',
+        icon: 'phone',
+        color: '#FFD23F',
+        weight: 1.0,
+        default: 37,
+        strand: 'ambos',
+        preventExplain:
+          'Mapas de risco traduzem estudos científicos em cores e regras de urbanização (tecnologia de informação geográfica). Alertas no telemóvel e sirenes avisam moradores em noite de temporal. Quando as pessoas sabem onde é perigoso viver e têm para onde ir, salvam-se muitas vidas. Informação clara é tão importante como o muro de contenção.'
+      }
+    ]
+  }
+];
+
+// Encouragement messages from the mascot
+window.MASCOT_TIPS = {
+  cheias: [
+    'Olá! Sou o Professor Eureka. As cheias podem ser controladas com ciência!',
+    'Experimenta as estações meteorológicas — são os nossos olhos no céu! ☁️',
+    'As barragens são fortes mas precisam de bom controlo.',
+    'As árvores são amigas: as raízes "bebem" a chuva!'
+  ],
+  incendios: [
+    'Os incêndios espalham-se depressa. A prevenção é tudo!',
+    'Quanto mais cedo virmos o fumo, mais rápido apagamos.',
+    'Aceiros são como labirintos vazios que confundem o fogo.',
+    'Lembra-te: limpar o mato é poupar a casa.'
+  ],
+  terramotos: [
+    'Não podemos parar a Terra de tremer — mas podemos preparar-nos!',
+    'Os edifícios certos abanam mas não caem.',
+    'Treinar nas escolas faz a diferença numa emergência.',
+    'Cada segundo de aviso pode salvar centenas de vidas.'
+  ],
+  tempestades: [
+    'Raios e vento são perigosos — mas a previsão dá-nos superpoderes! ⛈️',
+    'Telhados bem presos e janelas seguras fazem uma diferença enorme.',
+    'Para-raios são como escudos mágicos contra a eletricidade do céu.',
+    'Lembra-te: saber para onde ir vale tanto como ter um bom casaco!'
+  ],
+  secas: [
+    'A água doce é um tesouro — cada gota conta! 💧',
+    'Medir rios e poços é como pôr um termómetro na sede da Terra.',
+    'Árvores ajudam o solo a guardar humidade por baixo dos nossos pés.',
+    'Na escola aprendemos truques simples que salvam milhares de litros.'
+  ],
+  deslizamentos: [
+    'Chuva + encosta íngreme = precisamos de muita ciência em cima! ⛰️',
+    'Drenagens guiam a água como um escorrega seguro para longe das casas.',
+    'Raízes seguram a terra — a floresta é uma rede viva.',
+    'Mapas de risco dizem-nos onde não convém construir.'
+  ]
+};
+
+window.LOW_SCORE_MESSAGES = {
+  cheias: 'O rio transbordou. Da próxima, sobe a previsão e o controlo da barragem!',
+  incendios: 'O fogo alastrou. Mais vigilância e limpeza vão ajudar!',
+  terramotos: 'Houve muitos danos. Aposta em edifícios antissísmicos e em simulacros!',
+  tempestades: 'A tempestade fez estragos. Reforça previsão, casas e avisos!',
+  secas: 'A comunidade sofreu com a falta de água. Medição, poupança e florestas ajudam!',
+  deslizamentos: 'A lama desceu depressa. Sensores, drenagens e vegetação são a tua equipa!'
+};
+window.HIGH_SCORE_MESSAGES = {
+  cheias: 'Boa! A vila ficou seca e segura. Tu serias um excelente engenheiro hidráulico! 💧',
+  incendios: 'Incrível! A floresta foi salva. Os bombeiros agradecem! 🚁',
+  terramotos: 'Fantástico! A cidade resistiu sem grandes danos. Bravo! 🏗️',
+  tempestades: 'Excelente! A cidade aguentou a trovoada como um castelo bem preparado! ⛈️',
+  secas: 'Muito bem! Guardaste água e cuidaste da terra — verdadeiro guardião do planeta! ☀️',
+  deslizamentos: 'Bravo! A encosta ficou mais segura — geólogo em formação! ⛰️'
+};
+
+// Dicas gerais após o resultado (rodam com o factIndex no modal)
+window.RESULT_POST_TIPS = {
+  cheias: [
+    'Em casa, combina caixas de água limpa com o plano que a escola ou a junta de freguesia divulga em cheias.',
+    'Plantar árvores de espécies adequadas nas zonas húmidas protege o solo e ajuda o rio a não “inchar” de repente.',
+    'Nunca brincar nem estacionar junto a um rio quando há aviso de cheia — a água sobe mais depressa do que parece.',
+    'Partilhar informação correta com vizinhos evita pânico e salva tempo em emergências.'
+  ],
+  incendios: [
+    'Manter um aceiro ou zona limpa à volta da casa é um hábito de prevenção que protege famílias e habitat de animais.',
+    'Reportar fumo cedo (112) dá tempo aos bombeiros e reduz o CO₂ libertado por grandes fogos.',
+    'Florestas saudáveis e mistas ardem com mais dificuldade do que eucaliptal seco e denso.',
+    'Evitar fogueiras e balões em tempo seco protege o ar que todos respiram.'
+  ],
+  terramotos: [
+    'Fixar móveis altos à parede em casa reduz quedas quando a Terra treme — é prevenção simples.',
+    'Saber onde é o ponto de encontro da escola ou do prédio treina a comunidade inteira.',
+    'Edifícios antigos podem ser reforçados: obras de reabilitação sísmica salvam vidas durante décadas.',
+    'Ter uma mochila com água, lanterna e apito ajuda enquanto esperas ajuda profissional.'
+  ],
+  tempestades: [
+    'Guardar objetos soltos no quintal ou na varanda evita que o vento os transforme em projéteis perigosos.',
+    'Desligar aparelhos sensíveis durante trovoadas fortes protege a rede elétrica e reduz desperdício de equipamento.',
+    'Árvores antigas perto de linhas elétricas devem ser podadas por profissionais — evita cortes de energia e fogos.',
+    'Ouvir avisos oficiais em vez de rumores nas redes sociais mantém toda a gente mais segura.'
+  ],
+  secas: [
+    'Fechar a torneira enquanto escovas os dentes poupa litros todos os dias — multiplica por milhares de casas!',
+    'Regar de manhã ou à noite reduz a água perdida por evaporação no jardim da escola ou em casa.',
+    'Reutilizar água da lavagem de legumes para regar plantas dá uma segunda vida à água potável.',
+    'Florestas e solos húmidos ajudam a recarregar lençóis freáticos — por isso proteger natureza é proteger água.'
+  ],
+  deslizamentos: [
+    'Não construir em vales muito íngremes ou em leitos antigos de cheias protege gerações futuras.',
+    'Relvado e raízes fixam melhor o solo do que terreno nu após obras — revegetar rápido é importante.',
+    'Em dias de chuva forte, evitar estradas sinalizadas como perigosas protege condutores e equipas de socorro.',
+    'Pequenas drenagens mal mantidas entopem — limpar sarjetas na rua é cidadania e prevenção.'
+  ]
+};
+
+// Textos longos para a aba "Aprender mais" (4.º ano · pt-PT)
+window.LEARN_MORE = [
+  {
+    id: 'cheias',
+    emoji: '🌊',
+    title: 'Cheias',
+    oQueE:
+      'Uma cheia acontece quando chove muito e o rio não consegue levar toda a água de uma vez. A água sobe, sai das margens e pode entrar em campos, estradas e casas. Não é culpa de ninguém na escola — é um fenómeno natural — mas dá para preparar a comunidade.',
+    prevenir: [
+      'Ouvir avisos da proteção civil e da meteorologia quando está tudo molhado durante muitos dias.',
+      'Não brincar nem andar de bicicleta em zonas baixas perto do rio quando o aviso diz que pode subir água.',
+      'Em casa, subir objetos importantes do chão e saber para onde ir se a água entrar.',
+      'Plantar e cuidar de árvores e ribeiras ajuda a terra a “beber” a chuva com calma, em vez de a mandar toda de uma vez para o rio.'
+    ],
+    tecnologia: [
+      'Estações meteorológicas e satélites que “fotografam” nuvens e medem a chuva em tempo real.',
+      'Computadores que fazem mapas de risco e avisos automáticos no telemóvel.',
+      'Barragens e comportas que guardam ou libertam água com controlo de engenheiros.',
+      'Pontes e muros desenhados para aguentar picos de água sem partir de repente.'
+    ],
+    ciencia: [
+      'Meteorologia: perceber quanto vai chover e para onde a água costuma ir na tua região.',
+      'Hidrologia: estudar leitos dos rios, vales e solos para saber onde a água corre mais depressa.',
+      'Modelos matemáticos que simulam “e se chuver o dobro?” antes da tempestade chegar.'
+    ],
+    lembrar: 'Prevenir cheias junta ciência, tecnologia e boas decisões de toda a gente — pequenos gestos em casa somam-se com grandes obras na comunidade.'
+  },
+  {
+    id: 'incendios',
+    emoji: '🔥',
+    title: 'Incêndios florestais',
+    oQueE:
+      'Um incêndio florestal é fogo que se alastra pelas árvores, mato e tocos secos. Com vento forte e calor, as chamas correm muito depressa. O fogo liberta fumo que faz mal à saúde e destrói casas e habitat de animais. Por isso a prevenção começa muito antes do verão.',
+    prevenir: [
+      'Limpar mato e ramos secos junto de casas, escolas e estradas (com ajuda de adultos e ferramentas seguras).',
+      'Nunca brincar com fósforos nem fazer fogueiras quando está vento e seco.',
+      'Chamar de imediato o 112 se vires fumo — quanto mais cedo, mais pequeno fica o fogo.',
+      'Aceiros e faixas sem vegetação cortam o caminho das chamas, como uma “parede vazia” que o fogo não gosta de saltar.'
+    ],
+    tecnologia: [
+      'Torres de vigia, câmaras e satélites que detetam fumo e calor de longe.',
+      'Aviões e helicópteros bombeiros que largam água ou espuma em sítios difíceis.',
+      'Drones que ajudam a ver o fogo de cima sem pôr pilotos em perigo.',
+      'Veículos e mangueiras potentes usados pelos bombeiros e equipas florestais.'
+    ],
+    ciencia: [
+      'Estudar o vento, a humidade do ar e o tipo de plantas para saber onde o fogo corre mais rápido.',
+      'Perceber o triângulo do fogo: calor, oxigénio e combustível — se tirarmos um deles, o fogo enfraquece.',
+      'Planeamento do território: saber onde plantar, onde limpar e onde construir com mais segurança.'
+    ],
+    lembrar: 'O melhor “extintor” muitas vezes é a prevenção: menos mato seco perto das pessoas e mais olhos atentos na floresta.'
+  },
+  {
+    id: 'terramotos',
+    emoji: '🌍',
+    title: 'Terramotos',
+    oQueE:
+      'Um terramoto é um abanão forte da crosta da Terra. Não dá para prever o dia exato como a chuva, mas dá para estudar zonas de risco e preparar edifícios e pessoas. As ondas propagam-se como ripples numa poça — só que na rocha.',
+    prevenir: [
+      'Fazer simulacros na escola: saber onde nos agachamos, como protegemos a cabeça e por onde saímos com calma.',
+      'Em casa, fixar estantes altas à parede (com adultos) para não caírem em cima de ninguém.',
+      'Ter uma mochila simples com água, apito e lanterna — coisas que ajudam se a luz falhar.',
+      'Respeitar regras de construção: casas e pontes feitas “a pensar no abanão” aguentam melhor.'
+    ],
+    tecnologia: [
+      'Sensores sísmicos ligados a redes que avisam em segundos antes da onda mais forte chegar a certas cidades.',
+      'Telemóveis com alertas oficiais e aplicações da proteção civil.',
+      'Amortecedores e apoios especiais em pontes e edifícios modernos.',
+      'Ferramentas de engenharia que testam materiais e formas mais seguras.'
+    ],
+    ciencia: [
+      'Geologia: perceber falhas na rocha e histórico de abanões na região.',
+      'Física das ondas: algumas viajam mais depressa e avisam sensores antes de outras.',
+      'Estudos sobre solos moles ou rochosos — o mesmo abanão não “sente-se” igual em todo o lado.'
+    ],
+    lembrar: 'Treinar o cérebro e o corpo com simulacros vale tanto como betão novo: na hora do susto, sabemos o que fazer.'
+  },
+  {
+    id: 'tempestades',
+    emoji: '⛈️',
+    title: 'Tempestades',
+    oQueE:
+      'Tempestade forte mistura vento muito intenso, chuva torrencial, trovoada e por vezes granizo. O vento pode arrancar telhas; o relâmpago pode danificar redes elétricas; a chuva enche ruas depressa. Tudo isto junto assusta — mas há formas de nos protegermos.',
+    prevenir: [
+      'Ouvir avisos com cores (amarelo, laranja, vermelho) e seguir o que a escola e os adultos explicam.',
+      'Guardar bicicletas, baldes e brinquedos de jardim quando o vento vai subir — não voarem como projéteis.',
+      'Ficar longe de árvores muito altas, mastros e relva aberta durante relâmpagos.',
+      'Ter um sítio seguro em casa (sem vidros grandes por perto) para esperar a pior parte passar.'
+    ],
+    tecnologia: [
+      'Radares e satélites que “desenham” a tempestade horas antes.',
+      'Para-raios e boas ligações à terra nas escolas e edifícios públicos.',
+      'Telhados e janelas pensados por engenheiros para aguentar rajadas de vento.',
+      'Sirenes, redes sociais oficiais e SMS automáticos para avisar muita gente ao mesmo tempo.'
+    ],
+    ciencia: [
+      'Meteorologia: perceber frentes quentes e frias, nuvens carregadas e vento em cima das montanhas.',
+      'Estudos de danos antigos para saber quais ruas enchem primeiro na tua cidade.',
+      'Mapas de evacuação feitos com dados reais — ciência e geografia a trabalharem juntas.'
+    ],
+    lembrar: 'Uma tempestade é espetacular na Natureza, mas perigosa para quem não está preparado — por isso aviso e calma andam de mãos dadas.'
+  },
+  {
+    id: 'secas',
+    emoji: '☀️',
+    title: 'Secas',
+    oQueE:
+      'Seca é quando falta chuva durante muito tempo. Os rios baixam, o solo resseca, as plantas sofrem e até a água dos poços pode diminuir. Em climas quentes isto acontece com mais frequência — e todos podemos ajudar a gastar menos água potável.',
+    prevenir: [
+      'Fechar torneiras depressa: ao escovar os dentes, ao lavar as mãos, ao regar só o necessário.',
+      'Reutilizar água limpinha (por exemplo de lavar legumes) para regar plantas, com supervisão de adultos.',
+      'Plantar árvores adequadas e proteger o solo com menos escavação desnecessária.',
+      'Apoiar regras da autarquia sobre regas e piscinas em períodos difíceis — são para todos terem água.'
+    ],
+    tecnologia: [
+      'Sensores que medem o nível dos rios, barragens e poços.',
+      'Contadores inteligentes e torneiras que gastam menos litros por minuto.',
+      'Estações que tratam água para a tornar segura noutros usos (como regar espaços verdes).',
+      'Painéis solares em bombas de água — energia limpa para tirar água do subsolo com mais cuidado.'
+    ],
+    ciencia: [
+      'Climatologia: perceber ciclos de chuva e alterações a médio prazo na região.',
+      'Estudo dos lençóis freáticos — “lagoas escondidas” debaixo dos nossos pés.',
+      'Agricultura de precisão: regar só a planta certa, na hora certa, com menos desperdício.'
+    ],
+    lembrar: 'Cada gota poupada é um presente para o futuro — a água doce no planeta é finita e partilhada por humanos, animais e plantas.'
+  },
+  {
+    id: 'deslizamentos',
+    emoji: '⛰️',
+    title: 'Deslizamentos de terras',
+    oQueE:
+      'Às vezes, depois de muita chuva, o solo na encosta fica pesado e escorrega como lama com pedras. Chama-se deslizamento ou corrida de lama. Pode cobrir estradas e casas muito depressa. Encostas íngremes e terrenos mal drenados são sítios onde os geólogos prestam mais atenção.',
+    prevenir: [
+      'Não construir casas em sítios que os mapas dizem perigosos — parece óbvio, mas salva vidas.',
+      'Manter drenagens e sarjetas desentupidas para a água da chuva ter caminho certo.',
+      'Plantar vegetação com raízes fortes nas encostas estáveis (espécies indicadas por especialistas).',
+      'Em dias de temporal forte, seguir rotas seguras e não insistir em estradas com aviso de queda de pedras.'
+    ],
+    tecnologia: [
+      'Sensores de chuva e, nalguns sítios, instrumentos que sentem pequenos movimentos da encosta.',
+      'Mapas em 3D feitos com laser de avião ou drones para ver a forma do terreno ao milímetro.',
+      'Muros de contenção, estacas e tubos de drenagem desenhados por engenheiros.',
+      'Alertas no telemóvel ligados a estações meteorológicas e equipas de emergência.'
+    ],
+    ciencia: [
+      'Geologia: saber que tipo de rocha e solo existe — alguns transformam-se em lama mais depressa.',
+      'Estudo de encostas antigas que já deslizaram no passado (a história da Terra ensina-nos).',
+      'Modelos que calculam “quanto de chuva é demais” para aquela encosta em particular.'
+    ],
+    lembrar: 'Água + gravidade + encosta íngreme pedem respeito: a ciência mostra o risco e a tecnologia ajuda a avisar e a conter.'
+  }
+];
+
+  </script>
+  <script type="text/babel">
+// Reusable SVG icons + Professor Eureka mascot
+// Simple geometric shapes only — no over-detailed SVGs
+
+const VarIcon = ({ name, size = 24 }) => {
+  const s = size;
+  const stroke = '#2C2A4A';
+  const sw = 2.2;
+  switch (name) {
+    case 'meteo': // satellite dish
+      return (
+        <svg viewBox="0 0 24 24" width={s} height={s} fill="none" stroke={stroke} strokeWidth={sw} strokeLinecap="round" strokeLinejoin="round">
+          <path d="M4 18 L12 10 L20 18 Z" fill="#7FC8E8" />
+          <line x1="12" y1="10" x2="12" y2="20" />
+          <circle cx="18" cy="6" r="2" fill="#FFD23F" />
+          <path d="M14 8 Q16 6 18 6" />
+        </svg>
+      );
+    case 'dam': // dam wall + water
+      return (
+        <svg viewBox="0 0 24 24" width={s} height={s} fill="none" stroke={stroke} strokeWidth={sw} strokeLinecap="round" strokeLinejoin="round">
+          <path d="M3 16 Q12 11 21 16 L21 20 L3 20 Z" fill="#4A9FD9" />
+          <rect x="9" y="6" width="6" height="12" fill="#C9A06B" />
+        </svg>
+      );
+    case 'tree':
+      return (
+        <svg viewBox="0 0 24 24" width={s} height={s} fill="none" stroke={stroke} strokeWidth={sw} strokeLinecap="round" strokeLinejoin="round">
+          <rect x="10" y="14" width="4" height="6" fill="#A85439" />
+          <circle cx="12" cy="10" r="6" fill="#6BBE5E" />
+        </svg>
+      );
+    case 'phone':
+      return (
+        <svg viewBox="0 0 24 24" width={s} height={s} fill="none" stroke={stroke} strokeWidth={sw} strokeLinecap="round" strokeLinejoin="round">
+          <rect x="7" y="3" width="10" height="18" rx="2" fill="#fff" />
+          <rect x="9" y="6" width="6" height="9" fill="#FFD23F" />
+          <circle cx="12" cy="18" r="0.9" fill={stroke} />
+        </svg>
+      );
+    case 'tower': // watchtower
+      return (
+        <svg viewBox="0 0 24 24" width={s} height={s} fill="none" stroke={stroke} strokeWidth={sw} strokeLinecap="round" strokeLinejoin="round">
+          <path d="M6 21 L8 8 L16 8 L18 21 Z" fill="#C9A06B" />
+          <path d="M5 8 L19 8 L17 4 L7 4 Z" fill="#A85439" />
+          <rect x="10" y="12" width="4" height="4" fill="#FFD23F" />
+        </svg>
+      );
+    case 'firebreak':
+      return (
+        <svg viewBox="0 0 24 24" width={s} height={s} fill="none" stroke={stroke} strokeWidth={sw} strokeLinecap="round" strokeLinejoin="round">
+          <rect x="3" y="3" width="6" height="6" fill="#6BBE5E" />
+          <rect x="15" y="3" width="6" height="6" fill="#6BBE5E" />
+          <rect x="3" y="15" width="6" height="6" fill="#6BBE5E" />
+          <rect x="15" y="15" width="6" height="6" fill="#6BBE5E" />
+          <rect x="9" y="3" width="6" height="18" fill="#E8B85C" />
+        </svg>
+      );
+    case 'plane':
+      return (
+        <svg viewBox="0 0 24 24" width={s} height={s} fill="none" stroke={stroke} strokeWidth={sw} strokeLinecap="round" strokeLinejoin="round">
+          <path d="M3 14 L11 12 L17 6 L20 7 L15 13 L21 17 L19 18 L13 16 L11 20 L9 19 L10 15 L4 16 Z" fill="#E8845C" />
+        </svg>
+      );
+    case 'broom':
+      return (
+        <svg viewBox="0 0 24 24" width={s} height={s} fill="none" stroke={stroke} strokeWidth={sw} strokeLinecap="round" strokeLinejoin="round">
+          <path d="M14 4 L20 10" />
+          <path d="M5 21 L13 13 L17 17 L9 19 Z" fill="#E8B85C" />
+        </svg>
+      );
+    case 'sensor': // squiggly wave
+      return (
+        <svg viewBox="0 0 24 24" width={s} height={s} fill="none" stroke={stroke} strokeWidth={sw} strokeLinecap="round" strokeLinejoin="round">
+          <rect x="3" y="6" width="18" height="12" rx="2" fill="#fff" />
+          <path d="M5 12 L8 12 L9 8 L11 16 L13 9 L15 14 L19 12" stroke="#E8845C" strokeWidth="2.4" />
+        </svg>
+      );
+    case 'building':
+      return (
+        <svg viewBox="0 0 24 24" width={s} height={s} fill="none" stroke={stroke} strokeWidth={sw} strokeLinecap="round" strokeLinejoin="round">
+          <rect x="5" y="4" width="14" height="17" fill="#C9A06B" />
+          <rect x="8" y="8" width="3" height="3" fill="#FFD23F" />
+          <rect x="13" y="8" width="3" height="3" fill="#FFD23F" />
+          <rect x="8" y="14" width="3" height="3" fill="#FFD23F" />
+          <rect x="13" y="14" width="3" height="3" fill="#FFD23F" />
+        </svg>
+      );
+    case 'school': // school with flag
+      return (
+        <svg viewBox="0 0 24 24" width={s} height={s} fill="none" stroke={stroke} strokeWidth={sw} strokeLinecap="round" strokeLinejoin="round">
+          <rect x="4" y="10" width="16" height="11" fill="#FFF1B8" />
+          <path d="M3 10 L12 4 L21 10 Z" fill="#E8845C" />
+          <line x1="14" y1="6" x2="14" y2="2" />
+          <path d="M14 2 L18 3 L14 4 Z" fill="#E8845C" />
+          <rect x="10" y="14" width="4" height="7" fill="#A85439" />
+        </svg>
+      );
+    case 'bolt': // lightning + ground
+      return (
+        <svg viewBox="0 0 24 24" width={s} height={s} fill="none" stroke={stroke} strokeWidth={sw} strokeLinejoin="round">
+          <path d="M13 2 L8 12 H12 L10 22 L18 10 H13 L16 2 Z" fill="#FFD23F" stroke={stroke} />
+          <line x1="4" y1="20" x2="20" y2="20" stroke={stroke} strokeWidth={sw} strokeLinecap="round" />
+        </svg>
+      );
+    case 'droplet': // water drop
+      return (
+        <svg viewBox="0 0 24 24" width={s} height={s} fill="none" stroke={stroke} strokeWidth={sw} strokeLinejoin="round">
+          <path d="M12 3 Q6 10 6 15 Q6 20 12 20 Q18 20 18 15 Q18 10 12 3 Z" fill="#4A9FD9" stroke={stroke} />
+          <path d="M10 14 Q12 17 14 14" fill="none" stroke="#fff" strokeWidth="1.4" strokeLinecap="round" opacity="0.85" />
+        </svg>
+      );
+    default:
+      return <svg width={s} height={s}><rect width="100%" height="100%" fill="#ddd" /></svg>;
+  }
+};
+
+// Big mascot — friendly round-headed scientist with glasses
+const Mascot = ({ size = 180, mood = 'happy' }) => {
+  const stroke = '#2C2A4A';
+  const sw = 3;
+  return (
+    <svg viewBox="0 0 200 220" width={size} height={size} fill="none">
+      {/* coat body */}
+      <path d="M50 220 L60 130 Q100 110 140 130 L150 220 Z" fill="#FFFDF7" stroke={stroke} strokeWidth={sw} strokeLinejoin="round" />
+      {/* coat lapels */}
+      <path d="M100 122 L80 160 L100 175 L120 160 Z" fill="#FFFDF7" stroke={stroke} strokeWidth={sw} strokeLinejoin="round" />
+      {/* tie */}
+      <path d="M100 130 L94 138 L100 148 L106 138 Z" fill="#E8845C" stroke={stroke} strokeWidth={sw} strokeLinejoin="round" />
+      <path d="M97 148 L92 175 L108 175 L103 148 Z" fill="#E8845C" stroke={stroke} strokeWidth={sw} strokeLinejoin="round" />
+      {/* arms */}
+      <ellipse cx="56" cy="170" rx="14" ry="22" fill="#FFFDF7" stroke={stroke} strokeWidth={sw} />
+      <ellipse cx="144" cy="170" rx="14" ry="22" fill="#FFFDF7" stroke={stroke} strokeWidth={sw} />
+      {/* hands */}
+      <circle cx="56" cy="195" r="10" fill="#F5D5B3" stroke={stroke} strokeWidth={sw} />
+      <circle cx="144" cy="195" r="10" fill="#F5D5B3" stroke={stroke} strokeWidth={sw} />
+      {/* neck */}
+      <rect x="92" y="110" width="16" height="14" fill="#F5D5B3" stroke={stroke} strokeWidth={sw} />
+      {/* head */}
+      <circle cx="100" cy="78" r="42" fill="#F5D5B3" stroke={stroke} strokeWidth={sw} />
+      {/* hair tuft */}
+      <path d="M64 70 Q70 38 100 38 Q130 38 136 70 Q130 56 110 56 Q90 56 84 64 Q76 62 64 70 Z" fill="#3D2E22" stroke={stroke} strokeWidth={sw} strokeLinejoin="round" />
+      {/* ears */}
+      <ellipse cx="58" cy="80" rx="5" ry="8" fill="#F5D5B3" stroke={stroke} strokeWidth={sw} />
+      <ellipse cx="142" cy="80" rx="5" ry="8" fill="#F5D5B3" stroke={stroke} strokeWidth={sw} />
+      {/* glasses */}
+      <circle cx="85" cy="80" r="12" fill="#fff" stroke={stroke} strokeWidth={sw} />
+      <circle cx="115" cy="80" r="12" fill="#fff" stroke={stroke} strokeWidth={sw} />
+      <line x1="97" y1="80" x2="103" y2="80" stroke={stroke} strokeWidth={sw} />
+      {/* eyes */}
+      <circle cx="85" cy="80" r="3.5" fill={stroke} />
+      <circle cx="115" cy="80" r="3.5" fill={stroke} />
+      <circle cx="86" cy="78.5" r="1.2" fill="#fff" />
+      <circle cx="116" cy="78.5" r="1.2" fill="#fff" />
+      {/* eyebrows */}
+      <path d="M76 64 L94 62" stroke={stroke} strokeWidth={sw} strokeLinecap="round" />
+      <path d="M106 62 L124 64" stroke={stroke} strokeWidth={sw} strokeLinecap="round" />
+      {/* mouth */}
+      {mood === 'happy' && (
+        <path d="M88 100 Q100 110 112 100" stroke={stroke} strokeWidth={sw} strokeLinecap="round" fill="none" />
+      )}
+      {mood === 'sad' && (
+        <path d="M88 106 Q100 96 112 106" stroke={stroke} strokeWidth={sw} strokeLinecap="round" fill="none" />
+      )}
+      {/* badge */}
+      <circle cx="76" cy="148" r="6" fill="#FFD23F" stroke={stroke} strokeWidth={sw} />
+      <text x="76" y="151" fontSize="7" fontFamily="Fredoka" fontWeight="700" fill={stroke} textAnchor="middle">E</text>
+    </svg>
+  );
+};
+
+// Mini head-only mascot for tips
+const MascotMini = ({ size = 56, mood = 'happy' }) => {
+  const stroke = '#2C2A4A';
+  const sw = 3;
+  return (
+    <svg viewBox="0 0 100 100" width={size} height={size} fill="none">
+      <circle cx="50" cy="50" r="38" fill="#F5D5B3" stroke={stroke} strokeWidth={sw} />
+      <path d="M14 44 Q20 14 50 14 Q80 14 86 44 Q80 30 60 30 Q40 30 34 38 Q26 36 14 44 Z" fill="#3D2E22" stroke={stroke} strokeWidth={sw} strokeLinejoin="round" />
+      <circle cx="36" cy="52" r="11" fill="#fff" stroke={stroke} strokeWidth={sw} />
+      <circle cx="64" cy="52" r="11" fill="#fff" stroke={stroke} strokeWidth={sw} />
+      <line x1="47" y1="52" x2="53" y2="52" stroke={stroke} strokeWidth={sw} />
+      <circle cx="36" cy="52" r="3" fill={stroke} />
+      <circle cx="64" cy="52" r="3" fill={stroke} />
+      {mood === 'happy' && <path d="M40 72 Q50 80 60 72" stroke={stroke} strokeWidth={sw} strokeLinecap="round" fill="none" />}
+      {mood === 'sad' && <path d="M40 76 Q50 68 60 76" stroke={stroke} strokeWidth={sw} strokeLinecap="round" fill="none" />}
+    </svg>
+  );
+};
+
+// Yellow star for results
+const Star = ({ filled = true, size = 44 }) => (
+  <svg className={`star ${filled ? '' : 'off'}`} viewBox="0 0 24 24" width={size} height={size} fill="none">
+    <path d="M12 2 L14.7 8.6 L22 9.2 L16.5 13.9 L18.2 21 L12 17.3 L5.8 21 L7.5 13.9 L2 9.2 L9.3 8.6 Z"
+      fill={filled ? '#FFD23F' : '#D9D6CC'} stroke="#2C2A4A" strokeWidth="2" strokeLinejoin="round" />
+  </svg>
+);
+
+Object.assign(window, { VarIcon, Mascot, MascotMini, Star });
+
+  </script>
+  <script type="text/babel">
+// Cartoon SVG scenes for each disaster. They react to the simulation state.
+// Convention: protection 0..1, intensity 0..1 (mission mode). damage = max(0, intensity - protection*0.95)
+
+// --- Shared helpers ---
+const Sun = ({ x, y, r = 18, withSmile = false, color = '#FFD23F' }) => (
+  <g>
+    <circle cx={x} cy={y} r={r + 6} fill={color} opacity="0.25" />
+    <circle cx={x} cy={y} r={r} fill={color} stroke="#2C2A4A" strokeWidth="2" />
+    {withSmile && (
+      <g stroke="#2C2A4A" strokeWidth="1.6" strokeLinecap="round" fill="none">
+        <circle cx={x - 6} cy={y - 2} r="1.3" fill="#2C2A4A" stroke="none" />
+        <circle cx={x + 6} cy={y - 2} r="1.3" fill="#2C2A4A" stroke="none" />
+        <path d={`M ${x - 5} ${y + 4} Q ${x} ${y + 9} ${x + 5} ${y + 4}`} />
+      </g>
+    )}
+  </g>
+);
+
+const Cloud = ({ x, y, scale = 1, dark = false }) => (
+  <g transform={`translate(${x} ${y}) scale(${scale})`}>
+    <ellipse cx="0" cy="0" rx="28" ry="12" fill={dark ? '#9CA3B5' : '#fff'} stroke="#2C2A4A" strokeWidth="2" />
+    <ellipse cx="-14" cy="-4" rx="14" ry="11" fill={dark ? '#9CA3B5' : '#fff'} stroke="#2C2A4A" strokeWidth="2" />
+    <ellipse cx="10" cy="-6" rx="16" ry="12" fill={dark ? '#9CA3B5' : '#fff'} stroke="#2C2A4A" strokeWidth="2" />
+  </g>
+);
+
+const Tree = ({ x, y, scale = 1, burnt = false, fallen = false }) => {
+  const angle = fallen ? -45 : 0;
+  return (
+    <g transform={`translate(${x} ${y}) scale(${scale}) rotate(${angle})`}>
+      <rect x="-4" y="-6" width="8" height="22" fill="#7B4A2D" stroke="#2C2A4A" strokeWidth="2" />
+      <circle cx="0" cy="-18" r="18" fill={burnt ? '#5C5048' : '#5B8F4A'} stroke="#2C2A4A" strokeWidth="2" />
+      {!burnt && (
+        <>
+          <circle cx="-8" cy="-22" r="10" fill="#6BBE5E" stroke="#2C2A4A" strokeWidth="2" />
+          <circle cx="9" cy="-24" r="11" fill="#6BBE5E" stroke="#2C2A4A" strokeWidth="2" />
+        </>
+      )}
+    </g>
+  );
+};
+
+const House = ({ x, y, scale = 1, color = '#E8845C', tilt = 0, cracked = false, submergedY = null }) => {
+  return (
+    <g transform={`translate(${x} ${y}) scale(${scale}) rotate(${tilt})`}>
+      <rect x="-18" y="-2" width="36" height="28" fill={color} stroke="#2C2A4A" strokeWidth="2" />
+      <polygon points="-22,-2 0,-22 22,-2" fill="#A85439" stroke="#2C2A4A" strokeWidth="2" strokeLinejoin="round" />
+      <rect x="-5" y="12" width="10" height="14" fill="#5B3422" stroke="#2C2A4A" strokeWidth="2" />
+      <rect x="-14" y="2" width="8" height="8" fill="#FFD23F" stroke="#2C2A4A" strokeWidth="2" />
+      <rect x="6" y="2" width="8" height="8" fill="#FFD23F" stroke="#2C2A4A" strokeWidth="2" />
+      {cracked && (
+        <path d="M -10 -1 L -6 8 L -10 16 L -6 24" stroke="#2C2A4A" strokeWidth="2" fill="none" strokeLinecap="round" />
+      )}
+    </g>
+  );
+};
+
+const Hill = ({ cx, cy, rx, ry, color = '#5B8F4A' }) => (
+  <ellipse cx={cx} cy={cy} rx={rx} ry={ry} fill={color} stroke="#2C2A4A" strokeWidth="2" />
+);
+
+// =====================================================
+// CHEIAS scene
+// =====================================================
+const SceneCheias = ({ vars, damage, intensity, active }) => {
+  // water level rises from baseline based on damage; rain density based on intensity
+  const W = 800, H = 500;
+  const waterLevel = 380 - damage * 140; // higher damage -> water rises further up
+  const rainCount = Math.round(20 + intensity * 50);
+  const numTrees = Math.max(2, Math.round((vars.arvores / 100) * 8));
+  const damStrength = vars.barragem / 100; // 0..1
+  const damHeight = 80 + damStrength * 60;
+  const damTop = 320 - damStrength * 50;
+  const hasMeteo = vars.meteo > 30;
+
+  return (
+    <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="xMidYMid slice">
+      {/* sky */}
+      <defs>
+        <linearGradient id="skyCheias" x1="0" x2="0" y1="0" y2="1">
+          <stop offset="0" stopColor="#7C99B0" />
+          <stop offset="1" stopColor="#B8D6E8" />
+        </linearGradient>
+      </defs>
+      <rect width={W} height={H} fill="url(#skyCheias)" />
+
+      {/* dark clouds */}
+      <Cloud x={120} y={70} scale={1.4} dark />
+      <Cloud x={340} y={50} scale={1.1} dark />
+      <Cloud x={550} y={85} scale={1.6} dark />
+      <Cloud x={730} y={55} scale={1.0} dark />
+
+      {/* rain */}
+      {Array.from({ length: rainCount }).map((_, i) => {
+        const x = (i * 37) % W + 8;
+        const delay = (i % 11) * 0.1;
+        return (
+          <line key={i} x1={x} y1={-10} x2={x - 6} y2={4}
+            stroke="#4A9FD9" strokeWidth="2" strokeLinecap="round"
+            className="raindrop"
+            style={{ animationDelay: `${delay}s` }} />
+        );
+      })}
+
+      {/* hills behind */}
+      <Hill cx={150} cy={360} rx={220} ry={90} color="#6F9863" />
+      <Hill cx={620} cy={350} rx={260} ry={110} color="#6BBE5E" />
+
+      {/* trees on hills - sponge effect */}
+      {Array.from({ length: numTrees }).map((_, i) => {
+        const xs = [70, 140, 220, 290, 540, 620, 700, 760];
+        const ys = [300, 290, 320, 305, 290, 280, 300, 320];
+        return <Tree key={i} x={xs[i]} y={ys[i]} scale={1} />;
+      })}
+
+      {/* meteo station */}
+      {hasMeteo && (
+        <g transform="translate(60 320)">
+          <rect x="-3" y="-30" width="6" height="40" fill="#C9A06B" stroke="#2C2A4A" strokeWidth="2" />
+          <circle cx="0" cy="-30" r="6" fill="#FFD23F" stroke="#2C2A4A" strokeWidth="2" />
+          <line x1="0" y1="-30" x2="-12" y2="-42" stroke="#2C2A4A" strokeWidth="2" />
+          <circle cx="-14" cy="-44" r="3" fill="#E8845C" stroke="#2C2A4A" strokeWidth="2" />
+        </g>
+      )}
+
+      {/* dam wall */}
+      <g>
+        <rect x="320" y={damTop} width="60" height={damHeight} fill="#C9A06B" stroke="#2C2A4A" strokeWidth="2.5" />
+        <rect x="320" y={damTop} width="60" height="14" fill="#A07952" stroke="#2C2A4A" strokeWidth="2.5" />
+        {/* water held back behind dam */}
+        <rect x="380" y={damTop + 14} width={W - 380} height={H - damTop - 14} fill="#4A9FD9" opacity="0.5" />
+      </g>
+
+      {/* houses on plain */}
+      <House x={460} y={356} scale={1} color="#E8845C" />
+      <House x={540} y={356} scale={0.9} color="#F0B26B" />
+      <House x={620} y={356} scale={1.1} color="#E8845C" />
+      <House x={710} y={356} scale={0.85} color="#F2C28E" />
+
+      {/* ground */}
+      <rect x="0" y={380} width={W} height={H - 380} fill="#9CB87C" />
+      <rect x="0" y={380} width={W} height="6" fill="#5B8F4A" />
+
+      {/* flood water rising */}
+      {damage > 0.01 && (
+        <g>
+          <rect x="0" y={waterLevel} width={W} height={H - waterLevel} fill="#4A9FD9" opacity="0.85" />
+          {/* ripples */}
+          <path d={`M0 ${waterLevel - 4} Q 100 ${waterLevel - 8} 200 ${waterLevel - 4} T 400 ${waterLevel - 4} T 600 ${waterLevel - 4} T 800 ${waterLevel - 4}`}
+            stroke="#fff" strokeWidth="2" fill="none" opacity="0.7" />
+        </g>
+      )}
+
+      {/* phone alert popup */}
+      {vars.alerta > 50 && (
+        <g transform="translate(680 220)">
+          <rect x="-30" y="-26" width="60" height="48" rx="8" fill="#FFFDF7" stroke="#2C2A4A" strokeWidth="2.5" />
+          <rect x="-22" y="-18" width="44" height="6" fill="#E8845C" />
+          <rect x="-22" y="-8" width="36" height="3" fill="#D9D6CC" />
+          <rect x="-22" y="-2" width="30" height="3" fill="#D9D6CC" />
+          <rect x="-22" y="4" width="40" height="3" fill="#D9D6CC" />
+          <text x="0" y="-19.5" fontSize="6" fill="#fff" fontFamily="Fredoka" fontWeight="600" textAnchor="middle">ALERTA!</text>
+        </g>
+      )}
+    </svg>
+  );
+};
+
+// =====================================================
+// INCENDIOS scene
+// =====================================================
+const SceneIncendios = ({ vars, damage, intensity, active }) => {
+  const W = 800, H = 500;
+  const hasTower = vars.vigia > 30;
+  const hasBreaks = vars.aceiros > 30;
+  const planeCount = Math.round((vars.avioes / 100) * 2);
+  const cleanLevel = vars.limpeza / 100;
+
+  // fire spread: number of burning patches
+  const fires = Math.max(0, Math.round(damage * 6));
+  const burntTrees = Math.max(0, Math.round(damage * 5));
+
+  return (
+    <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="xMidYMid slice">
+      <defs>
+        <linearGradient id="skyFogo" x1="0" x2="0" y1="0" y2="1">
+          <stop offset="0" stopColor={damage > 0.2 ? '#F5A66B' : '#FFD78A'} />
+          <stop offset="1" stopColor="#FFEAB8" />
+        </linearGradient>
+      </defs>
+      <rect width={W} height={H} fill="url(#skyFogo)" />
+
+      <Sun x={680} y={90} r={28} color={damage > 0.3 ? '#E8513D' : '#FFA94D'} />
+
+      {/* smoke */}
+      {damage > 0.05 && (
+        <g opacity="0.7">
+          <Cloud x={300} y={90} scale={1.4} dark />
+          <Cloud x={460} y={70} scale={1.7} dark />
+        </g>
+      )}
+
+      {/* mountains */}
+      <Hill cx={180} cy={360} rx={260} ry={120} color="#8B6B4A" />
+      <Hill cx={640} cy={370} rx={280} ry={120} color="#6F5238" />
+
+      {/* dry ground */}
+      <rect x="0" y={380} width={W} height={H - 380} fill={cleanLevel > 0.5 ? '#D4B97A' : '#B89A5C'} />
+
+      {/* firebreak: a brown gap in the forest */}
+      {hasBreaks && (
+        <rect x="380" y="300" width="50" height="90" fill="#C9A06B" stroke="#2C2A4A" strokeWidth="2" />
+      )}
+
+      {/* trees - left forest */}
+      {[120, 170, 220, 260, 310].map((x, i) => (
+        <Tree key={`L${i}`} x={x} y={380} scale={1.1} burnt={i < burntTrees} />
+      ))}
+      {/* trees - right forest */}
+      {[460, 510, 560, 610, 660, 710].map((x, i) => (
+        <Tree key={`R${i}`} x={x} y={380} scale={1.0 + (i % 2) * 0.1} />
+      ))}
+
+      {/* watchtower */}
+      {hasTower && (
+        <g transform="translate(70 380)">
+          <path d="M -12 0 L -8 -50 L 8 -50 L 12 0 Z" fill="#A85439" stroke="#2C2A4A" strokeWidth="2.5" strokeLinejoin="round" />
+          <rect x="-14" y="-66" width="28" height="18" fill="#C9A06B" stroke="#2C2A4A" strokeWidth="2.5" />
+          <polygon points="-16,-66 16,-66 0,-78" fill="#A85439" stroke="#2C2A4A" strokeWidth="2.5" strokeLinejoin="round" />
+          <rect x="-6" y="-60" width="12" height="8" fill="#FFD23F" stroke="#2C2A4A" strokeWidth="2" />
+        </g>
+      )}
+
+      {/* houses on right */}
+      <House x={490} y={360} scale={0.85} color="#FFFDF7" />
+      <House x={560} y={360} scale={0.9} />
+      <House x={640} y={360} scale={1.0} color="#F2C28E" />
+      <House x={720} y={360} scale={0.85} />
+
+      {/* fires */}
+      {Array.from({ length: fires }).map((_, i) => {
+        const xs = [110, 165, 220, 270, 320, 360];
+        const x = xs[i] ?? 100 + i * 60;
+        return (
+          <g key={i} transform={`translate(${x} 372)`} className="flame">
+            <path d="M 0 0 Q -10 -10 -6 -22 Q 0 -14 4 -22 Q 8 -10 0 0 Z"
+              fill="#FF6B3D" stroke="#2C2A4A" strokeWidth="2" strokeLinejoin="round" />
+            <path d="M 0 -2 Q -4 -8 -2 -16 Q 2 -10 0 -2 Z" fill="#FFD23F" />
+          </g>
+        );
+      })}
+
+      {/* planes */}
+      {Array.from({ length: planeCount }).map((_, i) => (
+        <g key={`p${i}`} transform={`translate(${260 + i * 220} ${130 + i * 30})`}>
+          <ellipse cx="0" cy="0" rx="22" ry="6" fill="#E8845C" stroke="#2C2A4A" strokeWidth="2" />
+          <polygon points="-6,-2 6,-2 0,-14" fill="#A85439" stroke="#2C2A4A" strokeWidth="2" />
+          <circle cx="-12" cy="14" r="3" fill="#4A9FD9" />
+          <circle cx="-4" cy="14" r="3" fill="#4A9FD9" />
+          <circle cx="4" cy="14" r="3" fill="#4A9FD9" />
+          <circle cx="12" cy="14" r="3" fill="#4A9FD9" />
+        </g>
+      ))}
+
+      {/* ground line */}
+      <rect x="0" y={380} width={W} height="4" fill="#7B4A2D" />
+    </svg>
+  );
+};
+
+// =====================================================
+// TERRAMOTOS scene
+// =====================================================
+const SceneTerramotos = ({ vars, damage, intensity, active }) => {
+  const W = 800, H = 500;
+  const antiseismicLevel = vars.antissismico / 100;
+  const sensorOn = vars.sensores > 25;
+  const alertOn = vars.alerta_eq > 30;
+  const schoolOn = vars.simulacro > 25;
+  const isShaking = active && damage > 0.15;
+  const crackVisible = damage > 0.1;
+
+  // building damage = inverse of antiseismic
+  const buildingTilt = damage * (1 - antiseismicLevel) * 18; // degrees
+  const buildingCrack = damage > 0.3 && antiseismicLevel < 0.6;
+
+  return (
+    <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="xMidYMid slice">
+      <defs>
+        <linearGradient id="skyEq" x1="0" x2="0" y1="0" y2="1">
+          <stop offset="0" stopColor="#9FD9F0" />
+          <stop offset="1" stopColor="#D6E9F2" />
+        </linearGradient>
+      </defs>
+      <rect width={W} height={H} fill="url(#skyEq)" />
+      <Sun x={120} y={80} r={26} withSmile color="#FFD23F" />
+      <Cloud x={550} y={70} scale={1.2} />
+
+      {/* mountains */}
+      <Hill cx={100} cy={400} rx={220} ry={100} color="#A8B6C8" />
+      <Hill cx={700} cy={420} rx={240} ry={100} color="#8B98A8" />
+
+      <g className={isShaking ? 'quake' : ''}>
+        {/* buildings */}
+        <g transform="translate(180 380)">
+          <g transform={`rotate(${-buildingTilt})`} style={{ transformOrigin: '0 0' }}>
+            <rect x="-30" y="-130" width="60" height="130" fill="#C9A06B" stroke="#2C2A4A" strokeWidth="2.5" />
+            <rect x="-30" y="-138" width="60" height="10" fill="#A85439" stroke="#2C2A4A" strokeWidth="2.5" />
+            {[0, 1, 2, 3].map(row =>
+              [0, 1].map(col => (
+                <rect key={`${row}-${col}`}
+                  x={-22 + col * 22} y={-118 + row * 28}
+                  width="14" height="14"
+                  fill={damage > 0.4 && (row + col) % 2 === 0 ? '#5C5048' : '#FFD23F'}
+                  stroke="#2C2A4A" strokeWidth="2" />
+              ))
+            )}
+            {buildingCrack && (
+              <path d="M -10 -130 L -6 -90 L -12 -50 L -4 -10" stroke="#2C2A4A" strokeWidth="3" fill="none" strokeLinecap="round" />
+            )}
+          </g>
+        </g>
+
+        <g transform="translate(310 380)">
+          <g transform={`rotate(${buildingTilt * 0.7})`} style={{ transformOrigin: '0 0' }}>
+            <rect x="-26" y="-100" width="52" height="100" fill="#F2C28E" stroke="#2C2A4A" strokeWidth="2.5" />
+            <polygon points="-30,-100 0,-118 30,-100" fill="#A85439" stroke="#2C2A4A" strokeWidth="2.5" strokeLinejoin="round" />
+            {[0, 1, 2].map(row =>
+              [0, 1].map(col => (
+                <rect key={`${row}-${col}`}
+                  x={-18 + col * 22} y={-90 + row * 28}
+                  width="14" height="14"
+                  fill="#FFD23F" stroke="#2C2A4A" strokeWidth="2" />
+              ))
+            )}
+          </g>
+        </g>
+
+        {/* School */}
+        {schoolOn && (
+          <g transform="translate(430 380)">
+            <rect x="-40" y="-50" width="80" height="50" fill="#FFF1B8" stroke="#2C2A4A" strokeWidth="2.5" />
+            <polygon points="-44,-50 0,-78 44,-50" fill="#E8845C" stroke="#2C2A4A" strokeWidth="2.5" strokeLinejoin="round" />
+            <rect x="-30" y="-30" width="14" height="16" fill="#4A9FD9" stroke="#2C2A4A" strokeWidth="2" />
+            <rect x="16" y="-30" width="14" height="16" fill="#4A9FD9" stroke="#2C2A4A" strokeWidth="2" />
+            <rect x="-7" y="-26" width="14" height="26" fill="#5B3422" stroke="#2C2A4A" strokeWidth="2" />
+            {/* flag */}
+            <line x1="0" y1="-78" x2="0" y2="-94" stroke="#2C2A4A" strokeWidth="2" />
+            <path d="M 0 -94 L 14 -90 L 0 -86 Z" fill="#E8845C" stroke="#2C2A4A" strokeWidth="2" strokeLinejoin="round" />
+          </g>
+        )}
+
+        <House x={555} y={380} scale={1.1} color="#E8845C" tilt={damage > 0.5 ? 6 : 0} cracked={damage > 0.6} />
+        <House x={650} y={380} scale={1} color="#F2C28E" tilt={damage > 0.4 ? -4 : 0} />
+        <House x={735} y={380} scale={0.9} color="#FFFDF7" />
+      </g>
+
+      {/* ground */}
+      <rect x="0" y={380} width={W} height={H - 380} fill="#C9A06B" />
+      <rect x="0" y={380} width={W} height="4" fill="#7B4A2D" />
+
+      {/* crack in ground */}
+      {crackVisible && (
+        <path d="M 0 440 L 100 432 L 180 446 L 280 436 L 380 450 L 500 438 L 620 448 L 740 436 L 800 444"
+          stroke="#2C2A4A" strokeWidth={3 + damage * 4} fill="none" strokeLinecap="round" />
+      )}
+
+      {/* seismograph display top-right */}
+      {sensorOn && (
+        <g transform="translate(670 200)">
+          <rect x="-50" y="-22" width="100" height="44" rx="8" fill="#FFFDF7" stroke="#2C2A4A" strokeWidth="2.5" />
+          <path d={isShaking
+            ? "M -42 0 L -32 0 L -28 -14 L -22 18 L -16 -12 L -10 14 L -4 0 L 8 0 L 12 -10 L 18 8 L 24 0 L 42 0"
+            : "M -42 0 L -28 0 L -24 -3 L -18 3 L -12 0 L 8 0 L 12 -2 L 18 2 L 42 0"}
+            stroke="#E8513D" strokeWidth="2.2" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+          <circle cx="-44" cy="-16" r="3" fill="#6BBE5E" />
+        </g>
+      )}
+
+      {/* alert phone */}
+      {alertOn && isShaking && (
+        <g transform="translate(70 200)">
+          <rect x="-22" y="-30" width="44" height="60" rx="6" fill="#FFFDF7" stroke="#2C2A4A" strokeWidth="2.5" />
+          <rect x="-16" y="-22" width="32" height="8" fill="#E8513D" />
+          <text x="0" y="-15.5" fontSize="6" fill="#fff" fontFamily="Fredoka" fontWeight="600" textAnchor="middle">SISMO!</text>
+          <rect x="-16" y="-8" width="20" height="3" fill="#D9D6CC" />
+          <rect x="-16" y="-2" width="28" height="3" fill="#D9D6CC" />
+          <rect x="-16" y="4" width="22" height="3" fill="#D9D6CC" />
+        </g>
+      )}
+    </svg>
+  );
+};
+
+// =====================================================
+// TEMPESTADES scene
+// =====================================================
+const SceneTempestades = ({ vars, damage, intensity, active }) => {
+  const W = 800, H = 500;
+  const estr = vars.estruturas / 100;
+  const elec = vars.eletrica / 100;
+  const houseTilt = damage * (1 - estr) * 16;
+  const strikes = Math.max(0, Math.round(damage * 8 * (1 - elec * 0.9)));
+  const rainCount = Math.round(18 + intensity * 48);
+  const hasRadar = vars.previsao > 28;
+  const showRotas = vars.rotas > 32;
+
+  return (
+    <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="xMidYMid slice">
+      <defs>
+        <linearGradient id="skyTemp" x1="0" x2="0" y1="0" y2="1">
+          <stop offset="0" stopColor={damage > 0.35 ? '#4A5568' : '#6B6890'} />
+          <stop offset="1" stopColor="#8B9CB5" />
+        </linearGradient>
+      </defs>
+      <rect width={W} height={H} fill="url(#skyTemp)" />
+
+      <Cloud x={100} y={65} scale={1.5} dark />
+      <Cloud x={320} y={45} scale={1.3} dark />
+      <Cloud x={540} y={70} scale={1.6} dark />
+      <Cloud x={720} y={50} scale={1.1} dark />
+
+      {Array.from({ length: rainCount }).map((_, i) => {
+        const x = (i * 41) % W + 10;
+        const delay = (i % 9) * 0.08;
+        return (
+          <line key={i} x1={x} y1={-8} x2={x - 8} y2={6}
+            stroke="#4A9FD9" strokeWidth="2" strokeLinecap="round"
+            className="raindrop"
+            style={{ animationDelay: `${delay}s` }} />
+        );
+      })}
+
+      {/* wind streaks */}
+      {[0, 1, 2, 3, 4].map(i => (
+        <line key={`w${i}`}
+          x1={-20 + i * 160} y1={120 + i * 22} x2={140 + i * 160} y2={118 + i * 22}
+          stroke="#fff" strokeWidth="3" strokeLinecap="round" opacity={0.12 + intensity * 0.18} />
+      ))}
+
+      <Hill cx={200} cy={380} rx={280} ry={110} color="#5B8F4A" />
+      <Hill cx={620} cy={370} rx={300} ry={115} color="#6F9863" />
+
+      {hasRadar && (
+        <g transform="translate(90 310)">
+          <rect x="-4" y="-36" width="8" height="44" fill="#C9A06B" stroke="#2C2A4A" strokeWidth="2" />
+          <path d="M -22 -38 Q0 -52 22 -38" fill="none" stroke="#2C2A4A" strokeWidth="2.5" />
+          <path d="M -18 -36 L0 -48 L18 -36" fill="#7FC8E8" stroke="#2C2A4A" strokeWidth="2" />
+          <circle cx="0" cy="-42" r="4" fill="#FFD23F" stroke="#2C2A4A" strokeWidth="2" />
+        </g>
+      )}
+
+      <House x={420} y={368} scale={1} color="#E8845C" tilt={-houseTilt} cracked={damage > 0.55} />
+      <House x={520} y={368} scale={0.95} color="#F2C28E" tilt={houseTilt * 0.8} />
+      <House x={620} y={368} scale={1.05} color="#FFFDF7" tilt={damage > 0.45 ? houseTilt * 0.5 : 0} />
+      <House x={720} y={368} scale={0.9} color="#E8845C" tilt={damage > 0.5 ? -5 : 0} />
+
+      {Array.from({ length: strikes }).map((_, i) => {
+        const x = 200 + (i * 137) % 420;
+        return (
+          <path key={`L${i}`} d={`M ${x} 40 L ${x - 8} 95 L ${x + 4} 95 L ${x - 6} 160`}
+            stroke="#FFD23F" strokeWidth="4" fill="none" strokeLinejoin="round" opacity="0.85" />
+        );
+      })}
+
+      <rect x="0" y={380} width={W} height={H - 380} fill="#9CB87C" />
+      <rect x="0" y={380} width={W} height="6" fill="#5B8F4A" />
+
+      {showRotas && (
+        <g transform="translate(680 240)">
+          <rect x="-36" y="-28" width="72" height="52" rx="10" fill="#FFFDF7" stroke="#2C2A4A" strokeWidth="2.5" />
+          <path d="M -8 8 L 8 -4 L -8 -4 Z" fill="#6BBE5E" stroke="#2C2A4A" strokeWidth="2" transform="translate(4,0)" />
+          <text x="0" y="-10" fontSize="7" fontFamily="Fredoka" fontWeight="700" fill="#2C2A4A" textAnchor="middle">SAÍDA</text>
+          <text x="0" y="2" fontSize="6" fontFamily="Nunito" fontWeight="700" fill="#6B6890" textAnchor="middle">rota segura</text>
+        </g>
+      )}
+    </svg>
+  );
+};
+
+// =====================================================
+// SECAS scene
+// =====================================================
+const SceneSecas = ({ vars, damage, intensity, active }) => {
+  const W = 800, H = 500;
+  const med = vars.medicao / 100;
+  const reus = vars.reuso / 100;
+  const fl = vars.floresta / 100;
+  const esc = vars.escolas / 100;
+  const riverW = Math.max(40, 220 * (1 - damage * 0.75) * (0.35 + med * 0.65));
+  const treeGreen = fl * (1 - damage * 0.6);
+
+  return (
+    <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="xMidYMid slice">
+      <defs>
+        <linearGradient id="skySeca" x1="0" x2="0" y1="0" y2="1">
+          <stop offset="0" stopColor="#FFE0A8" />
+          <stop offset="1" stopColor="#FFD78A" />
+        </linearGradient>
+      </defs>
+      <rect width={W} height={H} fill="url(#skySeca)" />
+
+      <Sun x={680} y={85} r={32 + damage * 10} color={damage > 0.4 ? '#FF9A3D' : '#FFB347'} />
+
+      <Hill cx={160} cy={390} rx={240} ry={100} color={damage > 0.35 ? '#C4A574' : '#D4B97A'} />
+      <Hill cx={600} cy={385} rx={280} ry={105} color={damage > 0.35 ? '#A88B5C' : '#B89A5C'} />
+
+      {/* dried river */}
+      <ellipse cx={400} cy={415} rx={riverW} ry="14" fill={damage > 0.25 ? '#C9A06B' : '#4A9FD9'} opacity={damage > 0.25 ? 0.9 : 0.75} stroke="#2C2A4A" strokeWidth="2" />
+      {damage > 0.2 && (
+        <path d={`M ${400 - riverW * 0.7} 408 Q 400 400 ${400 + riverW * 0.7} 408`} stroke="#7B4A2D" strokeWidth="2" fill="none" strokeDasharray="6 8" opacity="0.8" />
+      )}
+
+      {[100, 180, 260, 540, 620].map((x, i) => (
+        <Tree key={i} x={x} y={382} scale={0.95} burnt={damage + (1 - treeGreen) * 0.5 + i * 0.04 > 0.48} />
+      ))}
+
+      {med > 0.32 && (
+        <g transform="translate(120 210)">
+          <rect x="-48" y="-26" width="96" height="52" rx="10" fill="#FFFDF7" stroke="#2C2A4A" strokeWidth="2.5" />
+          <text x="0" y="-12" fontSize="7" fontFamily="Fredoka" fontWeight="700" fill="#2C2A4A" textAnchor="middle">NÍVEL DO RIO</text>
+          <rect x="-36" y="-4" width="72" height="10" fill="#EDEAFF" stroke="#2C2A4A" strokeWidth="2" />
+          <rect x="-36" y="-4" width={Math.max(8, 72 * (1 - damage))} height="10" fill="#4A9FD9" />
+        </g>
+      )}
+
+      {reus > 0.32 && (
+        <g transform="translate(640 320)">
+          <rect x="-22" y="0" width="44" height="52" rx="6" fill="#E8F4FF" stroke="#2C2A4A" strokeWidth="2" />
+          <ellipse cx="0" cy="-8" rx="14" ry="18" fill="#4A9FD9" stroke="#2C2A4A" strokeWidth="2" />
+          <text x="0" y="38" fontSize="6" fontFamily="Fredoka" fontWeight="700" fill="#2C2A4A" textAnchor="middle">reutilizar</text>
+        </g>
+      )}
+
+      <House x={380} y={378} scale={1} color="#E8845C" />
+      <House x={460} y={378} scale={0.9} color="#F2C28E" />
+      <House x={700} y={378} scale={0.85} color="#FFFDF7" />
+
+      {damage > 0.25 && (
+        <path d="M 320 450 L 340 448 L 360 452 L 400 446 L 440 454 L 480 448 L 520 452"
+          stroke="#7B4A2D" strokeWidth={2 + damage * 3} fill="none" strokeLinecap="round" opacity="0.7" />
+      )}
+
+      {esc > 0.3 && (
+        <g transform="translate(400 160)">
+          <rect x="-70" y="-22" width="140" height="44" rx="10" fill="#FFF1B8" stroke="#2C2A4A" strokeWidth="2.5" />
+          <text x="0" y="-4" fontSize="8" fontFamily="Fredoka" fontWeight="700" fill="#2C2A4A" textAnchor="middle">POUPA ÁGUA</text>
+          <text x="0" y="10" fontSize="6" fontFamily="Nunito" fontWeight="700" fill="#6B6890" textAnchor="middle">projeto da escola</text>
+        </g>
+      )}
+
+      <rect x="0" y={380} width={W} height="4" fill="#7B4A2D" />
+    </svg>
+  );
+};
+
+// =====================================================
+// DESLIZAMENTOS scene
+// =====================================================
+const SceneDeslizamentos = ({ vars, damage, intensity, active }) => {
+  const W = 800, H = 500;
+  const ch = vars.chuva / 100;
+  const dr = vars.drenagem / 100;
+  const enc = vars.encosta / 100;
+  const rainCount = Math.round(12 + intensity * 40 * (0.4 + ch * 0.6));
+  const mudShift = damage * 140 * (1 - dr * 0.45) * (1 - enc * 0.15);
+  const numTrees = Math.max(2, Math.round(3 + enc * 6));
+
+  return (
+    <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="xMidYMid slice">
+      <defs>
+        <linearGradient id="skyDesliz" x1="0" x2="0" y1="0" y2="1">
+          <stop offset="0" stopColor="#8FA8BC" />
+          <stop offset="1" stopColor="#C5D6E6" />
+        </linearGradient>
+      </defs>
+      <rect width={W} height={H} fill="url(#skyDesliz)" />
+
+      <Cloud x={130} y={55} scale={1.2} dark />
+      <Cloud x={400} y={40} scale={1.4} dark />
+      <Cloud x={650} y={60} scale={1.1} dark />
+
+      {Array.from({ length: rainCount }).map((_, i) => {
+        const x = (i * 43) % W + 12;
+        const delay = (i % 10) * 0.09;
+        return (
+          <line key={i} x1={x} y1={-6} x2={x - 5} y2={8}
+            stroke="#6B8FA8" strokeWidth="2" strokeLinecap="round"
+            className="raindrop"
+            style={{ animationDelay: `${delay}s` }} />
+        );
+      })}
+
+      {/* mountain */}
+      <path d="M 0 120 L 180 280 L 340 100 L 520 240 L 800 160 L 800 500 L 0 500 Z"
+        fill="#7A9A6E" stroke="#2C2A4A" strokeWidth="2.5" strokeLinejoin="round" />
+
+      {dr > 0.28 && (
+        <g opacity="0.95">
+          <path d="M 280 260 L 300 380 L 320 260" fill="none" stroke="#4A9FD9" strokeWidth="8" strokeLinecap="round" />
+          <path d="M 400 200 L 415 360 L 430 200" fill="none" stroke="#4A9FD9" strokeWidth="6" strokeLinecap="round" />
+        </g>
+      )}
+
+      {Array.from({ length: numTrees }).map((_, i) => {
+        const xs = [120, 200, 260, 340, 450, 520];
+        const ys = [250, 270, 240, 260, 230, 255];
+        return <Tree key={i} x={xs[i] ?? 150 + i * 70} y={ys[i] ?? 260} scale={0.85} />;
+      })}
+
+      {/* village */}
+      <House x={580} y={372} scale={1} color="#E8845C" tilt={damage > 0.35 ? -8 : 0} cracked={damage > 0.5} />
+      <House x={660} y={372} scale={0.95} color="#F2C28E" tilt={damage > 0.4 ? 6 : 0} />
+      <House x={740} y={372} scale={0.9} color="#FFFDF7" />
+
+      {/* mudslide mass */}
+      {damage > 0.08 && (
+        <g transform={`translate(${mudShift} 0)`}>
+          <path d="M 180 200 Q 320 320 520 380 L 800 420 L 800 500 L 120 500 L 80 280 Z"
+            fill="#8B6B4A" stroke="#2C2A4A" strokeWidth="2.5" opacity={0.75 + damage * 0.2} />
+          <path d="M 200 260 Q 340 360 560 400" stroke="#5C4030" strokeWidth="3" fill="none" opacity="0.5" />
+        </g>
+      )}
+
+      <rect x="0" y={380} width={W} height={H - 380} fill="#C9A06B" />
+      <rect x="0" y={380} width={W} height="4" fill="#7B4A2D" />
+
+      {vars.alertas_risco > 34 && (
+        <g transform="translate(720 200)">
+          <rect x="-28" y="-30" width="56" height="56" rx="8" fill="#FFFDF7" stroke="#2C2A4A" strokeWidth="2.5" />
+          <rect x="-20" y="-22" width="40" height="10" fill="#E8513D" />
+          <text x="0" y="-14.5" fontSize="6" fill="#fff" fontFamily="Fredoka" fontWeight="700" textAnchor="middle">RISCO</text>
+          <rect x="-18" y="-6" width="32" height="3" fill="#D9D6CC" />
+          <rect x="-18" y="0" width="26" height="3" fill="#D9D6CC" />
+        </g>
+      )}
+    </svg>
+  );
+};
+
+// Placeholder scene for not-yet-built disasters
+const ScenePlaceholder = ({ name }) => {
+  return (
+    <svg viewBox="0 0 800 500" preserveAspectRatio="xMidYMid slice">
+      <defs>
+        <pattern id="diag" patternUnits="userSpaceOnUse" width="20" height="20" patternTransform="rotate(45)">
+          <line x1="0" y1="0" x2="0" y2="20" stroke="#E8E2D2" strokeWidth="10" />
+        </pattern>
+      </defs>
+      <rect width="800" height="500" fill="#FFF6E0" />
+      <rect width="800" height="500" fill="url(#diag)" />
+      <g transform="translate(400 250)">
+        <rect x="-160" y="-50" width="320" height="100" rx="20" fill="#FFFDF7" stroke="#2C2A4A" strokeWidth="3" />
+        <text x="0" y="-8" textAnchor="middle" fontFamily="Fredoka" fontWeight="600" fontSize="26" fill="#2C2A4A">{name}</text>
+        <text x="0" y="22" textAnchor="middle" fontFamily="Nunito" fontWeight="700" fontSize="14" fill="#6B6890">A construir com a tua ajuda…</text>
+      </g>
+    </svg>
+  );
+};
+
+const Scene = ({ disasterId, ...rest }) => {
+  if (disasterId === 'cheias') return <SceneCheias {...rest} />;
+  if (disasterId === 'incendios') return <SceneIncendios {...rest} />;
+  if (disasterId === 'terramotos') return <SceneTerramotos {...rest} />;
+  if (disasterId === 'tempestades') return <SceneTempestades {...rest} />;
+  if (disasterId === 'secas') return <SceneSecas {...rest} />;
+  if (disasterId === 'deslizamentos') return <SceneDeslizamentos {...rest} />;
+  return <ScenePlaceholder name={rest.name || '...'} />;
+};
+
+// Mini preview for home cards (static)
+const ScenePreview = ({ disasterId }) => {
+  if (disasterId === 'cheias') {
+    return (
+      <svg viewBox="0 0 320 160" preserveAspectRatio="xMidYMid slice">
+        <rect width="320" height="160" fill="#9FD9F0" />
+        <Cloud x={70} y={36} scale={1.0} dark />
+        <Cloud x={220} y={28} scale={1.2} dark />
+        {[40, 80, 120, 220, 260].map((x, i) => <line key={i} x1={x} y1="50" x2={x - 4} y2="68" stroke="#4A9FD9" strokeWidth="2" />)}
+        <Hill cx={60} cy={130} rx={100} ry={40} color="#6BBE5E" />
+        <Hill cx={260} cy={140} rx={110} ry={40} color="#5B8F4A" />
+        <Tree x={40} y={108} scale={0.7} />
+        <Tree x={90} y={114} scale={0.6} />
+        <Tree x={230} y={114} scale={0.7} />
+        <rect x="100" y="80" width="22" height="44" fill="#C9A06B" stroke="#2C2A4A" strokeWidth="2" />
+        <rect x="120" y="100" width="200" height="60" fill="#4A9FD9" />
+        <House x={170} y={108} scale={0.6} color="#E8845C" />
+        <House x={220} y={108} scale={0.55} />
+      </svg>
+    );
+  }
+  if (disasterId === 'incendios') {
+    return (
+      <svg viewBox="0 0 320 160" preserveAspectRatio="xMidYMid slice">
+        <rect width="320" height="160" fill="#FFD78A" />
+        <Sun x={260} y={36} r={18} color="#E8513D" />
+        <Cloud x={120} y={36} scale={1.1} dark />
+        <Hill cx={60} cy={140} rx={110} ry={40} color="#8B6B4A" />
+        <Hill cx={260} cy={140} rx={140} ry={50} color="#6F5238" />
+        <Tree x={50} y={120} scale={0.7} burnt />
+        <Tree x={90} y={124} scale={0.6} burnt />
+        <Tree x={210} y={120} scale={0.75} />
+        <Tree x={250} y={124} scale={0.7} />
+        <g transform="translate(140 122)">
+          <path d="M 0 0 Q -8 -8 -4 -18 Q 0 -10 3 -18 Q 7 -8 0 0 Z" fill="#FF6B3D" stroke="#2C2A4A" strokeWidth="2" strokeLinejoin="round" />
+        </g>
+        <House x={200} y={130} scale={0.5} />
+        <House x={240} y={130} scale={0.55} color="#F2C28E" />
+      </svg>
+    );
+  }
+  if (disasterId === 'terramotos') {
+    return (
+      <svg viewBox="0 0 320 160" preserveAspectRatio="xMidYMid slice">
+        <rect width="320" height="160" fill="#9FD9F0" />
+        <Sun x={60} y={32} r={16} withSmile />
+        <Hill cx={260} cy={140} rx={120} ry={36} color="#A8B6C8" />
+        <g transform="translate(120 130)">
+          <rect x="-18" y="-60" width="36" height="60" fill="#C9A06B" stroke="#2C2A4A" strokeWidth="2" />
+          {[0,1,2].map(r => [0,1].map(c => <rect key={`${r}${c}`} x={-13 + c*13} y={-52 + r*16} width="8" height="8" fill="#FFD23F" stroke="#2C2A4A" strokeWidth="1.5" />))}
+        </g>
+        <House x={180} y={130} scale={0.55} tilt={6} cracked />
+        <House x={235} y={130} scale={0.55} color="#F2C28E" />
+        <rect x="0" y={130} width="320" height="30" fill="#C9A06B" />
+        <path d="M 0 145 L 60 142 L 100 148 L 160 144 L 220 150 L 280 142 L 320 146" stroke="#2C2A4A" strokeWidth="2.5" fill="none" strokeLinecap="round" />
+      </svg>
+    );
+  }
+  if (disasterId === 'tempestades') {
+    return (
+      <svg viewBox="0 0 320 160" preserveAspectRatio="xMidYMid slice">
+        <rect width="320" height="160" fill="#5A6788" />
+        <Cloud x={100} y={50} scale={1.5} dark />
+        <Cloud x={230} y={40} scale={1.6} dark />
+        <path d="M 140 70 L 130 100 L 145 100 L 135 130" stroke="#FFD23F" strokeWidth="4" fill="none" strokeLinecap="round" />
+        <path d="M 220 70 L 210 100 L 225 100 L 215 130" stroke="#FFD23F" strokeWidth="4" fill="none" strokeLinecap="round" />
+        <Hill cx={160} cy={150} rx={200} ry={30} color="#3D4658" />
+        <House x={120} y={140} scale={0.55} tilt={-6} />
+        <House x={210} y={140} scale={0.55} color="#F2C28E" tilt={4} />
+      </svg>
+    );
+  }
+  if (disasterId === 'secas') {
+    return (
+      <svg viewBox="0 0 320 160" preserveAspectRatio="xMidYMid slice">
+        <rect width="320" height="160" fill="#FFD78A" />
+        <Sun x={260} y={36} r={26} color="#FFB347" />
+        <Hill cx={60} cy={140} rx={110} ry={36} color="#D4B97A" />
+        <Hill cx={260} cy={144} rx={140} ry={36} color="#B89A5C" />
+        <Tree x={50} y={120} scale={0.6} burnt />
+        <Tree x={150} y={130} scale={0.5} burnt />
+        <rect x="0" y={130} width="320" height="30" fill="#D4B97A" />
+        <path d="M 20 145 L 80 145 M 100 150 L 160 150 M 180 148 L 240 148 M 260 152 L 310 152" stroke="#7B4A2D" strokeWidth="2" strokeLinecap="round" />
+      </svg>
+    );
+  }
+  if (disasterId === 'deslizamentos') {
+    return (
+      <svg viewBox="0 0 320 160" preserveAspectRatio="xMidYMid slice">
+        <rect width="320" height="160" fill="#9FD9F0" />
+        <Cloud x={80} y={40} scale={1.1} dark />
+        <path d="M 0 60 L 100 70 L 160 30 L 240 80 L 320 70 L 320 160 L 0 160 Z" fill="#8B6B4A" stroke="#2C2A4A" strokeWidth="2" strokeLinejoin="round" />
+        <path d="M 120 90 Q 140 110 180 105 Q 210 100 230 120 L 230 160 L 120 160 Z" fill="#A07952" stroke="#2C2A4A" strokeWidth="2" strokeLinejoin="round" />
+        <House x={230} y={150} scale={0.5} tilt={-10} cracked />
+        <Tree x={60} y={70} scale={0.6} fallen />
+      </svg>
+    );
+  }
+  return null;
+};
+
+Object.assign(window, { Scene, ScenePreview, Sun, Cloud, Tree, House });
+
+  </script>
+  <script type="text/babel">
+// Main app for the Ciência vs. Catástrofes simulator
+const { useState, useEffect, useMemo } = React;
+
+/** Orçamento fixo: repartir pontos entre controlos (impossível “máximo em tudo”). */
+const BUDGET_TOTAL = 150;
+const BUDGET_MIN = 10;
+/** Cada movimento dos controlos altera valores em passos de 5 (mais claro em tablet). */
+const BUDGET_STEP = 5;
+
+const budgetQuant = (x) => Math.round(Number(x) / BUDGET_STEP) * BUDGET_STEP;
+
+/** Converte pontos (soma = BUDGET_TOTAL) na escala 0–100 usada pelo motor e pelas cenas. */
+const pointsToEngineHundred = (pointsMap, variables) => {
+  const n = variables.length;
+  const mid = BUDGET_TOTAL / n;
+  const scale = 50 / mid;
+  const o = {};
+  variables.forEach(v => {
+    const p = Number(pointsMap[v.id]) || 0;
+    o[v.id] = Math.min(100, Math.round(p * scale));
+  });
+  return o;
+};
+
+/** Garante soma = BUDGET_TOTAL e cada id entre BUDGET_MIN e o máximo possível. */
+const finalizeBudget = (out, ids) => {
+  const o = { ...out };
+  let loop = 0;
+  while (loop++ < 120) {
+    const sum = ids.reduce((a, id) => a + (o[id] ?? 0), 0);
+    const gap = BUDGET_TOTAL - sum;
+    if (gap === 0) break;
+    const step = Math.abs(gap) >= BUDGET_STEP ? BUDGET_STEP : 1;
+    const adj = gap > 0 ? Math.min(step, gap) : Math.max(-step, gap);
+    if (gap > 0) {
+      const cand = ids
+        .filter(id => {
+          const others = ids.filter(i => i !== id);
+          const maxV = BUDGET_TOTAL - BUDGET_MIN * others.length;
+          return (o[id] ?? 0) + adj <= maxV;
+        })
+        .sort((a, b) => (o[b] ?? 0) - (o[a] ?? 0))[0];
+      if (!cand) break;
+      o[cand] += adj;
+    } else {
+      const cand = ids
+        .filter(id => (o[id] ?? 0) + adj >= BUDGET_MIN)
+        .sort((a, b) => (o[b] ?? 0) - (o[a] ?? 0))[0];
+      if (!cand) break;
+      o[cand] += adj;
+    }
+  }
+  return o;
+};
+
+const buildInitialBudget = (disaster) => {
+  const vars = disaster.variables;
+  const ids = vars.map(v => v.id);
+  const sumD = vars.reduce((s, v) => s + v.default, 0) || 1;
+  const floats = ids.map((_, i) => (BUDGET_TOTAL * vars[i].default) / sumD);
+  let ints = floats.map(x => Math.floor(x));
+  let diff = BUDGET_TOTAL - ints.reduce((a, b) => a + b, 0);
+  const frac = floats.map((x, i) => x - ints[i]);
+  const order = ids.map((_, i) => i).sort((a, b) => frac[b] - frac[a]);
+  for (let k = 0; k < diff; k++) ints[order[k % ids.length]]++;
+  const out = {};
+  ids.forEach((id, i) => { out[id] = ints[i]; });
+  for (let iter = 0; iter < 80; iter++) {
+    const low = ids.find(id => out[id] < BUDGET_MIN);
+    if (!low) break;
+    const need = BUDGET_MIN - out[low];
+    const donor = ids.filter(id => id !== low && out[id] > BUDGET_MIN).sort((a, b) => out[b] - out[a])[0];
+    if (!donor) {
+      out[low] = BUDGET_MIN;
+      break;
+    }
+    const take = Math.min(need, out[donor] - BUDGET_MIN);
+    out[donor] -= take;
+    out[low] += take;
+  }
+  ids.forEach(id => {
+    out[id] = budgetQuant(out[id]);
+    if (out[id] < BUDGET_MIN) out[id] = BUDGET_MIN;
+  });
+  return finalizeBudget(out, ids);
+};
+
+/** Reparte `rem` entre `others`, cada um múltiplo de BUDGET_STEP e ≥ BUDGET_MIN. */
+const distributeRemAmongOthers = (rem, others, prev) => {
+  const k = others.length;
+  const minTotal = BUDGET_MIN * k;
+  const out = {};
+  if (rem < minTotal) {
+    others.forEach(id => { out[id] = BUDGET_MIN; });
+    return out;
+  }
+  const pool = rem - minTotal;
+  const flex = others.map(id => Math.max(0, (prev[id] ?? BUDGET_MIN) - BUDGET_MIN));
+  const sF = flex.reduce((a, b) => a + b, 0);
+  const poolUnits = pool / BUDGET_STEP;
+
+  if (pool <= 0 || sF === 0) {
+    const remUnits = Math.round(rem / BUDGET_STEP);
+    const minUnits = (BUDGET_MIN / BUDGET_STEP) * k;
+    const extra = remUnits - minUnits;
+    const baseU = Math.floor(extra / k);
+    const remainder = extra - baseU * k;
+    others.forEach((id, i) => {
+      out[id] = BUDGET_MIN + (baseU + (i < remainder ? 1 : 0)) * BUDGET_STEP;
+    });
+    return out;
+  }
+
+  const rawU = others.map((_, i) => (poolUnits * flex[i]) / sF);
+  let units = rawU.map(u => Math.floor(u));
+  let deficit = Math.round(poolUnits) - units.reduce((a, b) => a + b, 0);
+  const ord = others.map((_, i) => i).sort((a, b) => (rawU[b] - units[b]) - (rawU[a] - units[a]));
+  for (let t = 0; t < deficit; t++) units[ord[t % ord.length]]++;
+  others.forEach((id, i) => {
+    out[id] = BUDGET_MIN + units[i] * BUDGET_STEP;
+  });
+  return out;
+};
+
+/** Ao mover um control, os outros ajustam-se para manter a soma em BUDGET_TOTAL (passos de BUDGET_STEP). */
+const redistributeBudget = (prev, disaster, changedId, rawNew) => {
+  const ids = disaster.variables.map(v => v.id);
+  const others = ids.filter(id => id !== changedId);
+  const maxC = BUDGET_TOTAL - BUDGET_MIN * others.length;
+  let nv = Math.max(BUDGET_MIN, Math.min(Math.round(Number(rawNew)), maxC));
+  nv = budgetQuant(nv);
+  nv = Math.max(BUDGET_MIN, Math.min(nv, maxC));
+  const rem = BUDGET_TOTAL - nv;
+  const otherPart = distributeRemAmongOthers(rem, others, prev);
+  const out = { ...otherPart, [changedId]: nv };
+  return finalizeBudget(out, ids);
+};
+
+// ---------- helpers ----------
+const computeProtection = (disaster, pointsMap) => {
+  const eff = pointsToEngineHundred(pointsMap, disaster.variables);
+  const totalWeight = disaster.variables.reduce((s, v) => s + v.weight, 0);
+  const weighted = disaster.variables.reduce((s, v) => s + (eff[v.id] ?? 0) * v.weight, 0);
+  return Math.min(1, (weighted / totalWeight) / 100);
+};
+
+const computeOutcome = (disaster, pointsMap, intensity) => {
+  const protection = computeProtection(disaster, pointsMap);
+  // damage: how badly things were hit
+  const rawDamage = Math.max(0, intensity - protection * 0.95);
+  const damage = Math.min(1, rawDamage);
+
+  const buildingsPct = Math.round(Math.max(0, Math.min(100, (1 - damage) * 100)));
+  const peopleSaved = Math.round(disaster.population * (1 - damage * 0.85));
+  const score = Math.round((protection - intensity * 0.4) * 100 + 60); // rough
+  let stars = 1;
+  if (buildingsPct >= 90) stars = 3;
+  else if (buildingsPct >= 70) stars = 2;
+  return { protection, damage, buildingsPct, peopleSaved, stars };
+};
+
+const ratingLabel = (stars) => stars >= 3 ? 'Cientista de Topo!' : stars === 2 ? 'Boa Defesa!' : 'Podes melhorar!';
+
+/** Dicas pós-resultado: gera texto a partir dos controlos e de RESULT_POST_TIPS (data.js). */
+const buildPostSimulationAdvice = (disaster, outcome, values, factIndex) => {
+  const pool = (typeof RESULT_POST_TIPS !== 'undefined' && RESULT_POST_TIPS[disaster.id])
+    ? RESULT_POST_TIPS[disaster.id]
+    : [
+        'Em casa, combina um plano simples: quem avisa quem e para onde vais em emergência.',
+        'Apoiar ciência e tecnologia na escola e na comunidade constrói defesas para todos.'
+      ];
+  const tips = [];
+  if (pool.length) {
+    tips.push(pool[((factIndex ?? 0) + disaster.id.length) % pool.length]);
+    const t2 = pool[((factIndex ?? 0) + disaster.id.length + 1) % pool.length];
+    if (t2 !== tips[0]) tips.push(t2);
+  }
+
+  const eff = pointsToEngineHundred(values, disaster.variables);
+  const scored = disaster.variables.map(v => ({
+    name: v.name,
+    hint: v.hint,
+    val: eff[v.id] ?? 0,
+    pts: values[v.id] ?? 0
+  }));
+  const sortedAsc = [...scored].sort((a, b) => a.val - b.val);
+  const sortedDesc = [...scored].sort((a, b) => b.val - a.val);
+
+  const praiseLines = [];
+  const minPraise = outcome.stars >= 3 ? 58 : 54;
+  if (outcome.stars >= 2) {
+    sortedDesc.forEach(v => {
+      if (v.val >= minPraise && praiseLines.length < 3) {
+        praiseLines.push(
+          `«${v.name}» com ${Math.round(v.pts)} pontos esteve forte: ${v.hint} — ajudou a proteger pessoas e o ambiente.`
+        );
+      }
+    });
+    if (praiseLines.length === 0) {
+      praiseLines.push(
+        'A soma das tuas escolhas criou mais “camadas” de proteção: lembra-te que prevenção raramente depende de uma só medida.'
+      );
+    }
+  }
+
+  const showImprove = outcome.stars < 2 || outcome.damage > 0.26;
+  const improveLines = [];
+  if (showImprove) {
+    sortedAsc.forEach(v => {
+      if (v.val < 56 && improveLines.length < 3) {
+        improveLines.push(
+          `Podes tentar dar mais pontos a «${v.name}» (tinhas ${Math.round(v.pts)}; o mínimo útil na escala do jogo costuma ser subir os mais fracos): ${v.hint}.`
+        );
+      }
+    });
+    if (improveLines.length === 0) {
+      improveLines.push(
+        'Tenta repartir os 150 pontos de forma mais equilibrada — muitas defesas só funcionam bem em equipa, como na vida real.'
+      );
+    }
+  }
+
+  return {
+    tips,
+    praiseLines,
+    improveLines,
+    showPraise: outcome.stars >= 2,
+    showImprove
+  };
+};
+
+const strandBadge = (strand) => {
+  if (strand === 'ciencia') return { label: 'Ciência', emoji: '🔬', className: 'strand ciencia' };
+  if (strand === 'tecnologia') return { label: 'Tecnologia', emoji: '🛠️', className: 'strand tecnologia' };
+  return { label: 'Ciência e tecnologia', emoji: '🔬🛠️', className: 'strand ambos' };
+};
+
+// ---------- Aprender mais (conteúdo da aba na página inicial) ----------
+const LearnMorePanel = () => {
+  const articles = typeof LEARN_MORE !== 'undefined' ? LEARN_MORE : [];
+  return (
+    <section className="learn-more" aria-labelledby="learn-main-title">
+      <h2 id="learn-main-title" className="learn-more-title">Aprender mais sobre desastres naturais</h2>
+      <p className="learn-more-lead">
+        Aqui podes ler com calma, como se fosse uma revista da escola. Cada bloco fala de um perigo da Natureza,
+        do que fazemos para prevenir, da tecnologia que usamos e da ciência que explica tudo. Não precisas de decorar:
+        o objetivo é perceberes ideias que te protegem a ti, à tua família e ao planeta.
+      </p>
+      <div className="learn-more-stack">
+        {articles.map((a) => {
+          const meta = DISASTERS.find(d => d.id === a.id);
+          const accent = meta?.accent || '#2C2A4A';
+          return (
+            <article key={a.id} className="learn-card" style={{ borderColor: accent }}>
+              <header className="learn-card-head" style={{ background: accent + '18' }}>
+                <span className="learn-card-emoji" aria-hidden="true">{a.emoji}</span>
+                <h3 className="learn-card-title">{a.title}</h3>
+              </header>
+              <div className="learn-card-body">
+                <p className="learn-card-intro">{a.oQueE}</p>
+                <h4 className="learn-subhead">Como prevenir (hábitos e planeamento)</h4>
+                <ul className="learn-list">
+                  {a.prevenir.map((line, i) => <li key={i}>{line}</li>)}
+                </ul>
+                <h4 className="learn-subhead">Tecnologia à nossa volta</h4>
+                <ul className="learn-list">
+                  {a.tecnologia.map((line, i) => <li key={i}>{line}</li>)}
+                </ul>
+                <h4 className="learn-subhead">O que a ciência explica</h4>
+                <ul className="learn-list">
+                  {a.ciencia.map((line, i) => <li key={i}>{line}</li>)}
+                </ul>
+                <p className="learn-remember"><strong>Para lembrar:</strong> {a.lembrar}</p>
+              </div>
+            </article>
+          );
+        })}
+      </div>
+    </section>
+  );
+};
+
+// ---------- Home screen ----------
+const Home = ({ onPick }) => {
+  const edu = typeof HOME_EDUCATION !== 'undefined' ? HOME_EDUCATION : null;
+  const [homeTab, setHomeTab] = useState('jogar');
+  return (
+    <div className="app">
+      <div className="home-hero">
+        <div className="sun" />
+        <div className="cloud c1" />
+        <div className="cloud c2" />
+
+        <div className="home-header">
+          <span className="home-badge"><span className="dot" /> 4.º Ano · Ciência e Tecnologia</span>
+        </div>
+
+        <h1 className="home-title">
+          Ciência vs. <span className="accent">Catástrofes</span>
+        </h1>
+        <p className="home-subtitle">
+          Um simulador para perceberes como o saber científico e as invenções úteis ajudam a prevenir desastres naturais
+          e a proteger vidas — brinca com os controlos, lê as explicações e imagina uma comunidade bem preparada!
+        </p>
+
+        <div className="floating-mascot wobble">
+          <Mascot size={180} />
+        </div>
+      </div>
+
+      <nav className="home-tabs" role="tablist" aria-label="Secções da página inicial">
+        <button
+          type="button"
+          role="tab"
+          aria-selected={homeTab === 'jogar'}
+          aria-controls="panel-jogar"
+          id="tab-jogar"
+          className={`home-tab ${homeTab === 'jogar' ? 'on' : ''}`}
+          onClick={() => setHomeTab('jogar')}
+        >
+          Jogar
+        </button>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={homeTab === 'aprender'}
+          aria-controls="panel-aprender"
+          id="tab-aprender"
+          className={`home-tab ${homeTab === 'aprender' ? 'on' : ''}`}
+          onClick={() => setHomeTab('aprender')}
+        >
+          Aprender Mais
+        </button>
+      </nav>
+
+      {homeTab === 'jogar' && (
+        <div id="panel-jogar" role="tabpanel" aria-labelledby="tab-jogar" className="home-tab-panel">
+      {edu && (
+        <section className="home-edu" aria-labelledby="home-edu-title">
+          <h2 id="home-edu-title" className="home-edu-title">Para que serve este simulador?</h2>
+          <p className="home-edu-lead">{edu.lead}</p>
+          <div className="home-edu-grid">
+            {edu.blocks.map((b, i) => (
+              <article key={i} className="home-edu-card">
+                <h3 className="home-edu-card-title">{b.title}</h3>
+                <p className="home-edu-card-text">{b.text}</p>
+              </article>
+            ))}
+          </div>
+        </section>
+      )}
+
+      <div className="section-h">
+        <h2>Escolhe a tua catástrofe</h2>
+        <p>6 catástrofes · todas para explorares</p>
+      </div>
+
+      <div className="cards">
+        {DISASTERS.map(d => (
+          <div key={d.id}
+            className={`card ${d.enabled ? '' : 'disabled'}`}
+            onClick={() => d.enabled && onPick(d.id)}
+            role="button"
+            tabIndex={d.enabled ? 0 : -1}
+            onKeyDown={(e) => { if (d.enabled && (e.key === 'Enter' || e.key === ' ')) onPick(d.id); }}>
+            <div className="preview" style={{ background: d.accent + '22' }}>
+              <ScenePreview disasterId={d.id} />
+            </div>
+            <div className="card-body">
+              <h3 className="card-title">{d.emoji} {d.name}</h3>
+              <p className="card-desc">{d.short}</p>
+              {d.enabled ? (
+                <div className="card-foot">
+                  <span className="chip green">150 pts a repartir</span>
+                  <span className="chip">Livre + Missão</span>
+                </div>
+              ) : (
+                <div className="card-foot">
+                  <span className="chip muted">Em breve</span>
+                </div>
+              )}
+            </div>
+            {!d.enabled && <span className="ribbon">EM BREVE</span>}
+          </div>
+        ))}
+      </div>
+        </div>
+      )}
+
+      {homeTab === 'aprender' && (
+        <div id="panel-aprender" role="tabpanel" aria-labelledby="tab-aprender" className="home-tab-panel">
+          <LearnMorePanel />
+        </div>
+      )}
+
+      <div style={{ height: 40 }} />
+    </div>
+  );
+};
+
+// ---------- Simulator screen ----------
+const Simulator = ({ disasterId, onBack }) => {
+  const disaster = useMemo(() => DISASTERS.find(d => d.id === disasterId), [disasterId]);
+
+  const initialBudget = useMemo(() => buildInitialBudget(disaster), [disaster]);
+  const [values, setValues] = useState(initialBudget);
+
+  const [mode, setMode] = useState('livre'); // livre | missao
+  // Mission state
+  const [missionState, setMissionState] = useState('idle'); // idle | running | over
+  const [timeLeft, setTimeLeft] = useState(45);
+  const [intensity, setIntensity] = useState(0); // current intensity (rises during mission)
+  const [showResult, setShowResult] = useState(false);
+  const [factIndex, setFactIndex] = useState(0);
+  const [tipIndex, setTipIndex] = useState(0);
+
+  // Intensity for live preview
+  const liveIntensity = mode === 'livre' ? 0.65 : intensity;
+  const outcome = useMemo(
+    () => computeOutcome(disaster, values, liveIntensity),
+    [disaster, values, liveIntensity]
+  );
+
+  const sceneVars = useMemo(
+    () => pointsToEngineHundred(values, disaster.variables),
+    [values, disaster]
+  );
+
+  const budgetUsed = useMemo(
+    () => disaster.variables.reduce((s, v) => s + (values[v.id] ?? 0), 0),
+    [disaster, values]
+  );
+
+  const maxSlider = BUDGET_TOTAL - BUDGET_MIN * (disaster.variables.length - 1);
+  useEffect(() => {
+    if (mode !== 'livre') return;
+    const tips = MASCOT_TIPS[disaster.id] || [];
+    if (!tips.length) return;
+    const id = setInterval(() => setTipIndex(i => (i + 1) % tips.length), 6000);
+    return () => clearInterval(id);
+  }, [mode, disaster.id]);
+
+  // Mission countdown
+  useEffect(() => {
+    if (mode !== 'missao' || missionState !== 'running') return;
+    if (timeLeft <= 0) {
+      // run disaster
+      setMissionState('over');
+      // intensity peaks at end
+      setIntensity(0.88);
+      setTimeout(() => setShowResult(true), 900);
+      return;
+    }
+    const id = setTimeout(() => {
+      setTimeLeft(t => t - 1);
+      // gradually rise intensity for visual tension
+      setIntensity(i => Math.min(0.6, i + 0.02));
+    }, 1000);
+    return () => clearTimeout(id);
+  }, [mode, missionState, timeLeft]);
+
+  const startMission = () => {
+    setTimeLeft(45);
+    setIntensity(0.1);
+    setMissionState('running');
+    setShowResult(false);
+  };
+
+  const onModeChange = (newMode) => {
+    setMode(newMode);
+    setMissionState('idle');
+    setTimeLeft(45);
+    setIntensity(0);
+    setShowResult(false);
+  };
+
+  const reset = () => {
+    setValues(buildInitialBudget(disaster));
+    setMissionState('idle');
+    setTimeLeft(45);
+    setIntensity(0);
+    setShowResult(false);
+  };
+
+  const trySimulateLivre = () => {
+    setIntensity(0.85);
+    setMissionState('over'); // freezes UI for visualisation
+    setTimeout(() => setShowResult(true), 1000);
+  };
+
+  const closeResult = () => {
+    setShowResult(false);
+    if (mode === 'missao') {
+      setMissionState('idle');
+      setTimeLeft(45);
+      setIntensity(0);
+    } else {
+      setMissionState('idle');
+      setIntensity(0);
+    }
+    setFactIndex(i => (i + 1) % (disaster.facts?.length || 1));
+  };
+
+  const sliderDisabled = mode === 'missao' && missionState === 'over';
+
+  const currentTip = (() => {
+    const tips = MASCOT_TIPS[disaster.id] || [];
+    if (!tips.length) return '';
+    if (mode === 'missao' && missionState === 'running') {
+      return `Faltam ${timeLeft}s! Reparte bem os 150 pontos — as decisões contam.`;
+    }
+    if (mode === 'missao' && missionState === 'over') {
+      return 'A catástrofe aconteceu! Vamos ver os resultados...';
+    }
+    return tips[tipIndex];
+  })();
+
+  return (
+    <div className="app">
+      {/* Top bar */}
+      <div className="sim-top">
+        <button className="back-btn" onClick={onBack}>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M15 18 L9 12 L15 6" />
+          </svg>
+          Voltar
+        </button>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, flex: 1, justifyContent: 'center' }}>
+          <h1 className="h-title" style={{ fontSize: 28 }}>
+            <span style={{ fontSize: 28, marginRight: 8 }}>{disaster.emoji}</span>
+            {disaster.name}
+          </h1>
+        </div>
+
+        <div className="mode-switch" role="tablist">
+          <button className={mode === 'livre' ? 'on' : ''} onClick={() => onModeChange('livre')}>🧪 Livre</button>
+          <button className={mode === 'missao' ? 'on' : ''} onClick={() => onModeChange('missao')}>🎯 Missão</button>
+        </div>
+      </div>
+
+      <div className="sim-grid">
+        {/* Left: variables */}
+        <div className="panel">
+          <div className="panel-head">
+            <h3>Ciência e tecnologia</h3>
+            <span style={{ fontSize: 12, fontWeight: 800, color: 'var(--ink-soft)' }}>
+              {mode === 'livre'
+                ? `150 pontos no total — cada passo move ${BUDGET_STEP} pontos; os outros ajustam-se (mín. ${BUDGET_MIN} em cada)`
+                : 'Reparte 150 pontos antes do tempo acabar'}
+            </span>
+          </div>
+
+          <div className="budget-strip" aria-live="polite">
+            <span className="budget-strip-total">{budgetUsed}/{BUDGET_TOTAL} pontos usados</span>
+            <span className="budget-strip-hint">Não dá para maximizar tudo: é preciso escolher prioridades.</span>
+          </div>
+
+          {disaster.teachIntro && (
+            <div className="sim-teach" role="region" aria-label="Sobre esta catástrofe">
+              <p className="sim-teach-label">Sobre esta catástrofe</p>
+              <p className="sim-teach-text">{disaster.teachIntro}</p>
+            </div>
+          )}
+
+          <div className="mascot-row">
+            <MascotMini size={56} mood={outcome.stars >= 2 || mode === 'livre' ? 'happy' : 'happy'} />
+            <div className="bubble">{currentTip}</div>
+          </div>
+
+          <div className="panel-body">
+            {disaster.variables.map(v => {
+              const sb = v.strand ? strandBadge(v.strand) : null;
+              return (
+                <div key={v.id} className="var">
+                  <div className="var-top">
+                    <div className="var-icon" style={{ background: v.color }}>
+                      <VarIcon name={v.icon} />
+                    </div>
+                    <div className="var-text">
+                      <h4 className="var-name">{v.name}</h4>
+                      <p className="var-hint">{v.hint}</p>
+                      {sb && (
+                        <span className={sb.className} title="Ligação ao trabalho de Ciência e Tecnologia">
+                          <span className="strand-emoji" aria-hidden="true">{sb.emoji}</span>
+                          {sb.label}
+                        </span>
+                      )}
+                    </div>
+                    <div className="var-val">{values[v.id]} <span className="var-pts">pts</span></div>
+                  </div>
+                  <input
+                    type="range" min={BUDGET_MIN} max={maxSlider} step={BUDGET_STEP}
+                    className="chunky"
+                    value={values[v.id]}
+                    disabled={sliderDisabled}
+                    onChange={e => setValues(prev => redistributeBudget(prev, disaster, v.id, Number(e.target.value)))}
+                  />
+                  {v.preventExplain && (
+                    <div className="var-prevent">
+                      <p className="var-prevent-title">Como isto ajuda a prevenir?</p>
+                      <p className="var-prevent-text">{v.preventExplain}</p>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+
+          <div className="sim-actions">
+            {mode === 'livre' && (
+              <>
+                <button className="cta" onClick={trySimulateLivre}>
+                  ▶ Simular catástrofe
+                </button>
+                <button className="cta ghost" onClick={reset}>↻ Repor</button>
+              </>
+            )}
+            {mode === 'missao' && missionState === 'idle' && (
+              <>
+                <button className="cta big green" onClick={startMission}>
+                  🎯 Começar missão (45s)
+                </button>
+                <button className="cta ghost" onClick={reset}>↻ Repor</button>
+              </>
+            )}
+            {mode === 'missao' && missionState === 'running' && (
+              <button className="cta ghost" onClick={() => { setMissionState('over'); setIntensity(0.88); setTimeout(()=>setShowResult(true),800); }}>
+                ⚡ Saltar para o final
+              </button>
+            )}
+            {mode === 'missao' && missionState === 'over' && !showResult && (
+              <button className="cta" onClick={() => setShowResult(true)}>Ver resultado</button>
+            )}
+          </div>
+        </div>
+
+        {/* Right: scene + live stats */}
+        <div className="panel">
+          <div className="panel-head">
+            <h3>Cenário</h3>
+            <span style={{ fontSize: 12, fontWeight: 800, color: 'var(--ink-soft)' }}>
+              Intensidade: {mode === 'livre' ? 'Pré-visualização' : (missionState === 'running' ? 'A aproximar...' : missionState === 'over' ? 'CATÁSTROFE!' : 'Em espera')}
+            </span>
+          </div>
+
+          <div className="scene-wrap">
+            <Scene
+              disasterId={disaster.id}
+              vars={sceneVars}
+              damage={outcome.damage}
+              intensity={liveIntensity}
+              active={mode === 'missao'}
+              name={disaster.name}
+            />
+            {/* Protection meter */}
+            <div className="scene-meter">
+              <span className="mlabel">Proteção</span>
+              <div className="bar">
+                <div style={{
+                  width: `${Math.round(outcome.protection * 100)}%`,
+                  background: outcome.protection > 0.66 ? '#6BBE5E' : outcome.protection > 0.33 ? '#FFD23F' : '#E8513D'
+                }} />
+              </div>
+              <span style={{ fontVariantNumeric: 'tabular-nums' }}>{Math.round(outcome.protection * 100)}%</span>
+            </div>
+            {/* Timer (mission running) */}
+            {mode === 'missao' && missionState === 'running' && (
+              <div className={`timer-pill ${timeLeft <= 10 ? 'warn' : ''}`}>
+                <span className="pulse" />
+                {timeLeft}s
+              </div>
+            )}
+            {mode === 'missao' && missionState === 'over' && (
+              <div className="timer-pill warn"><span className="pulse" />FIM</div>
+            )}
+          </div>
+
+          {/* live stats */}
+          <div className="stats">
+            <div className="stat">
+              <div className="ico" style={{ background: '#C9F0B4' }}>
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#2C2A4A" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="4" y="9" width="16" height="12" fill="#FFFDF7" />
+                  <polygon points="3,9 12,3 21,9" fill="#E8845C" strokeLinejoin="round" />
+                  <rect x="10" y="13" width="4" height="8" fill="#5B3422" />
+                </svg>
+              </div>
+              <div>
+                <div className="label">Edifícios protegidos</div>
+                <div className="val">{outcome.buildingsPct}%</div>
+              </div>
+            </div>
+            <div className="stat">
+              <div className="ico" style={{ background: '#FFE7B8' }}>
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#2C2A4A" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="12" cy="8" r="4" fill="#F5D5B3" />
+                  <path d="M4 21 Q4 14 12 14 Q20 14 20 21" fill="#4A9FD9" />
+                </svg>
+              </div>
+              <div>
+                <div className="label">Pessoas a salvo</div>
+                <div className="val">{outcome.peopleSaved.toLocaleString('pt-PT')}</div>
+              </div>
+            </div>
+          </div>
+
+          <div style={{ height: 18 }} />
+        </div>
+      </div>
+
+      {/* Results modal */}
+      {showResult && (
+        <ResultsModal
+          disaster={disaster}
+          outcome={outcome}
+          values={values}
+          onClose={closeResult}
+          factIndex={factIndex}
+        />
+      )}
+
+      <div style={{ height: 40 }} />
+    </div>
+  );
+};
+
+// ---------- Results modal ----------
+const ResultsModal = ({ disaster, outcome, values, onClose, factIndex }) => {
+  const fact = disaster.facts[factIndex % disaster.facts.length];
+  const isWin = outcome.stars >= 2;
+  const advice = useMemo(
+    () => buildPostSimulationAdvice(disaster, outcome, values, factIndex),
+    [disaster, outcome, values, factIndex]
+  );
+
+  return (
+    <div className="modal-bg" onClick={onClose}>
+      <div className="modal" onClick={e => e.stopPropagation()} role="dialog" aria-modal="true">
+        <div className="modal-head">
+          <div className="stars">
+            {[1, 2, 3].map(i => <Star key={i} filled={outcome.stars >= i} />)}
+          </div>
+          <h2>{ratingLabel(outcome.stars)}</h2>
+          <p>{isWin ? HIGH_SCORE_MESSAGES[disaster.id] : LOW_SCORE_MESSAGES[disaster.id]}</p>
+        </div>
+        <div className="modal-body">
+          <div className="result-stats">
+            <div className="stat">
+              <div className="ico" style={{ background: '#C9F0B4' }}>
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#2C2A4A" strokeWidth="2.4" strokeLinejoin="round">
+                  <rect x="4" y="9" width="16" height="12" fill="#FFFDF7" />
+                  <polygon points="3,9 12,3 21,9" fill="#E8845C" />
+                </svg>
+              </div>
+              <div>
+                <div className="label">Edifícios</div>
+                <div className="val">{outcome.buildingsPct}%</div>
+              </div>
+            </div>
+            <div className="stat">
+              <div className="ico" style={{ background: '#FFE7B8' }}>
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#2C2A4A" strokeWidth="2.4" strokeLinejoin="round">
+                  <circle cx="12" cy="8" r="4" fill="#F5D5B3" />
+                  <path d="M4 21 Q4 14 12 14 Q20 14 20 21" fill="#4A9FD9" />
+                </svg>
+              </div>
+              <div>
+                <div className="label">Pessoas a salvo</div>
+                <div className="val">{outcome.peopleSaved.toLocaleString('pt-PT')}</div>
+              </div>
+            </div>
+          </div>
+
+          {advice.showPraise && (
+            <div className="modal-reflect good">
+              <h4 className="modal-reflect-title">O que funcionou muito bem</h4>
+              <ul className="modal-reflect-list">
+                {advice.praiseLines.map((line, i) => <li key={i}>{line}</li>)}
+              </ul>
+            </div>
+          )}
+
+          {advice.showImprove && (
+            <div className="modal-reflect improve">
+              <h4 className="modal-reflect-title">O que podias fazer diferente</h4>
+              <ul className="modal-reflect-list">
+                {advice.improveLines.map((line, i) => <li key={i}>{line}</li>)}
+              </ul>
+            </div>
+          )}
+
+          {advice.tips.length > 0 && (
+            <div className="modal-reflect tips">
+              <h4 className="modal-reflect-title">Dicas para a vida real</h4>
+              <ul className="modal-reflect-list">
+                {advice.tips.map((line, i) => <li key={i}>{line}</li>)}
+              </ul>
+            </div>
+          )}
+
+          <div className="fact">
+            <div className="ico">
+              <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#2C2A4A" strokeWidth="2.4" strokeLinejoin="round" strokeLinecap="round">
+                <path d="M12 3 Q5 3 5 11 Q5 14 8 16 L8 19 L16 19 L16 16 Q19 14 19 11 Q19 3 12 3 Z" fill="#FFD23F" />
+                <line x1="9" y1="22" x2="15" y2="22" />
+              </svg>
+            </div>
+            <div>
+              <p className="title">{disaster.factTitle}</p>
+              <p>{fact}</p>
+            </div>
+          </div>
+        </div>
+        <div className="modal-actions">
+          <button className="cta green" onClick={onClose}>↻ Jogar outra vez</button>
+          <button className="cta ghost" onClick={onClose}>Fechar</button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// ---------- Root ----------
+const App = () => {
+  const [screen, setScreen] = useState('home'); // home | sim
+  const [picked, setPicked] = useState(null);
+
+  const pick = (id) => { setPicked(id); setScreen('sim'); window.scrollTo(0, 0); };
+  const back = () => { setScreen('home'); window.scrollTo(0, 0); };
+
+  return screen === 'home'
+    ? <Home onPick={pick} />
+    : <Simulator key={picked} disasterId={picked} onBack={back} />;
+};
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+
+  </script>
+</body>
+</html>

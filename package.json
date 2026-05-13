@@ -1,0 +1,12 @@
+{
+  "name": "ciencia-catastrofes-simulador",
+  "private": true,
+  "description": "Simulador estático para Cloudflare Pages (ver CLOUDFLARE.md).",
+  "scripts": {
+    "build": "node scripts/prepare-pages.mjs",
+    "deploy": "npm run build && wrangler pages deploy dist"
+  },
+  "devDependencies": {
+    "wrangler": "^4.17.0"
+  }
+}
