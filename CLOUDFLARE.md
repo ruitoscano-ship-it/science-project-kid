@@ -10,8 +10,19 @@ Este projeto é **estático** (HTML + CSS + JS/JSX servidos tal como estão). O 
    - **Build command:** `npm run build`
    - **Build output directory:** `dist`
    - **Root directory:** `/` (raiz do repo)
+   - **Deploy command:** deixa **vazio** (não configures nada aqui).
 4. **Environment variables:** nenhuma obrigatória.
-5. **Deploy** — cada push na branch configurada gera um novo deploy.
+5. **Deploy** — cada push na branch configurada gera um novo deploy. O Pages **publica automaticamente** o conteúdo da pasta `dist` após o build; **não** uses `npx wrangler deploy` aí (isso é para **Workers**, não para este site estático).
+
+## Erro: `Missing entry-point to Worker script` após `wrangler deploy`
+
+Se no log aparece `Executing user deploy command: npx wrangler deploy` e depois falha:
+
+1. No projeto **Pages** → **Settings** → **Builds & deployments** → **Build configuration** (ou **Edit configuration**).
+2. Apaga o conteúdo do campo **Deploy command** / **Non-production branch deploy command** (deixa em branco).
+3. Guarda e faz **Retry deployment** ou um novo commit.
+
+`wrangler deploy` tenta publicar um **Worker**; este projeto só precisa do **output directory** `dist`. O `npm run build` já é suficiente.
 
 ## Linha de comandos
 
