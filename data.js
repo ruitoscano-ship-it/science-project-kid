@@ -3,29 +3,12 @@
 // strand: papel principal — ciência | tecnologia | ambos (para o trabalho de 4.º ano)
 
 window.HOME_EDUCATION = {
-  lead:
-    'Este simulador faz parte de um trabalho de Ciência e Tecnologia: perceber como a ciência e a tecnologia ajudam a prevenir desastres e a salvar vidas.',
+  lead: 'Ciência + tecnologia = equipa que protege a tua vila!',
   blocks: [
-    {
-      title: 'O que vais fazer aqui?',
-      text:
-        'Vais escolher uma catástrofe natural (cheias, fogo, terramoto, tempestade, seca ou deslizamento de terras). Depois, repartes 150 pontos por quatro controlos — não dá para estar tudo no máximo ao mesmo tempo, como na vida real com orçamentos e equipas. Cada controlo representa algo que a sociedade pode fazer melhor quando investe em conhecimento e em ferramentas. No fim, vês se as casas e as pessoas ficaram mais protegidas. Não é um jogo de adivinhar: é para perceberes que prevenir também é ciência!'
-    },
-    {
-      title: 'Ciência — perceber o mundo',
-      text:
-        'Ciência é fazer perguntas, observar, medir e aprender regras sobre a Natureza. Por exemplo: perceber como cai a chuva, como o fogo se alastra ou como se propagam as ondas de um terramoto. Quanto mais sabemos, melhor escolhemos o que fazer antes do perigo chegar.'
-    },
-    {
-      title: 'Tecnologia — ferramentas que ajudam',
-      text:
-        'Tecnologia são as invenções que usamos na prática: sensores, computadores, telemóveis, aviões bombeiros, barragens bem geridas, escolas preparadas… A tecnologia aplica o conhecimento científico para avisar, proteger e resgatar pessoas mais depressa.'
-    },
-    {
-      title: 'Porque é que isto importa?',
-      text:
-        'Muitas vidas se salvam quando há estudos, planeamento e equipamentos adequados. Não existe uma alavanca mágica: cada defesa funciona melhor em conjunto. Por isso, lê com atenção a explicação de cada cenário e de cada controlo — lá percebes em que medida o saber e o desenvolvimento técnico fazem a diferença.'
-    }
+    { icon: '🎮', title: 'Jogar', text: 'Escolhe uma catástrofe. Reparte 250 pontos em 4 ideias — não dá para tudo no máximo!' },
+    { icon: '🔬', title: 'Ciência', text: 'Perguntar, medir e perceber a Natureza antes do perigo chegar.' },
+    { icon: '🛠️', title: 'Tecnologia', text: 'Sensores, avisos no telemóvel e máquinas que ajudam a salvar vidas.' },
+    { icon: '⭐', title: 'Objetivo', text: 'Ver se casas e pessoas ficam mais seguras. Prevenir também é ciência!' }
   ]
 };
 
@@ -48,7 +31,7 @@ window.DISASTERS = [
     ],
     intro: 'Está a chover muito! Ajusta a ciência para proteger a vila do rio.',
     teachIntro:
-      'Nas cheias, a água desce em grande quantidade e pode inundar campos, estradas e casas. A ciência ajuda-nos a prever e a perceber rios e solos; a tecnologia ajuda-nos a medir, a comunicar e a segurar água de forma segura. Quanto melhor estivermos preparados, menos danos há e mais pessoas ficam a salvo.',
+      'Nas cheias, a água desce em grande quantidade e pode inundar campos, estradas e casas.',,
     variables: [
       {
         id: 'meteo',
@@ -60,7 +43,7 @@ window.DISASTERS = [
         default: 30,
         strand: 'ambos',
         preventExplain:
-          'Estas estações são tecnologia à nossa volta: pluviómetros, anemómetros e computadores que recolhem dados. Com base na ciência meteorológica, os especialistas interpretam números e nuvens e dizem “vai chover muito em breve”. Quanto mais cedo sabemos, mais tempo há para fechar portas, tirar carros da baixa e acionar planos de emergência. Sem medições fiáveis, a previsão fica turva e a proteção desce.'
+          'Estas estações são tecnologia à nossa volta: pluviómetros, anemómetros e…'
       },
       {
         id: 'barragem',
@@ -72,7 +55,7 @@ window.DISASTERS = [
         default: 40,
         strand: 'ambos',
         preventExplain:
-          'Uma barragem é uma grande obra de engenharia (tecnologia) desenhada com conhecimento de física e de materiais (ciência). O controlo inteligente significa libertar água com antecedência quando se prevê chuva forte, para a represa não ficar “demasiado cheia” de repente. Quando o controlo falha ou chega tarde, o risco de cheias à jusante aumenta muito. Por isso, saber + decidir a tempo salva aldeias inteiras.'
+          'Uma barragem é uma grande obra de engenharia (tecnologia) desenhada com…'
       },
       {
         id: 'arvores',
@@ -84,7 +67,7 @@ window.DISASTERS = [
         default: 50,
         strand: 'ciencia',
         preventExplain:
-          'Aqui o destaque é a ciência da Natureza: o solo com raízes e matéria orgânica absorve e retém água como uma esponja gigante. Isto desacelera o escoamento para o rio e reduz picos de cheia. Plantar e cuidar de florestas ribeirinas é uma estratégia de prevenção baseada em ecologia — não substitui alertas nem barragens, mas alivia o “choque” da chuva. Quanto mais verde e saudável for a bacia hidrográfica, mais ajuda a proteger pessoas e pontes lá em baixo.'
+          'Aqui o destaque é a ciência da Natureza: o solo com raízes e matéria orgânica…'
       },
       {
         id: 'alerta',
@@ -96,7 +79,7 @@ window.DISASTERS = [
         default: 40,
         strand: 'tecnologia',
         preventExplain:
-          'Os alertas são tecnologia de comunicação: redes, aplicações e mensagens automáticas que levam a informação da ciência até à tua família em segundos. Mesmo com boa previsão, se ninguém souber, ninguém se protege. Avisos claros (“subir bens”, “não atravessar pontes”, “ir para sítio seguro”) dão tempo para reagir. Em cheias, alguns minutos a mais podem evitar acidentes e perdas enormes.'
+          'Os alertas são tecnologia de comunicação: redes, aplicações e mensagens automáticas…'
       }
     ]
   },
@@ -118,7 +101,7 @@ window.DISASTERS = [
     ],
     intro: 'O verão está quente e seco. Prepara as defesas contra o fogo!',
     teachIntro:
-      'Nos incêndios florestais, o fogo precisa de calor, oxigénio e “combustível” (mato seco). A ciência explica como o fogo se propaga com o vento e a topografia; a tecnologia ajuda a detetar, a cortar caminhos às chamas e a apagar depressa. Prevenir é limpar a tempo, planejar a floresta e ter equipas e meios prontos a agir.',
+      'Nos incêndios florestais, o fogo precisa de calor, oxigénio e “combustível” (mato seco).',,
     variables: [
       {
         id: 'vigia',
@@ -130,7 +113,7 @@ window.DISASTERS = [
         default: 30,
         strand: 'ambos',
         preventExplain:
-          'Torres com pessoas atentas e satélites com câmaras térmicas são tecnologia de vigilância. Funcionam melhor quando há ciência por trás: treino para reconhecer fumo, mapas de risco e meteorologia (vento muda tudo!). Detetar cedo significa bombeiros a caminho mais cedo, menos frente de fogo gigante e mais hipóteses de salvar casas e animais. Sem vigilância, o fogo cresce “às escondidas” até ser tarde demais.'
+          'Torres com pessoas atentas e satélites com câmaras térmicas são tecnologia de…'
       },
       {
         id: 'aceiros',
@@ -142,7 +125,7 @@ window.DISASTERS = [
         default: 35,
         strand: 'ambos',
         preventExplain:
-          'Aceiros são faixas sem vegetação que partem a continuidade do combustível — é uma ideia da ciência do fogo aplicada no terreno. Construir e manter aceiros exige planeamento, máquinas e trabalho humano (tecnologia e organização). Cortam o “caminho” das chamas e dão segurança a equipas que defendem aldeias. Sozinhos não chegam se o mato voltar a crescer por todo o lado: por isso a limpeza regular também conta.'
+          'Aceiros são faixas sem vegetação que partem a continuidade do combustível — é uma…'
       },
       {
         id: 'avioes',
@@ -154,7 +137,7 @@ window.DISASTERS = [
         default: 40,
         strand: 'tecnologia',
         preventExplain:
-          'Aviões-canadair, helicópteros e drones são tecnologia aérea que leva água ou espuma para sítios difíceis no relevo. A ciência entra na meteorologia (vento forte pode impedir voos seguros) e na estratégia de onde atacar primeiro. Quando estes meios chegam a tempo, o fogo arrefece e perde força antes de chegar às casas. São caros e precisam de manutenção e pilotos treinados — por isso a prevenção no chão continua essencial.'
+          'Aviões-canadair, helicópteros e drones são tecnologia aérea que leva água ou espuma…'
       },
       {
         id: 'limpeza',
@@ -166,7 +149,7 @@ window.DISASTERS = [
         default: 35,
         strand: 'ciencia',
         preventExplain:
-          'Limpar mato junto a casas e estradas é prevenção baseada na ciência do combustível: menos mato seco significa chamas mais baixas e mais lentas. Famílias e autarquias usam ferramentas simples ou máquinas — é tecnologia leve, mas o mais importante é o hábito e o conhecimento de “até onde limpar”. Este controlo mostra que pequenas ações repetidas todas as primaveras podem evitar tragédias no verão.'
+          'Limpar mato junto a casas e estradas é prevenção baseada na ciência do combustível:…'
       }
     ]
   },
@@ -188,7 +171,7 @@ window.DISASTERS = [
     ],
     intro: 'A Terra pode tremer a qualquer momento. Quão preparada está a tua cidade?',
     teachIntro:
-      'Nos terramotos, a energia libertada na crosta propaga-se em ondas. A ciência permite estudar sismos, solos e materiais; a tecnologia permite medir ondas, enviar alertas e construir edifícios mais seguros. Não dá para “parar” o terramoto, mas dá para reduzir muito os danos e salvar vidas com preparação e engenharia.',
+      'Nos terramotos, a energia libertada na crosta propaga-se em ondas.',,
     variables: [
       {
         id: 'sensores',
@@ -200,7 +183,7 @@ window.DISASTERS = [
         default: 35,
         strand: 'ambos',
         preventExplain:
-          'Os sismógrafos e redes de sensores são instrumentos (tecnologia) que transformam vibrações em dados. Geólogos e engenheiros usam ciência para localizar falhas e perceber o risco de uma região. Em tempo real, sensores próximos do epicentro podem avisar cidades mais longe alguns segundos antes das ondas mais fortes chegarem — pouco tempo, mas suficiente para parar comboios ou avisar escolas. Sem rede de sensores, vamos “às cegas”.'
+          'Os sismógrafos e redes de sensores são instrumentos (tecnologia) que transformam…'
       },
       {
         id: 'antissismico',
@@ -212,7 +195,7 @@ window.DISASTERS = [
         default: 40,
         strand: 'ambos',
         preventExplain:
-          'Edifícios antissísmicos resultam de décadas de estudos (ciência dos materiais e das estruturas) e de normas de construção e fiscalização (tecnologia e organização). Fundações, vigas e ligações são desenhadas para abanar sem ruir. Isto não substitui o treino das pessoas, mas reduz esmagamento e ferimentos graves. Quanto mais antiga e frágil for uma cidade sem obras de reforço, maior é o perigo no mesmo terramoto.'
+          'Edifícios antissísmicos resultam de décadas de estudos (ciência dos materiais e das…'
       },
       {
         id: 'alerta_eq',
@@ -224,7 +207,7 @@ window.DISASTERS = [
         default: 30,
         strand: 'tecnologia',
         preventExplain:
-          'O alerta no telemóvel é um sistema tecnológico que liga sensores, computadores e redes móveis. A ideia científica é simples de explicar: ondas diferentes viajam a velocidades diferentes, por isso dá para ganhar uns segundos. Nesses segundos, podes proteger a cabeça e afastar-te de janelas ou objetos que possam cair. O alerta só funciona bem se as pessoas souberem o que fazer — daí a importância dos simulacros.'
+          'O alerta no telemóvel é um sistema tecnológico que liga sensores, computadores e…'
       },
       {
         id: 'simulacro',
@@ -236,7 +219,7 @@ window.DISASTERS = [
         default: 45,
         strand: 'ciencia',
         preventExplain:
-          'Simulacro é treino baseado no conhecimento: professores e alunos repetem passos seguros (cobrir a cabeça, agachar, sair com calma para o ponto de encontro). É “ciência em ação” na comunidade — aprendizagem, memória muscular e confiança. Mesmo com bons edifícios e alertas, o pânico e a confusão causam acidentes; treinar reduz isso. Quanto mais vezes se treina com sentido, melhor a escola protege crianças e adultos.'
+          'Simulacro é treino baseado no conhecimento: professores e alunos repetem passos…'
       }
     ]
   },
@@ -258,7 +241,7 @@ window.DISASTERS = [
     ],
     intro: 'O céu escureceu e o vento sopra forte. Prepara a cidade para a tempestade!',
     teachIntro:
-      'Nas tempestades severas, o vento puxa telhados, a chuva entra pelas frestas e os relâmpagos podem danificar redes elétricas. A ciência explica como se formam nuvens carregadas e rajadas de vento; a tecnologia permite prever, reforçar edifícios e avisar pessoas a tempo. Prevenir é combinar boa informação, boas construções e planos claros de proteção.',
+      'Nas tempestades severas, o vento puxa telhados, a chuva entra pelas frestas e os relâmpagos podem…',,
     variables: [
       {
         id: 'previsao',
@@ -270,7 +253,7 @@ window.DISASTERS = [
         default: 35,
         strand: 'ambos',
         preventExplain:
-          'Radares, satélites e modelos no computador são tecnologia que “fotografam” as nuvens e a chuva à distância. Meteorologistas usam ciência da atmosfera para dizer quando a tempestade chega e onde será mais forte. Quanto mais cedo as famílias e as escolas sabem, mais tempo há para fixar objetos ao chão, fechar portas e ir para sítios seguros. Sem previsão fiável, a surpresa aumenta muito os acidentes.'
+          'Radares, satélites e modelos no computador são tecnologia que “fotografam” as…'
       },
       {
         id: 'estruturas',
@@ -282,7 +265,7 @@ window.DISASTERS = [
         default: 38,
         strand: 'ambos',
         preventExplain:
-          'Engenheiros estudam ventos extremos e materiais (ciência) e desenham telhados presos com parafusos especiais, vidros mais resistentes e escolas com salas de refúgio (tecnologia de construção). Edifícios bem preparados perdem menos telhas, entram menos infiltrações e protegem melhor quem lá está. Isto custa planeamento e manutenção — mas reduz ferimentos e estragos caros depois da tempestade.'
+          'Engenheiros estudam ventos extremos e materiais (ciência) e desenham telhados…'
       },
       {
         id: 'eletrica',
@@ -294,7 +277,7 @@ window.DISASTERS = [
         default: 32,
         strand: 'tecnologia',
         preventExplain:
-          'Para-raios e boa ligação à terra desviam a energia do relâmpago de forma controlada — é tecnologia que aplica física sobre eletricidade. Em tempestade, também importa isolar equipamentos sensíveis e seguir regras (não usar telefone fixo com raios, por exemplo). Redes elétricas preparadas falham menos e causam menos incêndios ou choques. Sem estas proteções, um raio pode destruir casas e ferir pessoas mesmo longe do impacto direto.'
+          'Para-raios e boa ligação à terra desviam a energia do relâmpago de forma controlada…'
       },
       {
         id: 'rotas',
@@ -306,7 +289,7 @@ window.DISASTERS = [
         default: 40,
         strand: 'ambos',
         preventExplain:
-          'Mensagens no telemóvel, sirenes e planos de evacuação são tecnologia e organização — mas só funcionam se toda a gente treinar e perceber os mapas (ciência cívica e educação). Rotas seguras evitam cruzar pontes ou vales inundados. Na tempestade, a confusão mata tanto como o vento: por isso avisos simples e repetidos salvam vidas.'
+          'Mensagens no telemóvel, sirenes e planos de evacuação são tecnologia e organização…'
       }
     ]
   },
@@ -328,7 +311,7 @@ window.DISASTERS = [
     ],
     intro: 'O sol não para e os rios baixam. Como vais proteger a comunidade?',
     teachIntro:
-      'Na seca prolongada, falta água para beber, regar plantas e apagar fogos. A ciência estuda ciclos de chuva, solos e clima; a tecnologia ajuda a medir reservatórios, a poupar com contadores inteligentes e a reutilizar água. Ninguém inventa chuva de um dia para o outro — mas dá para sofrer menos com planeamento, florestas saudáveis e hábitos de poupança.',
+      'Na seca prolongada, falta água para beber, regar plantas e apagar fogos.',,
     variables: [
       {
         id: 'medicao',
@@ -340,7 +323,7 @@ window.DISASTERS = [
         default: 36,
         strand: 'ambos',
         preventExplain:
-          'Sensores nos rios, barragens e poços enviam números para computadores (tecnologia). Hidrologistas interpretam tendências: “estamos a gastar mais do que a chuva repõe?” (ciência). Com dados honestos, a autarquia pode avisar cedo, racionar com justiça e evitar que os poços secuem de repente. Sem medição, só notamos o problema quando já é tarde demais.'
+          'Sensores nos rios, barragens e poços enviam números para computadores (tecnologia).'
       },
       {
         id: 'reuso',
@@ -352,7 +335,7 @@ window.DISASTERS = [
         default: 34,
         strand: 'tecnologia',
         preventExplain:
-          'Redutores nas torneiras, rega por gotejamento e estações que tratam água cinzenta para regar são tecnologias de poupança. A ciência explica por que lavar a rua com mangueira desperdiça litros em segundos. Cada gota poupa alivia rios e aquíferos. Na seca, pequenos hábitos em milhares de casas somam um efeito enorme na comunidade.'
+          'Redutores nas torneiras, rega por gotejamento e estações que tratam água cinzenta…'
       },
       {
         id: 'floresta',
@@ -364,7 +347,7 @@ window.DISASTERS = [
         default: 42,
         strand: 'ciencia',
         preventExplain:
-          'Florestas e matos bem cuidados protegem o solo do sol direto e ajudam a água da chuva a infiltrar-se no subsolo em vez de evaporar logo (ciência do ciclo da água). Cortar árvores sem replantar ou deixar mato em monocultura frágil piora a seca local. Este controlo lembra que a Natureza, quando bem gerida, é uma aliada contra a falta de água.'
+          'Florestas e matos bem cuidados protegem o solo do sol direto e ajudam a água da…'
       },
       {
         id: 'escolas',
@@ -376,7 +359,7 @@ window.DISASTERS = [
         default: 38,
         strand: 'ciencia',
         preventExplain:
-          'Campanhas e projetos na escola ensinam crianças e famílias a fechar torneiras, a detetar fugas e a não desperdiçar comida (que também “gasta” água virtual). É educação científica na vida real: perceber que a água é finita e que todos têm um papel. Sem consciência coletiva, as melhores tecnologias sozinhas não chegam.'
+          'Campanhas e projetos na escola ensinam crianças e famílias a fechar torneiras, a…'
       }
     ]
   },
@@ -398,7 +381,7 @@ window.DISASTERS = [
     ],
     intro: 'A chuva molhou a montanha. Será que a encosta aguenta?',
     teachIntro:
-      'Nos deslizamentos, solo e rochas descem a encosta por causa da água, do peso e da gravidade. Geólogos estudam tipos de rocha e inclinações (ciência); engenheiros constroem drenagens, muros e redes de alerta (tecnologia). Plantar e cuidar vegetação na encosta também freia a erosão. Prevenir é não ignorar sinais de risco e dar à água um caminho seguro.',
+      'Nos deslizamentos, solo e rochas descem a encosta por causa da água, do peso e da gravidade.',,
     variables: [
       {
         id: 'chuva',
@@ -410,7 +393,7 @@ window.DISASTERS = [
         default: 33,
         strand: 'ambos',
         preventExplain:
-          'Pluviómetros e, em alguns sítios, instrumentos que detetam vibrações minúsculas avisam especialistas cedo (tecnologia). Geólogos cruzam estes dados com mapas de solos instáveis (ciência). Quando a chuva acumulada passa um limiar perigoso, pode haver ordem de evacuação. Sem monitorização, a primeira notícia é o barro à porta — tarde demais para muitas famílias.'
+          'Pluviómetros e, em alguns sítios, instrumentos que detetam vibrações minúsculas…'
       },
       {
         id: 'drenagem',
@@ -422,7 +405,7 @@ window.DISASTERS = [
         default: 36,
         strand: 'ambos',
         preventExplain:
-          'Drenagens levam a água da chuva para longe da encosta instável; muros e estacas seguram taludes em obras estudadas (engenharia = ciência + tecnologia). Mal feitas, as obras podem piorar o problema — por isso importa estudo de terreno e fiscalização. Este controlo mostra que “domar” a água com cuidado reduz o volume de lama que desce de uma vez.'
+          'Drenagens levam a água da chuva para longe da encosta instável; muros e estacas…'
       },
       {
         id: 'encosta',
@@ -434,7 +417,7 @@ window.DISASTERS = [
         default: 44,
         strand: 'ciencia',
         preventExplain:
-          'Plantas com raízes profundas ligam partículas de solo como uma rede natural (ciência da erosão). Cortar tudo na encosta ou deixar o fogo destruir a vegetação aumenta muito o risco. Reflorestar com espécies adequadas e manter herbáceas é prevenção lenta, mas muito eficaz a médio prazo — sobretudo em zonas com chuvas fortes.'
+          'Plantas com raízes profundas ligam partículas de solo como uma rede natural…'
       },
       {
         id: 'alertas_risco',
@@ -446,7 +429,7 @@ window.DISASTERS = [
         default: 37,
         strand: 'ambos',
         preventExplain:
-          'Mapas de risco traduzem estudos científicos em cores e regras de urbanização (tecnologia de informação geográfica). Alertas no telemóvel e sirenes avisam moradores em noite de temporal. Quando as pessoas sabem onde é perigoso viver e têm para onde ir, salvam-se muitas vidas. Informação clara é tão importante como o muro de contenção.'
+          'Mapas de risco traduzem estudos científicos em cores e regras de urbanização…'
       }
     ]
   }

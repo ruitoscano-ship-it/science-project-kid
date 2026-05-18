@@ -2,7 +2,7 @@
 const { useState, useEffect, useMemo } = React;
 
 /** Orçamento fixo: repartir pontos entre controlos (impossível “máximo em tudo”). */
-const BUDGET_TOTAL = 150;
+const BUDGET_TOTAL = 250;
 const BUDGET_MIN = 10;
 /** Cada movimento dos controlos altera valores em passos de 5 (mais claro em tablet). */
 const BUDGET_STEP = 5;
@@ -172,8 +172,6 @@ const buildPostSimulationAdvice = (disaster, outcome, values, factIndex) => {
   const tips = [];
   if (pool.length) {
     tips.push(pool[((factIndex ?? 0) + disaster.id.length) % pool.length]);
-    const t2 = pool[((factIndex ?? 0) + disaster.id.length + 1) % pool.length];
-    if (t2 !== tips[0]) tips.push(t2);
   }
 
   const eff = pointsToEngineHundred(values, disaster.variables);
@@ -191,15 +189,11 @@ const buildPostSimulationAdvice = (disaster, outcome, values, factIndex) => {
   if (outcome.stars >= 2) {
     sortedDesc.forEach(v => {
       if (v.val >= minPraise && praiseLines.length < 3) {
-        praiseLines.push(
-          `«${v.name}» com ${Math.round(v.pts)} pontos esteve forte: ${v.hint} — ajudou a proteger pessoas e o ambiente.`
-        );
+        praiseLines.push(`💪 «${v.name}» (${Math.round(v.pts)} pts) — ${v.hint}`);
       }
     });
     if (praiseLines.length === 0) {
-      praiseLines.push(
-        'A soma das tuas escolhas criou mais “camadas” de proteção: lembra-te que prevenção raramente depende de uma só medida.'
-      );
+      praiseLines.push('🛡️ Várias defesas juntas protegem melhor!');
     }
   }
 
@@ -208,14 +202,12 @@ const buildPostSimulationAdvice = (disaster, outcome, values, factIndex) => {
   if (showImprove) {
     sortedAsc.forEach(v => {
       if (v.val < 56 && improveLines.length < 3) {
-        improveLines.push(
-          `Podes tentar dar mais pontos a «${v.name}» (tinhas ${Math.round(v.pts)}; o mínimo útil na escala do jogo costuma ser subir os mais fracos): ${v.hint}.`
-        );
+        improveLines.push(`⬆️ Sobe «${v.name}» (tens ${Math.round(v.pts)} pts) — ${v.hint}`);
       }
     });
     if (improveLines.length === 0) {
       improveLines.push(
-        'Tenta repartir os 150 pontos de forma mais equilibrada — muitas defesas só funcionam bem em equipa, como na vida real.'
+        '⚖️ Reparte os 250 pontos — a equipa de defesas funciona melhor em conjunto!'
       );
     }
   }
@@ -235,44 +227,58 @@ const strandBadge = (strand) => {
   return { label: 'Ciência e tecnologia', emoji: '🔬🛠️', className: 'strand ambos' };
 };
 
+const ComicBubble = ({ children, className = '' }) => (
+  <div className={`comic-bubble ${className}`.trim()}>{children}</div>
+);
+
+const ComicPanel = ({ icon, title, children, accent, className = '' }) => (
+  <article className={`comic-panel ${className}`.trim()} style={accent ? { borderColor: accent } : undefined}>
+    <header className="comic-panel-head" style={accent ? { background: accent + '22' } : undefined}>
+      {icon && <span className="comic-panel-icon" aria-hidden="true">{icon}</span>}
+      {title && <h3 className="comic-panel-title">{title}</h3>}
+    </header>
+    <div className="comic-panel-body">{children}</div>
+  </article>
+);
+
+const ComicChips = ({ items }) => (
+  <ul className="comic-chips">
+    {(items || []).slice(0, 2).map((line, i) => (
+      <li key={i} className="comic-chip">{line}</li>
+    ))}
+  </ul>
+);
+
 // ---------- Aprender mais (conteúdo da aba na página inicial) ----------
 const LearnMorePanel = () => {
   const articles = typeof LEARN_MORE !== 'undefined' ? LEARN_MORE : [];
   return (
-    <section className="learn-more" aria-labelledby="learn-main-title">
-      <h2 id="learn-main-title" className="learn-more-title">Aprender mais sobre desastres naturais</h2>
-      <p className="learn-more-lead">
-        Aqui podes ler com calma, como se fosse uma revista da escola. Cada bloco fala de um perigo da Natureza,
-        do que fazemos para prevenir, da tecnologia que usamos e da ciência que explica tudo. Não precisas de decorar:
-        o objetivo é perceberes ideias que te protegem a ti, à tua família e ao planeta.
-      </p>
+    <section className="learn-more comic-page" aria-labelledby="learn-main-title">
+      <h2 id="learn-main-title" className="learn-more-title comic-title">📚 Revista da escola</h2>
+      <ComicBubble className="comic-bubble-center">Cada página é uma catástrofe — lê os quadrinhos!</ComicBubble>
       <div className="learn-more-stack">
         {articles.map((a) => {
           const meta = DISASTERS.find(d => d.id === a.id);
           const accent = meta?.accent || '#2C2A4A';
           return (
-            <article key={a.id} className="learn-card" style={{ borderColor: accent }}>
-              <header className="learn-card-head" style={{ background: accent + '18' }}>
-                <span className="learn-card-emoji" aria-hidden="true">{a.emoji}</span>
-                <h3 className="learn-card-title">{a.title}</h3>
-              </header>
-              <div className="learn-card-body">
-                <p className="learn-card-intro">{a.oQueE}</p>
-                <h4 className="learn-subhead">Como prevenir (hábitos e planeamento)</h4>
-                <ul className="learn-list">
-                  {a.prevenir.map((line, i) => <li key={i}>{line}</li>)}
-                </ul>
-                <h4 className="learn-subhead">Tecnologia à nossa volta</h4>
-                <ul className="learn-list">
-                  {a.tecnologia.map((line, i) => <li key={i}>{line}</li>)}
-                </ul>
-                <h4 className="learn-subhead">O que a ciência explica</h4>
-                <ul className="learn-list">
-                  {a.ciencia.map((line, i) => <li key={i}>{line}</li>)}
-                </ul>
-                <p className="learn-remember"><strong>Para lembrar:</strong> {a.lembrar}</p>
+            <ComicPanel key={a.id} icon={a.emoji} title={a.title} accent={accent}>
+              <p className="comic-intro">{a.oQueE}</p>
+              <div className="comic-trio">
+                <div className="comic-tile prevent">
+                  <span className="comic-tile-label">🛡️ Prevenir</span>
+                  <ComicChips items={a.prevenir} />
+                </div>
+                <div className="comic-tile tech">
+                  <span className="comic-tile-label">🛠️ Tecnologia</span>
+                  <ComicChips items={a.tecnologia} />
+                </div>
+                <div className="comic-tile science">
+                  <span className="comic-tile-label">🔬 Ciência</span>
+                  <ComicChips items={a.ciencia} />
+                </div>
               </div>
-            </article>
+              <p className="comic-punchline">💡 {a.lembrar}</p>
+            </ComicPanel>
           );
         })}
       </div>
@@ -298,10 +304,9 @@ const Home = ({ onPick }) => {
         <h1 className="home-title">
           Ciência vs. <span className="accent">Catástrofes</span>
         </h1>
-        <p className="home-subtitle">
-          Um simulador para perceberes como o saber científico e as invenções úteis ajudam a prevenir desastres naturais
-          e a proteger vidas — brinca com os controlos, lê as explicações e imagina uma comunidade bem preparada!
-        </p>
+        <ComicBubble className="home-hero-bubble">
+          Reparte <strong>{BUDGET_TOTAL} pontos</strong> · protege a vila · diverte-te a aprender!
+        </ComicBubble>
 
         <div className="floating-mascot wobble">
           <Mascot size={180} />
@@ -336,15 +341,14 @@ const Home = ({ onPick }) => {
       {homeTab === 'jogar' && (
         <div id="panel-jogar" role="tabpanel" aria-labelledby="tab-jogar" className="home-tab-panel">
       {edu && (
-        <section className="home-edu" aria-labelledby="home-edu-title">
-          <h2 id="home-edu-title" className="home-edu-title">Para que serve este simulador?</h2>
-          <p className="home-edu-lead">{edu.lead}</p>
+        <section className="home-edu comic-strip" aria-labelledby="home-edu-title">
+          <h2 id="home-edu-title" className="home-edu-title comic-title">Como funciona?</h2>
+          <ComicBubble className="comic-bubble-center">{edu.lead}</ComicBubble>
           <div className="home-edu-grid">
             {edu.blocks.map((b, i) => (
-              <article key={i} className="home-edu-card">
-                <h3 className="home-edu-card-title">{b.title}</h3>
-                <p className="home-edu-card-text">{b.text}</p>
-              </article>
+              <ComicPanel key={i} icon={b.icon || '💬'} title={b.title} className="home-edu-comic">
+                <p className="comic-intro">{b.text}</p>
+              </ComicPanel>
             ))}
           </div>
         </section>
@@ -371,7 +375,7 @@ const Home = ({ onPick }) => {
               <p className="card-desc">{d.short}</p>
               {d.enabled ? (
                 <div className="card-foot">
-                  <span className="chip green">150 pts a repartir</span>
+                  <span className="chip green">{BUDGET_TOTAL} pts</span>
                   <span className="chip">Livre + Missão</span>
                 </div>
               ) : (
@@ -507,7 +511,7 @@ const Simulator = ({ disasterId, onBack }) => {
     const tips = MASCOT_TIPS[disaster.id] || [];
     if (!tips.length) return '';
     if (mode === 'missao' && missionState === 'running') {
-      return `Faltam ${timeLeft}s! Reparte bem os 150 pontos — as decisões contam.`;
+      return `⏱️ ${timeLeft}s! Reparte os ${BUDGET_TOTAL} pontos!`;
     }
     if (mode === 'missao' && missionState === 'over') {
       return 'A catástrofe aconteceu! Vamos ver os resultados...';
@@ -546,33 +550,30 @@ const Simulator = ({ disasterId, onBack }) => {
             <h3>Ciência e tecnologia</h3>
             <span style={{ fontSize: 12, fontWeight: 800, color: 'var(--ink-soft)' }}>
               {mode === 'livre'
-                ? `150 pontos no total — cada passo move ${BUDGET_STEP} pontos; os outros ajustam-se (mín. ${BUDGET_MIN} em cada)`
-                : 'Reparte 150 pontos antes do tempo acabar'}
+                ? `${BUDGET_TOTAL} pts · passos de ${BUDGET_STEP} (mín. ${BUDGET_MIN} cada)`
+                : `Reparte ${BUDGET_TOTAL} pts antes do tempo acabar!`}
             </span>
           </div>
 
           <div className="budget-strip" aria-live="polite">
             <span className="budget-strip-total">{budgetUsed}/{BUDGET_TOTAL} pontos usados</span>
-            <span className="budget-strip-hint">Não dá para maximizar tudo: é preciso escolher prioridades.</span>
+            <span className="budget-strip-hint">🪙 Não dá para tudo no máximo — escolhe a tua equipa!</span>
           </div>
 
           {disaster.teachIntro && (
-            <div className="sim-teach" role="region" aria-label="Sobre esta catástrofe">
-              <p className="sim-teach-label">Sobre esta catástrofe</p>
-              <p className="sim-teach-text">{disaster.teachIntro}</p>
-            </div>
+            <ComicBubble className="sim-teach-comic">{disaster.emoji} {disaster.teachIntro}</ComicBubble>
           )}
 
-          <div className="mascot-row">
+          <div className="mascot-row comic-mascot-row">
             <MascotMini size={56} mood={outcome.stars >= 2 || mode === 'livre' ? 'happy' : 'happy'} />
-            <div className="bubble">{currentTip}</div>
+            <ComicBubble>{currentTip}</ComicBubble>
           </div>
 
           <div className="panel-body">
             {disaster.variables.map(v => {
               const sb = v.strand ? strandBadge(v.strand) : null;
               return (
-                <div key={v.id} className="var">
+                <div key={v.id} className="var comic-var">
                   <div className="var-top">
                     <div className="var-icon" style={{ background: v.color }}>
                       <VarIcon name={v.icon} />
@@ -597,10 +598,10 @@ const Simulator = ({ disasterId, onBack }) => {
                     onChange={e => setValues(prev => redistributeBudget(prev, disaster, v.id, Number(e.target.value)))}
                   />
                   {v.preventExplain && (
-                    <div className="var-prevent">
-                      <p className="var-prevent-title">Como isto ajuda a prevenir?</p>
+                    <details className="var-prevent comic-details">
+                      <summary>💡 Saber mais</summary>
                       <p className="var-prevent-text">{v.preventExplain}</p>
-                    </div>
+                    </details>
                   )}
                 </div>
               );
@@ -776,7 +777,7 @@ const ResultsModal = ({ disaster, outcome, values, onClose, factIndex }) => {
             <div className="modal-reflect good">
               <h4 className="modal-reflect-title">O que funcionou muito bem</h4>
               <ul className="modal-reflect-list">
-                {advice.praiseLines.map((line, i) => <li key={i}>{line}</li>)}
+                {advice.praiseLines.slice(0, 2).map((line, i) => <li key={i}>{line}</li>)}
               </ul>
             </div>
           )}
@@ -785,7 +786,7 @@ const ResultsModal = ({ disaster, outcome, values, onClose, factIndex }) => {
             <div className="modal-reflect improve">
               <h4 className="modal-reflect-title">O que podias fazer diferente</h4>
               <ul className="modal-reflect-list">
-                {advice.improveLines.map((line, i) => <li key={i}>{line}</li>)}
+                {advice.improveLines.slice(0, 2).map((line, i) => <li key={i}>{line}</li>)}
               </ul>
             </div>
           )}
@@ -794,7 +795,7 @@ const ResultsModal = ({ disaster, outcome, values, onClose, factIndex }) => {
             <div className="modal-reflect tips">
               <h4 className="modal-reflect-title">Dicas para a vida real</h4>
               <ul className="modal-reflect-list">
-                {advice.tips.map((line, i) => <li key={i}>{line}</li>)}
+                {advice.tips.slice(0, 1).map((line, i) => <li key={i}>{line}</li>)}
               </ul>
             </div>
           )}
