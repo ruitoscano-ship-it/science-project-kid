@@ -31,7 +31,7 @@ window.DISASTERS = [
     ],
     intro: 'Está a chover muito! Ajusta a ciência para proteger a vila do rio.',
     teachIntro:
-      'Nas cheias, a água desce em grande quantidade e pode inundar campos, estradas e casas.',,
+      'Nas cheias, a água desce em grande quantidade e pode inundar campos, estradas e casas.',
     variables: [
       {
         id: 'meteo',
@@ -101,7 +101,7 @@ window.DISASTERS = [
     ],
     intro: 'O verão está quente e seco. Prepara as defesas contra o fogo!',
     teachIntro:
-      'Nos incêndios florestais, o fogo precisa de calor, oxigénio e “combustível” (mato seco).',,
+      'Nos incêndios florestais, o fogo precisa de calor, oxigénio e “combustível” (mato seco).',
     variables: [
       {
         id: 'vigia',
@@ -171,7 +171,7 @@ window.DISASTERS = [
     ],
     intro: 'A Terra pode tremer a qualquer momento. Quão preparada está a tua cidade?',
     teachIntro:
-      'Nos terramotos, a energia libertada na crosta propaga-se em ondas.',,
+      'Nos terramotos, a energia libertada na crosta propaga-se em ondas.',
     variables: [
       {
         id: 'sensores',
@@ -241,7 +241,7 @@ window.DISASTERS = [
     ],
     intro: 'O céu escureceu e o vento sopra forte. Prepara a cidade para a tempestade!',
     teachIntro:
-      'Nas tempestades severas, o vento puxa telhados, a chuva entra pelas frestas e os relâmpagos podem…',,
+      'Nas tempestades severas, o vento puxa telhados, a chuva entra pelas frestas e os relâmpagos podem…',
     variables: [
       {
         id: 'previsao',
@@ -311,7 +311,7 @@ window.DISASTERS = [
     ],
     intro: 'O sol não para e os rios baixam. Como vais proteger a comunidade?',
     teachIntro:
-      'Na seca prolongada, falta água para beber, regar plantas e apagar fogos.',,
+      'Na seca prolongada, falta água para beber, regar plantas e apagar fogos.',
     variables: [
       {
         id: 'medicao',
@@ -381,7 +381,7 @@ window.DISASTERS = [
     ],
     intro: 'A chuva molhou a montanha. Será que a encosta aguenta?',
     teachIntro:
-      'Nos deslizamentos, solo e rochas descem a encosta por causa da água, do peso e da gravidade.',,
+      'Nos deslizamentos, solo e rochas descem a encosta por causa da água, do peso e da gravidade.',
     variables: [
       {
         id: 'chuva',
