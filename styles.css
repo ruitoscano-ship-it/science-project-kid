@@ -10,6 +10,10 @@ body {
 }
 button { font-family: inherit; cursor: pointer; border: none; background: none; }
 :root {
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --dur-fast: 0.18s;
+  --dur-med: 0.4s;
   --cream: #FFF6E0;
   --sky: #9FD9F0;
   --sky-deep: #7FC8E8;
@@ -121,19 +125,28 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
   background: #fff;
   color: var(--ink-soft);
   box-shadow: var(--shadow-sm);
-  transition: transform 0.12s ease, box-shadow 0.12s ease, background 0.12s ease;
+  transition:
+    transform var(--dur-fast) var(--ease-out),
+    box-shadow var(--dur-fast) var(--ease-out),
+    background var(--dur-fast) ease,
+    color var(--dur-fast) ease;
 }
 .home-tab:hover {
-  transform: translateY(-2px);
+  transform: translateY(-3px) scale(1.02);
   color: var(--ink);
+  box-shadow: 0 5px 0 rgba(44, 42, 74, 0.14);
 }
 .home-tab.on {
   background: var(--ink);
   color: #FFD23F;
   box-shadow: var(--shadow-sm);
+  transform: translateY(-1px);
 }
 .home-tab-panel {
   margin-top: 8px;
+}
+.home-tab-panel.tab-enter {
+  animation: tabIn var(--dur-med) var(--ease-out) both;
 }
 
 /* Aprender mais */
@@ -305,16 +318,28 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
   border-radius: 24px;
   overflow: hidden;
   box-shadow: var(--shadow);
-  transition: transform .15s ease, box-shadow .15s ease;
+  transition:
+    transform var(--dur-fast) var(--ease-out),
+    box-shadow var(--dur-fast) var(--ease-out);
   cursor: pointer;
   position: relative;
   display: flex; flex-direction: column;
+  animation: cardIn 0.55s var(--ease-out) both;
 }
+.cards .card:nth-child(1) { animation-delay: 0.05s; }
+.cards .card:nth-child(2) { animation-delay: 0.1s; }
+.cards .card:nth-child(3) { animation-delay: 0.15s; }
+.cards .card:nth-child(4) { animation-delay: 0.2s; }
+.cards .card:nth-child(5) { animation-delay: 0.25s; }
+.cards .card:nth-child(6) { animation-delay: 0.3s; }
 .card:hover:not(.disabled) {
-  transform: translateY(-4px);
+  transform: translateY(-6px) scale(1.02);
   box-shadow: 0 10px 0 rgba(44, 42, 74, 0.12), 0 18px 36px rgba(44, 42, 74, 0.12);
 }
-.card:active:not(.disabled) { transform: translateY(0); }
+.card:active:not(.disabled) {
+  transform: translateY(-1px) scale(0.98);
+  transition-duration: 0.08s;
+}
 .card.disabled { opacity: 0.65; cursor: not-allowed; }
 .card .preview {
   height: 160px; position: relative; overflow: hidden;
@@ -359,8 +384,15 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
   border-radius: 100px; padding: 8px 16px;
   font-weight: 800; color: var(--ink); font-size: 14px;
   box-shadow: var(--shadow-sm);
+  transition:
+    transform var(--dur-fast) var(--ease-out),
+    box-shadow var(--dur-fast) var(--ease-out),
+    background var(--dur-fast) ease;
 }
-.back-btn:hover { transform: translateY(-2px); }
+.back-btn:hover {
+  transform: translateY(-3px) scale(1.03);
+  box-shadow: 0 5px 0 rgba(44, 42, 74, 0.14);
+}
 .mode-switch {
   display: inline-flex; background: #fff; border: 3px solid var(--ink);
   border-radius: 100px; padding: 4px;
@@ -369,9 +401,18 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
 .mode-switch button {
   padding: 8px 18px; border-radius: 100px;
   font-weight: 800; font-size: 14px; color: var(--ink-soft);
+  transition:
+    transform var(--dur-fast) var(--ease-out),
+    background var(--dur-fast) ease,
+    color var(--dur-fast) ease;
+}
+.mode-switch button:hover:not(.on) {
+  transform: scale(1.04);
+  color: var(--ink);
 }
 .mode-switch button.on {
   background: var(--ink); color: #FFD23F;
+  transform: scale(1.02);
 }
 
 .sim-grid {
@@ -625,10 +666,26 @@ input[type=range].chunky::-moz-range-thumb {
   border: 3px solid var(--ink); border-radius: 100px;
   padding: 12px 22px; font-weight: 900; font-size: 16px;
   box-shadow: 0 5px 0 var(--ink);
-  transition: transform .1s ease, box-shadow .1s ease;
+  transition:
+    transform var(--dur-fast) var(--ease-out),
+    box-shadow var(--dur-fast) var(--ease-out),
+    background var(--dur-fast) ease,
+    filter var(--dur-fast) ease;
 }
-.cta:hover { transform: translateY(-2px); box-shadow: 0 7px 0 var(--ink); }
-.cta:active { transform: translateY(3px); box-shadow: 0 2px 0 var(--ink); }
+.cta:hover {
+  transform: translateY(-3px) scale(1.03);
+  box-shadow: 0 8px 0 var(--ink);
+  filter: brightness(1.05);
+}
+.cta:active {
+  transform: translateY(2px) scale(0.97);
+  box-shadow: 0 2px 0 var(--ink);
+  transition-duration: 0.06s;
+}
+.btn-press:focus-visible {
+  outline: 3px solid var(--sun);
+  outline-offset: 3px;
+}
 .cta.green { background: var(--grass); }
 .cta.ghost { background: #fff; color: var(--ink); }
 .cta.big { font-size: 18px; padding: 14px 26px; }
@@ -640,7 +697,8 @@ input[type=range].chunky::-moz-range-thumb {
   position: fixed; inset: 0; background: rgba(44, 42, 74, 0.55);
   display: grid; place-items: center; z-index: 100;
   padding: 20px;
-  animation: fadeIn .2s ease;
+  animation: fadeIn 0.35s ease both;
+  backdrop-filter: blur(4px);
 }
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 .modal {
@@ -650,9 +708,12 @@ input[type=range].chunky::-moz-range-thumb {
   max-width: 560px; width: 100%;
   box-shadow: 0 14px 0 rgba(44,42,74,0.18), 0 30px 50px rgba(0,0,0,0.3);
   overflow: hidden;
-  animation: popIn .25s cubic-bezier(.34,1.56,.64,1);
+  animation: popIn 0.45s var(--ease-bounce) both;
 }
-@keyframes popIn { from { transform: scale(.85); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+@keyframes popIn {
+  from { transform: scale(0.88) translateY(12px); opacity: 0; }
+  to { transform: scale(1) translateY(0); opacity: 1; }
+}
 .modal-head {
   padding: 26px 26px 20px;
   background: #FFF1B8;
@@ -1016,4 +1077,172 @@ input[type=range].chunky::-moz-range-thumb {
 }
 .modal-reflect-title {
   font-family: 'Fredoka', sans-serif;
+}
+
+/* ===== Animações — transições de página e botões ===== */
+.page-view {
+  min-height: 100vh;
+  animation-duration: var(--dur-med);
+  animation-timing-function: var(--ease-out);
+  animation-fill-mode: both;
+}
+.page-view.page-forward {
+  animation-name: pageInForward;
+}
+.page-view.page-back {
+  animation-name: pageInBack;
+}
+@keyframes pageInForward {
+  from {
+    opacity: 0;
+    transform: translateX(28px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+@keyframes pageInBack {
+  from {
+    opacity: 0;
+    transform: translateX(-28px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+.hero-enter {
+  animation: heroIn 0.65s var(--ease-out) both;
+}
+@keyframes heroIn {
+  from {
+    opacity: 0;
+    transform: translateY(-12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.hero-enter .home-title {
+  animation: titlePop 0.55s var(--ease-bounce) 0.12s both;
+}
+@keyframes titlePop {
+  from {
+    opacity: 0;
+    transform: scale(0.92) translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+@keyframes tabIn {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes cardIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+.sim-enter {
+  animation: simIn 0.5s var(--ease-out) both;
+}
+.sim-enter-delay {
+  animation-delay: 0.08s;
+}
+@keyframes simIn {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.sim-grid .panel {
+  animation: panelIn 0.55s var(--ease-out) both;
+}
+.sim-grid .panel:nth-child(1) { animation-delay: 0.12s; }
+.sim-grid .panel:nth-child(2) { animation-delay: 0.2s; }
+@keyframes panelIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.99);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+.learn-more-stack .comic-panel {
+  animation: cardIn 0.5s var(--ease-out) both;
+}
+.learn-more-stack .comic-panel:nth-child(1) { animation-delay: 0.06s; }
+.learn-more-stack .comic-panel:nth-child(2) { animation-delay: 0.12s; }
+.learn-more-stack .comic-panel:nth-child(3) { animation-delay: 0.18s; }
+.learn-more-stack .comic-panel:nth-child(4) { animation-delay: 0.24s; }
+.learn-more-stack .comic-panel:nth-child(5) { animation-delay: 0.3s; }
+.learn-more-stack .comic-panel:nth-child(6) { animation-delay: 0.36s; }
+.home-edu-grid .comic-panel {
+  animation: cardIn 0.45s var(--ease-out) both;
+}
+.home-edu-grid .comic-panel:nth-child(1) { animation-delay: 0.08s; }
+.home-edu-grid .comic-panel:nth-child(2) { animation-delay: 0.14s; }
+.home-edu-grid .comic-panel:nth-child(3) { animation-delay: 0.2s; }
+.home-edu-grid .comic-panel:nth-child(4) { animation-delay: 0.26s; }
+.comic-bubble {
+  animation: bubbleIn 0.4s var(--ease-out) both;
+}
+@keyframes bubbleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.94);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+.home-tab:active,
+.back-btn:active,
+.mode-switch button:active {
+  transform: scale(0.96) !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page-view,
+  .hero-enter,
+  .hero-enter .home-title,
+  .home-tab-panel.tab-enter,
+  .cards .card,
+  .sim-enter,
+  .sim-grid .panel,
+  .learn-more-stack .comic-panel,
+  .home-edu-grid .comic-panel,
+  .comic-bubble,
+  .modal,
+  .modal-bg {
+    animation: none !important;
+  }
+  .card:hover:not(.disabled),
+  .cta:hover,
+  .home-tab:hover,
+  .back-btn:hover {
+    transform: none;
+  }
 }

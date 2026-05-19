@@ -220,7 +220,7 @@ const Home = ({ onPick }) => {
   const [homeTab, setHomeTab] = useState('jogar');
   return (
     <div className="app">
-      <div className="home-hero">
+      <div className="home-hero hero-enter">
         <div className="sun" />
         <div className="cloud c1" />
         <div className="cloud c2" />
@@ -248,7 +248,7 @@ const Home = ({ onPick }) => {
           aria-selected={homeTab === 'jogar'}
           aria-controls="panel-jogar"
           id="tab-jogar"
-          className={`home-tab ${homeTab === 'jogar' ? 'on' : ''}`}
+          className={`home-tab btn-press ${homeTab === 'jogar' ? 'on' : ''}`}
           onClick={() => setHomeTab('jogar')}
         >
           Jogar
@@ -259,7 +259,7 @@ const Home = ({ onPick }) => {
           aria-selected={homeTab === 'aprender'}
           aria-controls="panel-aprender"
           id="tab-aprender"
-          className={`home-tab ${homeTab === 'aprender' ? 'on' : ''}`}
+          className={`home-tab btn-press ${homeTab === 'aprender' ? 'on' : ''}`}
           onClick={() => setHomeTab('aprender')}
         >
           Aprender Mais
@@ -267,7 +267,7 @@ const Home = ({ onPick }) => {
       </nav>
 
       {homeTab === 'jogar' && (
-        <div id="panel-jogar" role="tabpanel" aria-labelledby="tab-jogar" className="home-tab-panel">
+        <div id="panel-jogar" role="tabpanel" aria-labelledby="tab-jogar" className="home-tab-panel tab-enter" key="tab-jogar">
       {edu && (
         <section className="home-edu comic-strip" aria-labelledby="home-edu-title">
           <h2 id="home-edu-title" className="home-edu-title comic-title">Como funciona?</h2>
@@ -320,7 +320,7 @@ const Home = ({ onPick }) => {
       )}
 
       {homeTab === 'aprender' && (
-        <div id="panel-aprender" role="tabpanel" aria-labelledby="tab-aprender" className="home-tab-panel">
+        <div id="panel-aprender" role="tabpanel" aria-labelledby="tab-aprender" className="home-tab-panel tab-enter" key="tab-aprender">
           <LearnMorePanel />
         </div>
       )}
@@ -450,8 +450,8 @@ const Simulator = ({ disasterId, onBack }) => {
   return (
     <div className="app">
       {/* Top bar */}
-      <div className="sim-top">
-        <button className="back-btn" onClick={onBack}>
+      <div className="sim-top sim-enter">
+        <button type="button" className="back-btn btn-press" onClick={onBack}>
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
             <path d="M15 18 L9 12 L15 6" />
           </svg>
@@ -466,12 +466,12 @@ const Simulator = ({ disasterId, onBack }) => {
         </div>
 
         <div className="mode-switch" role="tablist">
-          <button className={mode === 'livre' ? 'on' : ''} onClick={() => onModeChange('livre')}>🧪 Livre</button>
-          <button className={mode === 'missao' ? 'on' : ''} onClick={() => onModeChange('missao')}>🎯 Missão</button>
+          <button type="button" className={`btn-press ${mode === 'livre' ? 'on' : ''}`} onClick={() => onModeChange('livre')}>🧪 Livre</button>
+          <button type="button" className={`btn-press ${mode === 'missao' ? 'on' : ''}`} onClick={() => onModeChange('missao')}>🎯 Missão</button>
         </div>
       </div>
 
-      <div className="sim-grid">
+      <div className="sim-grid sim-enter sim-enter-delay">
         {/* Left: variables */}
         <div className="panel">
           <div className="panel-head">
@@ -546,19 +546,19 @@ const Simulator = ({ disasterId, onBack }) => {
                 <button className="cta" onClick={trySimulateLivre}>
                   ▶ Simular catástrofe
                 </button>
-                <button className="cta ghost" onClick={reset}>↻ Repor</button>
+                <button className="cta btn-press ghost" onClick={reset}>↻ Repor</button>
               </>
             )}
             {mode === 'missao' && missionState === 'idle' && (
               <>
-                <button className="cta big green" onClick={startMission}>
+                <button className="cta btn-press big green" onClick={startMission}>
                   🎯 Começar missão (45s)
                 </button>
-                <button className="cta ghost" onClick={reset}>↻ Repor</button>
+                <button className="cta btn-press ghost" onClick={reset}>↻ Repor</button>
               </>
             )}
             {mode === 'missao' && missionState === 'running' && (
-              <button className="cta ghost" onClick={() => { setMissionState('over'); setIntensity(0.88); setTimeout(()=>setShowResult(true),800); }}>
+              <button className="cta btn-press ghost" onClick={() => { setMissionState('over'); setIntensity(0.88); setTimeout(()=>setShowResult(true),800); }}>
                 ⚡ Saltar para o final
               </button>
             )}
@@ -746,25 +746,46 @@ const ResultsModal = ({ disaster, outcome, values, onClose, factIndex }) => {
           </div>
         </div>
         <div className="modal-actions">
-          <button className="cta green" onClick={onClose}>↻ Jogar outra vez</button>
-          <button className="cta ghost" onClick={onClose}>Fechar</button>
+          <button className="cta btn-press green" onClick={onClose}>↻ Jogar outra vez</button>
+          <button className="cta btn-press ghost" onClick={onClose}>Fechar</button>
         </div>
       </div>
     </div>
   );
 };
 
+// ---------- Transições de ecrã ----------
+const PageView = ({ direction, children }) => (
+  <div className={`page-view page-${direction}`}>
+    {children}
+  </div>
+);
+
 // ---------- Root ----------
 const App = () => {
   const [screen, setScreen] = useState('home'); // home | sim
   const [picked, setPicked] = useState(null);
+  const [pageDir, setPageDir] = useState('forward'); // forward | back
 
-  const pick = (id) => { setPicked(id); setScreen('sim'); window.scrollTo(0, 0); };
-  const back = () => { setScreen('home'); window.scrollTo(0, 0); };
+  const pick = (id) => {
+    setPageDir('forward');
+    setPicked(id);
+    setScreen('sim');
+    window.scrollTo(0, 0);
+  };
+  const back = () => {
+    setPageDir('back');
+    setScreen('home');
+    window.scrollTo(0, 0);
+  };
 
-  return screen === 'home'
-    ? <Home onPick={pick} />
-    : <Simulator key={picked} disasterId={picked} onBack={back} />;
+  return (
+    <PageView direction={pageDir}>
+      {screen === 'home'
+        ? <Home onPick={pick} />
+        : <Simulator key={picked} disasterId={picked} onBack={back} />}
+    </PageView>
+  );
 };
 
 ReactDOM.createRoot(document.getElementById('root')).render(<App />);
