@@ -454,9 +454,9 @@ const Simulator = ({ disasterId, onBack }) => {
           Voltar
         </button>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12, flex: 1, justifyContent: 'center' }}>
-          <h1 className="h-title" style={{ fontSize: 28 }}>
-            <span style={{ fontSize: 28, marginRight: 8 }}>{disaster.emoji}</span>
+        <div className="sim-title-wrap">
+          <h1 className="h-title sim-title">
+            <span className="sim-title-emoji" aria-hidden="true">{disaster.emoji}</span>
             {disaster.name}
           </h1>
         </div>

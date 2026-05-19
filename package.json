@@ -5,9 +5,11 @@
   "scripts": {
     "build": "node scripts/prepare-pages.mjs",
     "start": "npm run build && npx --yes serve dist",
+    "test:responsive": "npm run build && node scripts/responsive-test.mjs",
     "deploy": "npm run build && wrangler pages deploy dist"
   },
   "devDependencies": {
+    "playwright": "^1.52.0",
     "wrangler": "^4.17.0"
   }
 }
