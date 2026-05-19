@@ -31,9 +31,10 @@ const pointsToEngineHundred = (pointsMap, variables) => {
   return o;
 };
 
+/** Orçamento inicial: 0 em cada variável (o jogador distribui os 250). */
 const buildInitialBudget = (disaster) => {
   const out = {};
-  disaster.variables.forEach(v => { out[v.id] = 0; });
+  (disaster?.variables || []).forEach(v => { out[v.id] = 0; });
   return out;
 };
 
@@ -319,8 +320,7 @@ const Home = ({ onPick }) => {
 const Simulator = ({ disasterId, onBack }) => {
   const disaster = useMemo(() => DISASTERS.find(d => d.id === disasterId), [disasterId]);
 
-  const initialBudget = useMemo(() => buildInitialBudget(disaster), [disaster]);
-  const [values, setValues] = useState(initialBudget);
+  const [values, setValues] = useState(() => buildInitialBudget(disaster));
 
   const [mode, setMode] = useState('livre'); // livre | missao
   // Mission state
@@ -349,6 +349,17 @@ const Simulator = ({ disasterId, onBack }) => {
   );
 
   const budgetRemaining = BUDGET_TOTAL - budgetUsed;
+
+  /* Sempre 0 ao abrir ou mudar de catástrofe (evita estado antigo). */
+  useEffect(() => {
+    setValues(buildInitialBudget(disaster));
+    setMode('livre');
+    setMissionState('idle');
+    setTimeLeft(45);
+    setIntensity(0);
+    setShowResult(false);
+  }, [disasterId]);
+
   useEffect(() => {
     if (mode !== 'livre') return;
     const tips = MASCOT_TIPS[disaster.id] || [];
@@ -505,12 +516,12 @@ const Simulator = ({ disasterId, onBack }) => {
                         </span>
                       )}
                     </div>
-                    <div className="var-val">{values[v.id]} <span className="var-pts">/{BUDGET_MAX}</span></div>
+                    <div className="var-val">{values[v.id] ?? 0}<span className="var-pts">/{BUDGET_MAX}</span></div>
                   </div>
                   <input
                     type="range" min={0} max={maxPointsForVar(values, disaster.variables, v.id)} step={BUDGET_STEP}
                     className="chunky"
-                    value={values[v.id]}
+                    value={values[v.id] ?? 0}
                     disabled={sliderDisabled}
                     onChange={e => setValues(prev => setVarBudget(prev, disaster, v.id, Number(e.target.value)))}
                   />
