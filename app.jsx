@@ -1,19 +1,28 @@
 // Main app for the Ciência vs. Catástrofes simulator
 const { useState, useEffect, useMemo } = React;
 
-/** Orçamento fixo: repartir pontos entre controlos (impossível “máximo em tudo”). */
+/** 250 pontos no total; cada variável: 0–70 (não dá para maximizar tudo). */
 const BUDGET_TOTAL = 250;
-const BUDGET_MIN = 10;
-/** Cada movimento dos controlos altera valores em passos de 5 (mais claro em tablet). */
+const BUDGET_MAX = 70;
 const BUDGET_STEP = 5;
 
 const budgetQuant = (x) => Math.round(Number(x) / BUDGET_STEP) * BUDGET_STEP;
 
-/** Converte pontos (soma = BUDGET_TOTAL) na escala 0–100 usada pelo motor e pelas cenas. */
+const sumBudget = (values, variables) =>
+  variables.reduce((s, v) => s + (Number(values[v.id]) || 0), 0);
+
+/** Máximo que este controlo pode ter sem passar o total nem 70. */
+const maxPointsForVar = (values, variables, varId) => {
+  const others = variables.reduce(
+    (s, v) => (v.id === varId ? s : s + (Number(values[v.id]) || 0)),
+    0
+  );
+  return Math.min(BUDGET_MAX, BUDGET_TOTAL - others);
+};
+
+/** Converte pontos (0–70) na escala 0–100 do motor e das cenas. */
 const pointsToEngineHundred = (pointsMap, variables) => {
-  const n = variables.length;
-  const mid = BUDGET_TOTAL / n;
-  const scale = 50 / mid;
+  const scale = 100 / BUDGET_MAX;
   const o = {};
   variables.forEach(v => {
     const p = Number(pointsMap[v.id]) || 0;
@@ -22,118 +31,37 @@ const pointsToEngineHundred = (pointsMap, variables) => {
   return o;
 };
 
-/** Garante soma = BUDGET_TOTAL e cada id entre BUDGET_MIN e o máximo possível. */
-const finalizeBudget = (out, ids) => {
-  const o = { ...out };
-  let loop = 0;
-  while (loop++ < 120) {
-    const sum = ids.reduce((a, id) => a + (o[id] ?? 0), 0);
-    const gap = BUDGET_TOTAL - sum;
-    if (gap === 0) break;
-    const step = Math.abs(gap) >= BUDGET_STEP ? BUDGET_STEP : 1;
-    const adj = gap > 0 ? Math.min(step, gap) : Math.max(-step, gap);
-    if (gap > 0) {
-      const cand = ids
-        .filter(id => {
-          const others = ids.filter(i => i !== id);
-          const maxV = BUDGET_TOTAL - BUDGET_MIN * others.length;
-          return (o[id] ?? 0) + adj <= maxV;
-        })
-        .sort((a, b) => (o[b] ?? 0) - (o[a] ?? 0))[0];
-      if (!cand) break;
-      o[cand] += adj;
-    } else {
-      const cand = ids
-        .filter(id => (o[id] ?? 0) + adj >= BUDGET_MIN)
-        .sort((a, b) => (o[b] ?? 0) - (o[a] ?? 0))[0];
-      if (!cand) break;
-      o[cand] += adj;
-    }
-  }
-  return o;
-};
-
 const buildInitialBudget = (disaster) => {
   const vars = disaster.variables;
   const ids = vars.map(v => v.id);
-  const sumD = vars.reduce((s, v) => s + v.default, 0) || 1;
-  const floats = ids.map((_, i) => (BUDGET_TOTAL * vars[i].default) / sumD);
-  let ints = floats.map(x => Math.floor(x));
-  let diff = BUDGET_TOTAL - ints.reduce((a, b) => a + b, 0);
-  const frac = floats.map((x, i) => x - ints[i]);
-  const order = ids.map((_, i) => i).sort((a, b) => frac[b] - frac[a]);
-  for (let k = 0; k < diff; k++) ints[order[k % ids.length]]++;
+  const n = ids.length;
+  const base = Math.floor(BUDGET_TOTAL / n / BUDGET_STEP) * BUDGET_STEP;
   const out = {};
-  ids.forEach((id, i) => { out[id] = ints[i]; });
-  for (let iter = 0; iter < 80; iter++) {
-    const low = ids.find(id => out[id] < BUDGET_MIN);
-    if (!low) break;
-    const need = BUDGET_MIN - out[low];
-    const donor = ids.filter(id => id !== low && out[id] > BUDGET_MIN).sort((a, b) => out[b] - out[a])[0];
-    if (!donor) {
-      out[low] = BUDGET_MIN;
-      break;
+  ids.forEach(id => { out[id] = Math.min(BUDGET_MAX, base); });
+  let left = BUDGET_TOTAL - sumBudget(out, vars);
+  let i = 0;
+  while (left > 0 && i < 500) {
+    const id = ids[i % n];
+    if (out[id] < BUDGET_MAX) {
+      const add = Math.min(BUDGET_STEP, left, BUDGET_MAX - out[id]);
+      out[id] += add;
+      left -= add;
     }
-    const take = Math.min(need, out[donor] - BUDGET_MIN);
-    out[donor] -= take;
-    out[low] += take;
+    i++;
   }
-  ids.forEach(id => {
-    out[id] = budgetQuant(out[id]);
-    if (out[id] < BUDGET_MIN) out[id] = BUDGET_MIN;
-  });
-  return finalizeBudget(out, ids);
-};
-
-/** Reparte `rem` entre `others`, cada um múltiplo de BUDGET_STEP e ≥ BUDGET_MIN. */
-const distributeRemAmongOthers = (rem, others, prev) => {
-  const k = others.length;
-  const minTotal = BUDGET_MIN * k;
-  const out = {};
-  if (rem < minTotal) {
-    others.forEach(id => { out[id] = BUDGET_MIN; });
-    return out;
-  }
-  const pool = rem - minTotal;
-  const flex = others.map(id => Math.max(0, (prev[id] ?? BUDGET_MIN) - BUDGET_MIN));
-  const sF = flex.reduce((a, b) => a + b, 0);
-  const poolUnits = pool / BUDGET_STEP;
-
-  if (pool <= 0 || sF === 0) {
-    const remUnits = Math.round(rem / BUDGET_STEP);
-    const minUnits = (BUDGET_MIN / BUDGET_STEP) * k;
-    const extra = remUnits - minUnits;
-    const baseU = Math.floor(extra / k);
-    const remainder = extra - baseU * k;
-    others.forEach((id, i) => {
-      out[id] = BUDGET_MIN + (baseU + (i < remainder ? 1 : 0)) * BUDGET_STEP;
-    });
-    return out;
-  }
-
-  const rawU = others.map((_, i) => (poolUnits * flex[i]) / sF);
-  let units = rawU.map(u => Math.floor(u));
-  let deficit = Math.round(poolUnits) - units.reduce((a, b) => a + b, 0);
-  const ord = others.map((_, i) => i).sort((a, b) => (rawU[b] - units[b]) - (rawU[a] - units[a]));
-  for (let t = 0; t < deficit; t++) units[ord[t % ord.length]]++;
-  others.forEach((id, i) => {
-    out[id] = BUDGET_MIN + units[i] * BUDGET_STEP;
-  });
   return out;
 };
 
-/** Ao mover um control, os outros ajustam-se para manter a soma em BUDGET_TOTAL (passos de BUDGET_STEP). */
-const redistributeBudget = (prev, disaster, changedId, rawNew) => {
-  const ids = disaster.variables.map(v => v.id);
-  const others = ids.filter(id => id !== changedId);
-  const maxC = BUDGET_TOTAL - BUDGET_MIN * others.length;
-  let nv = Math.max(BUDGET_MIN, Math.min(Math.round(Number(rawNew)), maxC));
-  nv = budgetQuant(nv);
-  nv = Math.max(BUDGET_MIN, Math.min(nv, maxC));
-  const rem = BUDGET_TOTAL - nv;
-  const otherPart = distributeRemAmongOthers(rem, others, prev);
-  const out = { ...otherPart, [changedId]: nv };
-  return finalizeBudget(out, ids);
+/** Só altera o controlo que mexeste; os outros ficam iguais. */
+const setVarBudget = (prev, disaster, changedId, rawNew) => {
+  const vars = disaster.variables;
+  const othersSum = vars.reduce(
+    (s, v) => (v.id === changedId ? s : s + (Number(prev[v.id]) || 0)),
+    0
+  );
+  let nv = budgetQuant(Number(rawNew));
+  nv = Math.max(0, Math.min(BUDGET_MAX, nv, BUDGET_TOTAL - othersSum));
+  return { ...prev, [changedId]: nv };
 };
 
 // ---------- helpers ----------
@@ -207,7 +135,7 @@ const buildPostSimulationAdvice = (disaster, outcome, values, factIndex) => {
     });
     if (improveLines.length === 0) {
       improveLines.push(
-        '⚖️ Reparte os 250 pontos — a equipa de defesas funciona melhor em conjunto!'
+        '⚖️ Gasta os 250 pontos — máx. 70 em cada controlo!'
       );
     }
   }
@@ -435,7 +363,7 @@ const Simulator = ({ disasterId, onBack }) => {
     [disaster, values]
   );
 
-  const maxSlider = BUDGET_TOTAL - BUDGET_MIN * (disaster.variables.length - 1);
+  const budgetRemaining = BUDGET_TOTAL - budgetUsed;
   useEffect(() => {
     if (mode !== 'livre') return;
     const tips = MASCOT_TIPS[disaster.id] || [];
@@ -511,7 +439,7 @@ const Simulator = ({ disasterId, onBack }) => {
     const tips = MASCOT_TIPS[disaster.id] || [];
     if (!tips.length) return '';
     if (mode === 'missao' && missionState === 'running') {
-      return `⏱️ ${timeLeft}s! Reparte os ${BUDGET_TOTAL} pontos!`;
+      return `⏱️ ${timeLeft}s! Distribui ${BUDGET_TOTAL} pts (máx. ${BUDGET_MAX} cada)!`;
     }
     if (mode === 'missao' && missionState === 'over') {
       return 'A catástrofe aconteceu! Vamos ver os resultados...';
@@ -550,14 +478,18 @@ const Simulator = ({ disasterId, onBack }) => {
             <h3>Ciência e tecnologia</h3>
             <span style={{ fontSize: 12, fontWeight: 800, color: 'var(--ink-soft)' }}>
               {mode === 'livre'
-                ? `${BUDGET_TOTAL} pts · passos de ${BUDGET_STEP} (mín. ${BUDGET_MIN} cada)`
-                : `Reparte ${BUDGET_TOTAL} pts antes do tempo acabar!`}
+                ? `${BUDGET_TOTAL} pts no total · máx. ${BUDGET_MAX} em cada`
+                : `Distribui ${BUDGET_TOTAL} pts (máx. ${BUDGET_MAX} cada)!`}
             </span>
           </div>
 
-          <div className="budget-strip" aria-live="polite">
-            <span className="budget-strip-total">{budgetUsed}/{BUDGET_TOTAL} pontos usados</span>
-            <span className="budget-strip-hint">🪙 Não dá para tudo no máximo — escolhe a tua equipa!</span>
+          <div className={`budget-strip ${budgetRemaining === 0 ? 'budget-ok' : ''}`} aria-live="polite">
+            <span className="budget-strip-total">{budgetUsed}/{BUDGET_TOTAL} pontos</span>
+            <span className="budget-strip-hint">
+              {budgetRemaining > 0
+                ? `🪙 Faltam ${budgetRemaining} — máx. ${BUDGET_MAX} em cada`
+                : `✅ Todos os pontos distribuídos`}
+            </span>
           </div>
 
           {disaster.teachIntro && (
@@ -588,14 +520,14 @@ const Simulator = ({ disasterId, onBack }) => {
                         </span>
                       )}
                     </div>
-                    <div className="var-val">{values[v.id]} <span className="var-pts">pts</span></div>
+                    <div className="var-val">{values[v.id]} <span className="var-pts">/{BUDGET_MAX}</span></div>
                   </div>
                   <input
-                    type="range" min={BUDGET_MIN} max={maxSlider} step={BUDGET_STEP}
+                    type="range" min={0} max={maxPointsForVar(values, disaster.variables, v.id)} step={BUDGET_STEP}
                     className="chunky"
                     value={values[v.id]}
                     disabled={sliderDisabled}
-                    onChange={e => setValues(prev => redistributeBudget(prev, disaster, v.id, Number(e.target.value)))}
+                    onChange={e => setValues(prev => setVarBudget(prev, disaster, v.id, Number(e.target.value)))}
                   />
                   {v.preventExplain && (
                     <details className="var-prevent comic-details">

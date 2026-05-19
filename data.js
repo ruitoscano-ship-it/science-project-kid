@@ -5,7 +5,7 @@
 window.HOME_EDUCATION = {
   lead: 'Ciência + tecnologia = equipa que protege a tua vila!',
   blocks: [
-    { icon: '🎮', title: 'Jogar', text: 'Escolhe uma catástrofe. Reparte 250 pontos em 4 ideias — não dá para tudo no máximo!' },
+    { icon: '🎮', title: 'Jogar', text: 'Escolhe uma catástrofe. Distribui 250 pontos — máx. 70 em cada ideia!' },
     { icon: '🔬', title: 'Ciência', text: 'Perguntar, medir e perceber a Natureza antes do perigo chegar.' },
     { icon: '🛠️', title: 'Tecnologia', text: 'Sensores, avisos no telemóvel e máquinas que ajudam a salvar vidas.' },
     { icon: '⭐', title: 'Objetivo', text: 'Ver se casas e pessoas ficam mais seguras. Prevenir também é ciência!' }

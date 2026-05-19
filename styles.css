@@ -993,6 +993,9 @@ input[type=range].chunky::-moz-range-thumb {
 .budget-strip {
   background: linear-gradient(90deg, #FFF1B8 0%, #FFE7B8 100%);
 }
+.budget-strip.budget-ok {
+  background: linear-gradient(90deg, #C9F0B4 0%, #E8F8E0 100%);
+}
 .budget-strip-total {
   font-size: 18px;
 }
