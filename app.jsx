@@ -32,23 +32,8 @@ const pointsToEngineHundred = (pointsMap, variables) => {
 };
 
 const buildInitialBudget = (disaster) => {
-  const vars = disaster.variables;
-  const ids = vars.map(v => v.id);
-  const n = ids.length;
-  const base = Math.floor(BUDGET_TOTAL / n / BUDGET_STEP) * BUDGET_STEP;
   const out = {};
-  ids.forEach(id => { out[id] = Math.min(BUDGET_MAX, base); });
-  let left = BUDGET_TOTAL - sumBudget(out, vars);
-  let i = 0;
-  while (left > 0 && i < 500) {
-    const id = ids[i % n];
-    if (out[id] < BUDGET_MAX) {
-      const add = Math.min(BUDGET_STEP, left, BUDGET_MAX - out[id]);
-      out[id] += add;
-      left -= add;
-    }
-    i++;
-  }
+  disaster.variables.forEach(v => { out[v.id] = 0; });
   return out;
 };
 
