@@ -1,5 +1,5 @@
 // Main app for the Ciência vs. Catástrofes simulator
-const { useState, useEffect, useMemo } = React;
+const { useState, useEffect, useMemo, useRef } = React;
 
 /** 250 pontos no total; cada variável: 0–70 (não dá para maximizar tudo). */
 const BUDGET_TOTAL = 250;
@@ -200,6 +200,140 @@ const LearnMorePanel = () => {
   );
 };
 
+// ---------- Certificado de participação ----------
+const formatCertDate = () => {
+  try {
+    return new Date().toLocaleDateString('pt-PT', { day: 'numeric', month: 'long', year: 'numeric' });
+  } catch {
+    return new Date().toISOString().slice(0, 10);
+  }
+};
+
+const CertificatePanel = () => {
+  const [kidName, setKidName] = useState('');
+  const [displayName, setDisplayName] = useState('');
+  const [pdfBusy, setPdfBusy] = useState(false);
+  const diplomaRef = useRef(null);
+
+  const generate = (e) => {
+    e.preventDefault();
+    const n = kidName.trim();
+    if (n.length < 2) return;
+    setDisplayName(n);
+  };
+
+  const exportPdf = async () => {
+    if (!displayName || !diplomaRef.current) return;
+    if (typeof html2pdf === 'undefined') {
+      window.print();
+      return;
+    }
+    setPdfBusy(true);
+    try {
+      const safe = displayName
+        .replace(/[^\p{L}\p{N}\s-]/gu, '')
+        .trim()
+        .replace(/\s+/g, '-') || 'participante';
+      await html2pdf()
+        .set({
+          margin: 0.35,
+          filename: `certificado-${safe}.pdf`,
+          image: { type: 'jpeg', quality: 0.96 },
+          html2canvas: { scale: 2, useCORS: true, logging: false, backgroundColor: '#FFFDF7' },
+          jsPDF: { unit: 'in', format: 'a4', orientation: 'landscape' }
+        })
+        .from(diplomaRef.current)
+        .save();
+    } finally {
+      setPdfBusy(false);
+    }
+  };
+
+  return (
+    <section className="cert-page comic-page" aria-labelledby="cert-title">
+      <h2 id="cert-title" className="learn-more-title comic-title">🏅 Certificado de Participação</h2>
+      <ComicBubble className="comic-bubble-center">
+        Escreve o teu nome e recebe um diploma de cientista preparado para prevenir catástrofes!
+      </ComicBubble>
+
+      <form className="cert-form" onSubmit={generate}>
+        <label className="cert-label" htmlFor="kid-name">O teu nome</label>
+        <input
+          id="kid-name"
+          className="cert-input"
+          type="text"
+          maxLength={48}
+          placeholder="Ex.: Maria Silva"
+          value={kidName}
+          onChange={e => setKidName(e.target.value)}
+          autoComplete="name"
+        />
+        <button type="submit" className="cta btn-press green" disabled={kidName.trim().length < 2}>
+          ✨ Gerar diploma
+        </button>
+      </form>
+
+      {displayName && (
+        <div className="cert-result">
+          <div className="cert-actions no-print">
+            <button
+              type="button"
+              className="cta btn-press"
+              onClick={exportPdf}
+              disabled={pdfBusy}
+            >
+              {pdfBusy ? 'A guardar…' : '📄 Guardar PDF'}
+            </button>
+          </div>
+
+          <article ref={diplomaRef} className="diploma" aria-label={`Diploma de ${displayName}`}>
+            <div className="diploma-frame">
+              <div className="diploma-corner tl" aria-hidden="true">★</div>
+              <div className="diploma-corner tr" aria-hidden="true">★</div>
+              <div className="diploma-corner bl" aria-hidden="true">★</div>
+              <div className="diploma-corner br" aria-hidden="true">★</div>
+
+              <header className="diploma-head">
+                <span className="diploma-badge">4.º Ano · Ciência e Tecnologia</span>
+                <h3 className="diploma-title">Certificado de Participação</h3>
+                <p className="diploma-sub">Ciência vs. Catástrofes</p>
+              </header>
+
+              <div className="diploma-body">
+                <div className="diploma-mascot" aria-hidden="true">
+                  <Mascot size={120} />
+                </div>
+                <div className="diploma-text">
+                  <p className="diploma-lead">Certifica-se que</p>
+                  <p className="diploma-name">{displayName}</p>
+                  <p className="diploma-desc">
+                    participou no simulador <strong>Ciência vs. Catástrofes</strong> e demonstrou estar
+                    preparado(a) para usar a <strong>Ciência</strong> e a <strong>Tecnologia</strong> na
+                    prevenção de desastres naturais — protegendo pessoas, comunidades e o planeta.
+                  </p>
+                  <ul className="diploma-skills" aria-label="Competências">
+                    <li>🔬 Observar e perceber a Natureza</li>
+                    <li>🛠️ Usar ferramentas que avisam e protegem</li>
+                    <li>🛡️ Escolher defesas em equipa</li>
+                  </ul>
+                </div>
+              </div>
+
+              <footer className="diploma-foot">
+                <div className="diploma-date">{formatCertDate()}</div>
+                <div className="diploma-sign">
+                  <span className="diploma-sign-line" />
+                  <span className="diploma-sign-label">Professor Eureka · Simulador escolar</span>
+                </div>
+              </footer>
+            </div>
+          </article>
+        </div>
+      )}
+    </section>
+  );
+};
+
 // ---------- Home screen ----------
 const Home = ({ onPick }) => {
   const edu = typeof HOME_EDUCATION !== 'undefined' ? HOME_EDUCATION : null;
@@ -249,6 +383,17 @@ const Home = ({ onPick }) => {
           onClick={() => setHomeTab('aprender')}
         >
           Aprender Mais
+        </button>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={homeTab === 'certificado'}
+          aria-controls="panel-certificado"
+          id="tab-certificado"
+          className={`home-tab btn-press home-tab-cert ${homeTab === 'certificado' ? 'on' : ''}`}
+          onClick={() => setHomeTab('certificado')}
+        >
+          🏅 Certificado de Participação
         </button>
       </nav>
 
@@ -308,6 +453,12 @@ const Home = ({ onPick }) => {
       {homeTab === 'aprender' && (
         <div id="panel-aprender" role="tabpanel" aria-labelledby="tab-aprender" className="home-tab-panel tab-enter" key="tab-aprender">
           <LearnMorePanel />
+        </div>
+      )}
+
+      {homeTab === 'certificado' && (
+        <div id="panel-certificado" role="tabpanel" aria-labelledby="tab-certificado" className="home-tab-panel tab-enter" key="tab-certificado">
+          <CertificatePanel />
         </div>
       )}
 
