@@ -310,12 +310,122 @@ const DiplomaStarRow = ({ count }) => (
   </div>
 );
 
+const parseStudentNames = (text) =>
+  (text || '')
+    .split(/[\n,;]+/)
+    .map(s => s.trim())
+    .filter(s => s.length >= 2)
+    .filter((name, i, arr) =>
+      arr.findIndex(n => n.toLowerCase() === name.toLowerCase()) === i
+    );
+
+const safePdfFilename = (name) =>
+  (name || '')
+    .replace(/[^\p{L}\p{N}\s-]/gu, '')
+    .trim()
+    .replace(/\s+/g, '-') || 'aluno';
+
+const HTML2PDF_DIPLOMA_OPTS = (filename) => ({
+  margin: [8, 8, 8, 8],
+  filename,
+  image: { type: 'jpeg', quality: 0.96 },
+  html2canvas: {
+    scale: 2,
+    useCORS: true,
+    logging: false,
+    backgroundColor: '#FDF8EE',
+    scrollX: 0,
+    scrollY: -window.scrollY
+  },
+  jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+  pagebreak: { mode: ['avoid-all', 'css', 'legacy'], avoid: '.diploma-v2-frame' }
+});
+
+const DiplomaCard = React.forwardRef(({ studentName, groups, totalStars, level }, ref) => (
+  <article
+    ref={ref}
+    className="diploma diploma-v2"
+    aria-label={studentName ? `Diploma de ${studentName}` : 'Diploma'}
+  >
+    <div className="diploma-v2-frame">
+      <span className="diploma-v2-corner tl" aria-hidden="true" />
+      <span className="diploma-v2-corner tr" aria-hidden="true" />
+      <span className="diploma-v2-corner bl" aria-hidden="true" />
+      <span className="diploma-v2-corner br" aria-hidden="true" />
+
+      <header className="diploma-v2-head">
+        <DiplomaSeal />
+        <p className="diploma-v2-kicker">Diploma oficial de</p>
+        <h3 className="diploma-v2-title">Mini-Cientista da Prevenção</h3>
+        <p className="diploma-v2-sub">Ciência e Tecnologia contra as Catástrofes Naturais</p>
+        <div className="diploma-v2-rule" aria-hidden="true">
+          <span className="diploma-v2-rule-star">★</span>
+          <span className="diploma-v2-rule-line" />
+          <span className="diploma-v2-rule-star">★</span>
+        </div>
+      </header>
+
+      <div className="diploma-v2-body">
+        <p className="diploma-v2-lead">Este diploma é orgulhosamente atribuído a</p>
+        <p className="diploma-v2-name">{studentName}</p>
+        <p className="diploma-v2-desc">
+          por ter aprendido a usar a{' '}
+          <span className="diploma-v2-hl">ciência</span> e a{' '}
+          <span className="diploma-v2-hl">tecnologia</span> — estações meteorológicas,
+          barragens, sensores, satélites e muito mais — para proteger pessoas, casas e
+          florestas das catástrofes naturais. 🌍
+        </p>
+
+        <div className="diploma-v2-progress" aria-label={`${totalStars} de ${DIPLOMA_MAX_STARS} estrelas`}>
+          {groups.map(g => (
+            <div key={g.id} className={`diploma-v2-badge diploma-v2-badge--${g.tone}`}>
+              <DiplomaDisasterIcon tone={g.tone} />
+              <DiplomaStarRow count={g.stars} />
+            </div>
+          ))}
+        </div>
+
+        <p className="diploma-v2-level">
+          Nível alcançado: <strong>{level}</strong>
+        </p>
+      </div>
+
+      <footer className="diploma-v2-foot">
+        <div className="diploma-v2-sign">
+          <div className="diploma-v2-avatar" aria-hidden="true">
+            <MascotMini size={52} />
+          </div>
+          <p className="diploma-v2-sign-name">Prof. Eureka</p>
+          <span className="diploma-v2-sign-line" />
+          <p className="diploma-v2-sign-role">Diretor do Laboratório</p>
+        </div>
+
+        <div className="diploma-v2-date">
+          <p className="diploma-v2-date-val">{formatCertDate()}</p>
+          <span className="diploma-v2-sign-line" />
+          <p className="diploma-v2-sign-role">Data de atribuição</p>
+        </div>
+      </footer>
+
+      <div className="diploma-v2-micro-badge" aria-hidden="true">
+        <DiplomaMicroscope size={22} />
+      </div>
+    </div>
+  </article>
+));
+
 const CertificatePanel = () => {
   const [kidName, setKidName] = useState('');
   const [displayName, setDisplayName] = useState('');
+  const [classList, setClassList] = useState('');
   const [pdfBusy, setPdfBusy] = useState(false);
+  const [bulkProgress, setBulkProgress] = useState(null);
   const [starData, setStarData] = useState(() => loadDiplomaStars());
+  const [pdfExportName, setPdfExportName] = useState('');
   const diplomaRef = useRef(null);
+
+  const flushRender = () =>
+    new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
 
   useEffect(() => {
     const refresh = () => setStarData(loadDiplomaStars());
@@ -326,6 +436,7 @@ const CertificatePanel = () => {
   const groups = useMemo(() => buildDiplomaGroups(starData), [starData]);
   const totalStars = useMemo(() => groups.reduce((s, g) => s + g.stars, 0), [groups]);
   const level = diplomaLevelLabel(totalStars);
+  const classNames = useMemo(() => parseStudentNames(classList), [classList]);
 
   const generate = (e) => {
     e.preventDefault();
@@ -335,6 +446,22 @@ const CertificatePanel = () => {
     setDisplayName(n);
   };
 
+  const saveDiplomaPdf = async (studentName) => {
+    if (!diplomaRef.current || typeof html2pdf === 'undefined') return false;
+    const el = diplomaRef.current;
+    el.classList.add('diploma-exporting');
+    try {
+      await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+      await html2pdf()
+        .set(HTML2PDF_DIPLOMA_OPTS(`diploma-${safePdfFilename(studentName)}.pdf`))
+        .from(el)
+        .save();
+      return true;
+    } finally {
+      el.classList.remove('diploma-exporting');
+    }
+  };
+
   const exportPdf = async () => {
     if (!displayName || !diplomaRef.current) return;
     if (typeof html2pdf === 'undefined') {
@@ -342,35 +469,38 @@ const CertificatePanel = () => {
       return;
     }
     setPdfBusy(true);
-    const el = diplomaRef.current;
-    el.classList.add('diploma-exporting');
     try {
-      await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
-      const safe = displayName
-        .replace(/[^\p{L}\p{N}\s-]/gu, '')
-        .trim()
-        .replace(/\s+/g, '-') || 'participante';
-      await html2pdf()
-        .set({
-          margin: [8, 8, 8, 8],
-          filename: `diploma-${safe}.pdf`,
-          image: { type: 'jpeg', quality: 0.96 },
-          html2canvas: {
-            scale: 2,
-            useCORS: true,
-            logging: false,
-            backgroundColor: '#FDF8EE',
-            scrollX: 0,
-            scrollY: -window.scrollY
-          },
-          jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-          pagebreak: { mode: ['avoid-all', 'css', 'legacy'], avoid: '.diploma-v2-frame' }
-        })
-        .from(el)
-        .save();
+      setPdfExportName(displayName);
+      await flushRender();
+      await saveDiplomaPdf(displayName);
     } finally {
-      el.classList.remove('diploma-exporting');
       setPdfBusy(false);
+    }
+  };
+
+  const exportClassPdfs = async () => {
+    if (!classNames.length || !diplomaRef.current) return;
+    if (typeof html2pdf === 'undefined') {
+      window.print();
+      return;
+    }
+    setStarData(loadDiplomaStars());
+    setPdfBusy(true);
+    setBulkProgress({ current: 0, total: classNames.length });
+    try {
+      for (let i = 0; i < classNames.length; i++) {
+        const name = classNames[i];
+        setBulkProgress({ current: i + 1, total: classNames.length });
+        setPdfExportName(name);
+        await flushRender();
+        await saveDiplomaPdf(name);
+        if (i < classNames.length - 1) {
+          await new Promise((resolve) => setTimeout(resolve, 400));
+        }
+      }
+    } finally {
+      setPdfBusy(false);
+      setBulkProgress(null);
     }
   };
 
@@ -378,11 +508,11 @@ const CertificatePanel = () => {
     <section className="cert-page comic-page" aria-labelledby="cert-title">
       <h2 id="cert-title" className="learn-more-title comic-title">🏅 Diploma de Especialista</h2>
       <ComicBubble className="comic-bubble-center">
-        Escreve o teu nome e recebe o diploma oficial — com estrelas das simulações que já fizeste!
+        Gera um diploma individual ou exporta diplomas para toda a turma de uma vez.
       </ComicBubble>
 
       <form className="cert-form" onSubmit={generate}>
-        <label className="cert-label" htmlFor="kid-name">O teu nome</label>
+        <label className="cert-label" htmlFor="kid-name">Um aluno</label>
         <input
           id="kid-name"
           className="cert-input"
@@ -398,7 +528,50 @@ const CertificatePanel = () => {
         </button>
       </form>
 
-      {displayName && (
+      <div className="cert-class-block">
+        <h3 className="cert-class-title">Entrega à turma</h3>
+        <p className="cert-class-hint">
+          Cola a lista de nomes — um aluno por linha (também podes separar por vírgula).
+        </p>
+        <label className="cert-label" htmlFor="class-list">Lista de alunos</label>
+        <textarea
+          id="class-list"
+          className="cert-textarea"
+          rows={8}
+          maxLength={4000}
+          placeholder={'Maria Silva\nJoão Santos\nAna Costa'}
+          value={classList}
+          onChange={e => setClassList(e.target.value)}
+          disabled={pdfBusy}
+        />
+        <p className="cert-class-count" aria-live="polite">
+          {classNames.length === 0
+            ? 'Ainda não há nomes válidos na lista.'
+            : `${classNames.length} aluno${classNames.length === 1 ? '' : 's'} na lista`}
+        </p>
+        <button
+          type="button"
+          className="cta btn-press"
+          onClick={exportClassPdfs}
+          disabled={pdfBusy || classNames.length === 0}
+        >
+          {pdfBusy && bulkProgress
+            ? `A guardar ${bulkProgress.current}/${bulkProgress.total}…`
+            : `📄 Exportar ${classNames.length} diploma${classNames.length === 1 ? '' : 's'}`}
+        </button>
+      </div>
+
+      <div className="diploma-export-slot" aria-hidden="true">
+        <DiplomaCard
+          ref={diplomaRef}
+          studentName={pdfExportName || displayName || ' '}
+          groups={groups}
+          totalStars={totalStars}
+          level={level}
+        />
+      </div>
+
+      {displayName && !pdfBusy && (
         <div className="cert-result">
           <div className="cert-actions no-print">
             <button
@@ -411,72 +584,12 @@ const CertificatePanel = () => {
             </button>
           </div>
 
-          <article ref={diplomaRef} className="diploma diploma-v2" aria-label={`Diploma de ${displayName}`}>
-            <div className="diploma-v2-frame">
-              <span className="diploma-v2-corner tl" aria-hidden="true" />
-              <span className="diploma-v2-corner tr" aria-hidden="true" />
-              <span className="diploma-v2-corner bl" aria-hidden="true" />
-              <span className="diploma-v2-corner br" aria-hidden="true" />
-
-              <header className="diploma-v2-head">
-                <DiplomaSeal />
-                <p className="diploma-v2-kicker">Diploma oficial de</p>
-                <h3 className="diploma-v2-title">Mini-Cientista da Prevenção</h3>
-                <p className="diploma-v2-sub">Ciência e Tecnologia contra as Catástrofes Naturais</p>
-                <div className="diploma-v2-rule" aria-hidden="true">
-                  <span className="diploma-v2-rule-star">★</span>
-                  <span className="diploma-v2-rule-line" />
-                  <span className="diploma-v2-rule-star">★</span>
-                </div>
-              </header>
-
-              <div className="diploma-v2-body">
-                <p className="diploma-v2-lead">Este diploma é orgulhosamente atribuído a</p>
-                <p className="diploma-v2-name">{displayName}</p>
-                <p className="diploma-v2-desc">
-                  por ter aprendido a usar a{' '}
-                  <span className="diploma-v2-hl">ciência</span> e a{' '}
-                  <span className="diploma-v2-hl">tecnologia</span> — estações meteorológicas,
-                  barragens, sensores, satélites e muito mais — para proteger pessoas, casas e
-                  florestas das catástrofes naturais. 🌍
-                </p>
-
-                <div className="diploma-v2-progress" aria-label={`${totalStars} de ${DIPLOMA_MAX_STARS} estrelas`}>
-                  {groups.map(g => (
-                    <div key={g.id} className={`diploma-v2-badge diploma-v2-badge--${g.tone}`}>
-                      <DiplomaDisasterIcon tone={g.tone} />
-                      <DiplomaStarRow count={g.stars} />
-                    </div>
-                  ))}
-                </div>
-
-                <p className="diploma-v2-level">
-                  Nível alcançado: <strong>{level}</strong>
-                </p>
-              </div>
-
-              <footer className="diploma-v2-foot">
-                <div className="diploma-v2-sign">
-                  <div className="diploma-v2-avatar" aria-hidden="true">
-                    <MascotMini size={52} />
-                  </div>
-                  <p className="diploma-v2-sign-name">Prof. Eureka</p>
-                  <span className="diploma-v2-sign-line" />
-                  <p className="diploma-v2-sign-role">Diretor do Laboratório</p>
-                </div>
-
-                <div className="diploma-v2-date">
-                  <p className="diploma-v2-date-val">{formatCertDate()}</p>
-                  <span className="diploma-v2-sign-line" />
-                  <p className="diploma-v2-sign-role">Data de atribuição</p>
-                </div>
-              </footer>
-
-              <div className="diploma-v2-micro-badge" aria-hidden="true">
-                <DiplomaMicroscope size={22} />
-              </div>
-            </div>
-          </article>
+          <DiplomaCard
+            studentName={displayName}
+            groups={groups}
+            totalStars={totalStars}
+            level={level}
+          />
         </div>
       )}
     </section>
