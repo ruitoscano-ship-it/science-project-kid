@@ -536,7 +536,13 @@ const downloadBlob = (blob, filename) => {
   document.body.appendChild(link);
   link.click();
   link.remove();
-  window.setTimeout(() => URL.revokeObjectURL(url), 3000);
+  return url;
+};
+
+const revokeBlobUrls = (urls, delayMs = 120000) => {
+  window.setTimeout(() => {
+    urls.forEach((url) => URL.revokeObjectURL(url));
+  }, delayMs);
 };
 
 const DiplomaCard = React.forwardRef(({ studentName, groups, totalStars, level }, ref) => (
@@ -694,7 +700,7 @@ const CertificatePanel = () => {
 
   const saveDiplomaPdf = async (studentName) => {
     const blob = await captureDiplomaBlob(studentName, true);
-    downloadBlob(blob, `diploma-${safePdfFilename(studentName)}.pdf`);
+    revokeBlobUrls([downloadBlob(blob, `diploma-${safePdfFilename(studentName)}.pdf`)]);
     return true;
   };
 
@@ -737,24 +743,30 @@ const CertificatePanel = () => {
       }
 
       if (entries.length === 1) {
-        downloadBlob(entries[0].blob, `diploma-${safePdfFilename(entries[0].name)}.pdf`);
+        revokeBlobUrls([
+          downloadBlob(entries[0].blob, `diploma-${safePdfFilename(entries[0].name)}.pdf`)
+        ]);
       } else if (typeof JSZip !== 'undefined') {
         const zip = new JSZip();
         entries.forEach(({ name, blob }) => {
           zip.file(`diploma-${safePdfFilename(name)}.pdf`, blob);
         });
         const zipBlob = await zip.generateAsync({ type: 'blob' });
-        downloadBlob(zipBlob, 'diplomas-turma.zip');
+        revokeBlobUrls([downloadBlob(zipBlob, 'diplomas-turma.zip')]);
       } else {
+        const downloadUrls = [];
         for (let i = 0; i < entries.length; i++) {
-          downloadBlob(
-            entries[i].blob,
-            `diploma-${safePdfFilename(entries[i].name)}.pdf`
+          downloadUrls.push(
+            downloadBlob(
+              entries[i].blob,
+              `diploma-${safePdfFilename(entries[i].name)}.pdf`
+            )
           );
           if (i < entries.length - 1) {
             await new Promise((resolve) => setTimeout(resolve, 700));
           }
         }
+        revokeBlobUrls(downloadUrls);
       }
     } catch (err) {
       console.error(err);

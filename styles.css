@@ -1495,17 +1495,16 @@ input[type=range].chunky::-moz-range-thumb {
 }
 .diploma-export-slot {
   position: fixed;
-  left: 0;
+  left: -10000px;
   top: 0;
   width: 718px;
   height: 971px;
   pointer-events: none;
-  opacity: 0.01;
-  z-index: -1;
   overflow: hidden;
+  visibility: hidden;
 }
 .diploma-export-slot.is-exporting {
-  z-index: 2147483646;
+  visibility: visible;
 }
 .home-tab-cert {
   font-size: 15px;
