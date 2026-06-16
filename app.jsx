@@ -465,11 +465,6 @@ const CertificatePanel = () => {
                   <p className="diploma-v2-sign-role">Diretor do Laboratório</p>
                 </div>
 
-                <div className="diploma-v2-score" aria-label={`${totalStars} estrelas conquistadas`}>
-                  <span className="diploma-v2-score-num">{totalStars}/{DIPLOMA_MAX_STARS}</span>
-                  <span className="diploma-v2-score-label">Estrelas conquistadas</span>
-                </div>
-
                 <div className="diploma-v2-date">
                   <p className="diploma-v2-date-val">{formatCertDate()}</p>
                   <span className="diploma-v2-sign-line" />
