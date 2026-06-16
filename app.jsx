@@ -325,8 +325,21 @@ const safePdfFilename = (name) =>
     .trim()
     .replace(/\s+/g, '-') || 'aluno';
 
+const DIPLOMA_PAGE = {
+  marginTopMm: 20,
+  marginBottomMm: 20,
+  marginSideMm: 10,
+  widthMm: 190,
+  heightMm: 257
+};
+
 const HTML2PDF_DIPLOMA_OPTS = (filename) => ({
-  margin: [8, 8, 8, 8],
+  margin: [
+    DIPLOMA_PAGE.marginTopMm,
+    DIPLOMA_PAGE.marginSideMm,
+    DIPLOMA_PAGE.marginBottomMm,
+    DIPLOMA_PAGE.marginSideMm
+  ],
   filename,
   image: { type: 'jpeg', quality: 0.96 },
   html2canvas: {
