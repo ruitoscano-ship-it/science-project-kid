@@ -360,57 +360,62 @@ const DIPLOMA_PAGE = {
 };
 
 const canExportPdf = () =>
-  (typeof html2canvas !== 'undefined' && typeof jspdf !== 'undefined')
-  || typeof html2pdf !== 'undefined';
+  typeof jspdf !== 'undefined'
+  && (typeof html2canvas !== 'undefined' || typeof html2pdf !== 'undefined');
 
-const saveDiplomaPdfFile = async (element, filename) => {
-  const canvasLib = typeof html2canvas !== 'undefined' ? html2canvas : null;
-  const jsPdfLib = typeof jspdf !== 'undefined' ? jspdf : null;
-  if (!canvasLib || !jsPdfLib?.jsPDF) {
-    if (typeof html2pdf !== 'undefined') {
-      await html2pdf()
-        .set({
-          margin: [
-            DIPLOMA_PAGE.marginTopMm,
-            DIPLOMA_PAGE.marginSideMm,
-            DIPLOMA_PAGE.marginBottomMm,
-            DIPLOMA_PAGE.marginSideMm
-          ],
-          filename,
-          image: { type: 'jpeg', quality: 0.96 },
-          html2canvas: {
-            scale: 2,
-            useCORS: true,
-            logging: false,
-            backgroundColor: '#FDF8EE',
-            scrollX: 0,
-            scrollY: 0
-          },
-          jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-        })
-        .from(element)
-        .save();
-      return;
+const diplomaHtml2CanvasOpts = (studentName) => ({
+  scale: 2,
+  useCORS: true,
+  logging: false,
+  backgroundColor: '#FDF8EE',
+  scrollX: 0,
+  scrollY: 0,
+  onclone: (_doc, clone) => {
+    clone.classList.add('diploma-exporting');
+    clone.style.width = `${DIPLOMA_PAGE.widthMm}mm`;
+    clone.style.maxWidth = `${DIPLOMA_PAGE.widthMm}mm`;
+    clone.style.height = 'auto';
+    clone.style.margin = '0';
+    clone.style.boxSizing = 'border-box';
+    const frame = clone.querySelector('.diploma-v2-frame');
+    if (frame) {
+      frame.style.overflow = 'visible';
+      frame.style.height = 'auto';
+      frame.style.maxHeight = 'none';
     }
+    const nameEl = clone.querySelector('.diploma-v2-name');
+    if (nameEl && studentName) nameEl.textContent = studentName;
+  }
+});
+
+const captureDiplomaCanvas = async (element, studentName) => {
+  const opts = diplomaHtml2CanvasOpts(studentName);
+  if (typeof html2canvas !== 'undefined') {
+    return html2canvas(element, {
+      ...opts,
+      width: element.scrollWidth,
+      height: element.scrollHeight,
+      windowWidth: element.scrollWidth,
+      windowHeight: element.scrollHeight
+    });
+  }
+  if (typeof html2pdf === 'undefined') {
     throw new Error('PDF export unavailable');
   }
+  const worker = html2pdf().set({ html2canvas: opts }).from(element);
+  await worker.toCanvas();
+  const canvas = worker.prop?.canvas;
+  if (!canvas) throw new Error('Canvas capture failed');
+  return canvas;
+};
 
-  const canvas = await canvasLib(element, {
-    scale: 2,
-    useCORS: true,
-    logging: false,
-    backgroundColor: '#FDF8EE',
-    scrollX: 0,
-    scrollY: 0,
-    width: element.scrollWidth,
-    height: element.scrollHeight,
-    windowWidth: element.scrollWidth,
-    windowHeight: element.scrollHeight
-  });
+const writeDiplomaCanvasToPdf = (canvas, filename) => {
+  const jsPdfLib = typeof jspdf !== 'undefined' ? jspdf : null;
+  if (!jsPdfLib?.jsPDF) throw new Error('jsPDF unavailable');
 
   const pdf = new jsPdfLib.jsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait' });
-  const availW = 210 - DIPLOMA_PAGE.marginSideMm * 2;
-  const availH = 297 - DIPLOMA_PAGE.marginTopMm - DIPLOMA_PAGE.marginBottomMm;
+  const availW = DIPLOMA_PAGE.widthMm;
+  const availH = DIPLOMA_PAGE.heightMm;
   const imgData = canvas.toDataURL('image/jpeg', 0.96);
   const ratio = canvas.height / canvas.width;
 
@@ -425,6 +430,11 @@ const saveDiplomaPdfFile = async (element, filename) => {
   const y = DIPLOMA_PAGE.marginTopMm + (availH - drawH) / 2;
   pdf.addImage(imgData, 'JPEG', x, y, drawW, drawH, undefined, 'FAST');
   pdf.save(filename);
+};
+
+const saveDiplomaPdfFile = async (element, studentName, filename) => {
+  const canvas = await captureDiplomaCanvas(element, studentName);
+  writeDiplomaCanvasToPdf(canvas, filename);
 };
 
 const DiplomaCard = React.forwardRef(({ studentName, groups, totalStars, level }, ref) => (
@@ -532,19 +542,44 @@ const CertificatePanel = () => {
     setDisplayName(n);
   };
 
+  const applyExportStudentName = (studentName) => {
+    const syncDom = (el) => {
+      if (!el) return;
+      const nameEl = el.querySelector('.diploma-v2-name');
+      if (nameEl) nameEl.textContent = studentName;
+    };
+    if (typeof ReactDOM !== 'undefined' && typeof ReactDOM.flushSync === 'function') {
+      ReactDOM.flushSync(() => setPdfExportName(studentName));
+    } else {
+      setPdfExportName(studentName);
+    }
+    syncDom(diplomaRef.current);
+  };
+
   const saveDiplomaPdf = async (studentName) => {
-    if (!diplomaRef.current) return false;
+    if (!diplomaRef.current || !studentName) return false;
     const el = diplomaRef.current;
     const slot = el.closest('.diploma-export-slot');
+
+    applyExportStudentName(studentName);
     el.classList.add('diploma-exporting');
     if (slot) slot.classList.add('is-exporting');
+    el.style.width = `${DIPLOMA_PAGE.widthMm}mm`;
+    el.style.maxWidth = `${DIPLOMA_PAGE.widthMm}mm`;
+
     try {
       await flushRender();
-      await new Promise((resolve) => setTimeout(resolve, 80));
-      await saveDiplomaPdfFile(el, `diploma-${safePdfFilename(studentName)}.pdf`);
+      await new Promise((resolve) => setTimeout(resolve, 150));
+      await saveDiplomaPdfFile(
+        el,
+        studentName,
+        `diploma-${safePdfFilename(studentName)}.pdf`
+      );
       return true;
     } finally {
       el.classList.remove('diploma-exporting');
+      el.style.width = '';
+      el.style.maxWidth = '';
       if (slot) slot.classList.remove('is-exporting');
     }
   };
@@ -557,8 +592,6 @@ const CertificatePanel = () => {
     }
     setPdfBusy(true);
     try {
-      setPdfExportName(displayName);
-      await flushRender();
       await saveDiplomaPdf(displayName);
     } finally {
       setPdfBusy(false);
@@ -578,11 +611,9 @@ const CertificatePanel = () => {
       for (let i = 0; i < classNames.length; i++) {
         const name = classNames[i];
         setBulkProgress({ current: i + 1, total: classNames.length });
-        setPdfExportName(name);
-        await flushRender();
         await saveDiplomaPdf(name);
         if (i < classNames.length - 1) {
-          await new Promise((resolve) => setTimeout(resolve, 400));
+          await new Promise((resolve) => setTimeout(resolve, 450));
         }
       }
     } finally {

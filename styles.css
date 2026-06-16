@@ -1362,6 +1362,7 @@ input[type=range].chunky::-moz-range-thumb {
   z-index: -1;
   opacity: 0;
   overflow: visible;
+  visibility: hidden;
 }
 .diploma-export-slot.is-exporting {
   visibility: visible;
