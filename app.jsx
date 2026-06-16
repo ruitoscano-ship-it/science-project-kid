@@ -431,6 +431,22 @@ const DIPLOMA_PAGE = {
   widthMm: 190,
   heightMm: 257
 };
+const DIPLOMA_PX_PER_MM = 96 / 25.4;
+const diplomaExportPx = () => ({
+  w: Math.round(DIPLOMA_PAGE.widthMm * DIPLOMA_PX_PER_MM),
+  h: Math.round(DIPLOMA_PAGE.heightMm * DIPLOMA_PX_PER_MM)
+});
+
+const getJsPDF = () => {
+  if (typeof jspdf !== 'undefined' && jspdf.jsPDF) return jspdf.jsPDF;
+  return null;
+};
+
+const canExportPdf = () =>
+  typeof html2canvas !== 'undefined' && !!getJsPDF();
+
+const PDF_EXPORT_ERROR =
+  'Não foi possível guardar o PDF. Verifica a ligação à internet e recarrega a página.';
 
 const applyDiplomaExportNameStyle = (nameEl, studentName) => {
   if (!nameEl) return;
@@ -441,18 +457,20 @@ const applyDiplomaExportNameStyle = (nameEl, studentName) => {
 };
 
 const prepareDiplomaExportClone = (clone, studentName) => {
+  const { w, h } = diplomaExportPx();
   clone.classList.add('diploma-exporting');
-  clone.style.width = `${DIPLOMA_PAGE.widthMm}mm`;
-  clone.style.height = `${DIPLOMA_PAGE.heightMm}mm`;
-  clone.style.maxWidth = `${DIPLOMA_PAGE.widthMm}mm`;
-  clone.style.maxHeight = `${DIPLOMA_PAGE.heightMm}mm`;
+  clone.style.width = `${w}px`;
+  clone.style.height = `${h}px`;
+  clone.style.maxWidth = `${w}px`;
+  clone.style.maxHeight = `${h}px`;
   clone.style.margin = '0';
   clone.style.boxSizing = 'border-box';
   const frame = clone.querySelector('.diploma-v2-frame');
   if (frame) {
+    frame.style.width = '100%';
     frame.style.height = '100%';
-    frame.style.minHeight = `${DIPLOMA_PAGE.heightMm}mm`;
-    frame.style.maxHeight = `${DIPLOMA_PAGE.heightMm}mm`;
+    frame.style.minHeight = `${h}px`;
+    frame.style.maxHeight = `${h}px`;
     frame.style.overflow = 'hidden';
     frame.style.display = 'flex';
     frame.style.flexDirection = 'column';
@@ -472,33 +490,25 @@ const diplomaHtml2CanvasOpts = (studentName) => ({
 });
 
 const captureDiplomaCanvas = async (element, studentName) => {
+  if (typeof html2canvas === 'undefined') {
+    throw new Error('html2canvas unavailable');
+  }
+  const { w, h } = diplomaExportPx();
   const opts = diplomaHtml2CanvasOpts(studentName);
-  const w = element.offsetWidth;
-  const h = element.offsetHeight;
-  if (typeof html2canvas !== 'undefined') {
-    return html2canvas(element, {
-      ...opts,
-      width: w,
-      height: h,
-      windowWidth: w,
-      windowHeight: h
-    });
-  }
-  if (typeof html2pdf === 'undefined') {
-    throw new Error('PDF export unavailable');
-  }
-  const worker = html2pdf().set({ html2canvas: opts }).from(element);
-  await worker.toCanvas();
-  const canvas = worker.prop?.canvas;
-  if (!canvas) throw new Error('Canvas capture failed');
-  return canvas;
+  return html2canvas(element, {
+    ...opts,
+    width: w,
+    height: h,
+    windowWidth: w,
+    windowHeight: h
+  });
 };
 
 const writeDiplomaCanvasToPdf = (canvas, filename) => {
-  const jsPdfLib = typeof jspdf !== 'undefined' ? jspdf : null;
-  if (!jsPdfLib?.jsPDF) throw new Error('jsPDF unavailable');
+  const JsPDF = getJsPDF();
+  if (!JsPDF) throw new Error('jsPDF unavailable');
 
-  const pdf = new jsPdfLib.jsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait' });
+  const pdf = new JsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait' });
   const imgData = canvas.toDataURL('image/jpeg', 0.96);
   pdf.addImage(
     imgData,
@@ -512,10 +522,6 @@ const writeDiplomaCanvasToPdf = (canvas, filename) => {
   );
   pdf.save(filename);
 };
-
-const canExportPdf = () =>
-  typeof jspdf !== 'undefined'
-  && (typeof html2canvas !== 'undefined' || typeof html2pdf !== 'undefined');
 
 const saveDiplomaPdfFile = async (element, studentName, filename) => {
   const canvas = await captureDiplomaCanvas(element, studentName);
@@ -645,18 +651,19 @@ const CertificatePanel = () => {
     const el = diplomaRef.current;
     const slot = el.closest('.diploma-export-slot');
     const nameEl = el.querySelector('.diploma-v2-name');
+    const { w, h } = diplomaExportPx();
 
     applyExportStudentName(studentName);
     el.classList.add('diploma-exporting');
     if (slot) slot.classList.add('is-exporting');
-    el.style.width = `${DIPLOMA_PAGE.widthMm}mm`;
-    el.style.height = `${DIPLOMA_PAGE.heightMm}mm`;
-    el.style.maxWidth = `${DIPLOMA_PAGE.widthMm}mm`;
-    el.style.maxHeight = `${DIPLOMA_PAGE.heightMm}mm`;
+    el.style.width = `${w}px`;
+    el.style.height = `${h}px`;
+    el.style.maxWidth = `${w}px`;
+    el.style.maxHeight = `${h}px`;
 
     try {
       await flushRender();
-      await new Promise((resolve) => setTimeout(resolve, 180));
+      await new Promise((resolve) => setTimeout(resolve, 250));
       await saveDiplomaPdfFile(
         el,
         studentName,
@@ -677,12 +684,15 @@ const CertificatePanel = () => {
   const exportPdf = async () => {
     if (!displayName || !diplomaRef.current) return;
     if (!canExportPdf()) {
-      window.print();
+      window.alert(PDF_EXPORT_ERROR);
       return;
     }
     setPdfBusy(true);
     try {
       await saveDiplomaPdf(displayName);
+    } catch (err) {
+      console.error(err);
+      window.alert(PDF_EXPORT_ERROR);
     } finally {
       setPdfBusy(false);
     }
@@ -691,7 +701,7 @@ const CertificatePanel = () => {
   const exportClassPdfs = async () => {
     if (!classNames.length || !diplomaRef.current) return;
     if (!canExportPdf()) {
-      window.print();
+      window.alert(PDF_EXPORT_ERROR);
       return;
     }
     setStarData(loadDiplomaStars());
@@ -706,6 +716,9 @@ const CertificatePanel = () => {
           await new Promise((resolve) => setTimeout(resolve, 450));
         }
       }
+    } catch (err) {
+      console.error(err);
+      window.alert(PDF_EXPORT_ERROR);
     } finally {
       setPdfBusy(false);
       setBulkProgress(null);
