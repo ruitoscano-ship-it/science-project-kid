@@ -342,22 +342,34 @@ const CertificatePanel = () => {
       return;
     }
     setPdfBusy(true);
+    const el = diplomaRef.current;
+    el.classList.add('diploma-exporting');
     try {
+      await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
       const safe = displayName
         .replace(/[^\p{L}\p{N}\s-]/gu, '')
         .trim()
         .replace(/\s+/g, '-') || 'participante';
       await html2pdf()
         .set({
-          margin: 0.35,
+          margin: [8, 8, 8, 8],
           filename: `diploma-${safe}.pdf`,
           image: { type: 'jpeg', quality: 0.96 },
-          html2canvas: { scale: 2, useCORS: true, logging: false, backgroundColor: '#FFFDF7' },
-          jsPDF: { unit: 'in', format: 'a4', orientation: 'landscape' }
+          html2canvas: {
+            scale: 2,
+            useCORS: true,
+            logging: false,
+            backgroundColor: '#FDF8EE',
+            scrollX: 0,
+            scrollY: -window.scrollY
+          },
+          jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+          pagebreak: { mode: ['avoid-all', 'css', 'legacy'], avoid: '.diploma-v2-frame' }
         })
-        .from(diplomaRef.current)
+        .from(el)
         .save();
     } finally {
+      el.classList.remove('diploma-exporting');
       setPdfBusy(false);
     }
   };
