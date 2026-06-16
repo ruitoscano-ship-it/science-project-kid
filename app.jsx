@@ -333,26 +333,73 @@ const DIPLOMA_PAGE = {
   heightMm: 257
 };
 
-const HTML2PDF_DIPLOMA_OPTS = (filename) => ({
-  margin: [
-    DIPLOMA_PAGE.marginTopMm,
-    DIPLOMA_PAGE.marginSideMm,
-    DIPLOMA_PAGE.marginBottomMm,
-    DIPLOMA_PAGE.marginSideMm
-  ],
-  filename,
-  image: { type: 'jpeg', quality: 0.96 },
-  html2canvas: {
+const canExportPdf = () =>
+  (typeof html2canvas !== 'undefined' && typeof jspdf !== 'undefined')
+  || typeof html2pdf !== 'undefined';
+
+const saveDiplomaPdfFile = async (element, filename) => {
+  const canvasLib = typeof html2canvas !== 'undefined' ? html2canvas : null;
+  const jsPdfLib = typeof jspdf !== 'undefined' ? jspdf : null;
+  if (!canvasLib || !jsPdfLib?.jsPDF) {
+    if (typeof html2pdf !== 'undefined') {
+      await html2pdf()
+        .set({
+          margin: [
+            DIPLOMA_PAGE.marginTopMm,
+            DIPLOMA_PAGE.marginSideMm,
+            DIPLOMA_PAGE.marginBottomMm,
+            DIPLOMA_PAGE.marginSideMm
+          ],
+          filename,
+          image: { type: 'jpeg', quality: 0.96 },
+          html2canvas: {
+            scale: 2,
+            useCORS: true,
+            logging: false,
+            backgroundColor: '#FDF8EE',
+            scrollX: 0,
+            scrollY: 0
+          },
+          jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        })
+        .from(element)
+        .save();
+      return;
+    }
+    throw new Error('PDF export unavailable');
+  }
+
+  const canvas = await canvasLib(element, {
     scale: 2,
     useCORS: true,
     logging: false,
     backgroundColor: '#FDF8EE',
     scrollX: 0,
-    scrollY: -window.scrollY
-  },
-  jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-  pagebreak: { mode: ['avoid-all', 'css', 'legacy'], avoid: '.diploma-v2-frame' }
-});
+    scrollY: 0,
+    width: element.scrollWidth,
+    height: element.scrollHeight,
+    windowWidth: element.scrollWidth,
+    windowHeight: element.scrollHeight
+  });
+
+  const pdf = new jsPdfLib.jsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait' });
+  const availW = 210 - DIPLOMA_PAGE.marginSideMm * 2;
+  const availH = 297 - DIPLOMA_PAGE.marginTopMm - DIPLOMA_PAGE.marginBottomMm;
+  const imgData = canvas.toDataURL('image/jpeg', 0.96);
+  const ratio = canvas.height / canvas.width;
+
+  let drawW = availW;
+  let drawH = drawW * ratio;
+  if (drawH > availH) {
+    drawH = availH;
+    drawW = drawH / ratio;
+  }
+
+  const x = DIPLOMA_PAGE.marginSideMm + (availW - drawW) / 2;
+  const y = DIPLOMA_PAGE.marginTopMm + (availH - drawH) / 2;
+  pdf.addImage(imgData, 'JPEG', x, y, drawW, drawH, undefined, 'FAST');
+  pdf.save(filename);
+};
 
 const DiplomaCard = React.forwardRef(({ studentName, groups, totalStars, level }, ref) => (
   <article
@@ -460,24 +507,25 @@ const CertificatePanel = () => {
   };
 
   const saveDiplomaPdf = async (studentName) => {
-    if (!diplomaRef.current || typeof html2pdf === 'undefined') return false;
+    if (!diplomaRef.current) return false;
     const el = diplomaRef.current;
+    const slot = el.closest('.diploma-export-slot');
     el.classList.add('diploma-exporting');
+    if (slot) slot.classList.add('is-exporting');
     try {
-      await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
-      await html2pdf()
-        .set(HTML2PDF_DIPLOMA_OPTS(`diploma-${safePdfFilename(studentName)}.pdf`))
-        .from(el)
-        .save();
+      await flushRender();
+      await new Promise((resolve) => setTimeout(resolve, 80));
+      await saveDiplomaPdfFile(el, `diploma-${safePdfFilename(studentName)}.pdf`);
       return true;
     } finally {
       el.classList.remove('diploma-exporting');
+      if (slot) slot.classList.remove('is-exporting');
     }
   };
 
   const exportPdf = async () => {
     if (!displayName || !diplomaRef.current) return;
-    if (typeof html2pdf === 'undefined') {
+    if (!canExportPdf()) {
       window.print();
       return;
     }
@@ -493,7 +541,7 @@ const CertificatePanel = () => {
 
   const exportClassPdfs = async () => {
     if (!classNames.length || !diplomaRef.current) return;
-    if (typeof html2pdf === 'undefined') {
+    if (!canExportPdf()) {
       window.print();
       return;
     }

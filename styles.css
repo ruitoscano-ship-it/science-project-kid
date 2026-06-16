@@ -1355,12 +1355,16 @@ input[type=range].chunky::-moz-range-thumb {
 }
 .diploma-export-slot {
   position: fixed;
-  left: -10000px;
+  left: 0;
   top: 0;
   width: 190mm;
-  height: 257mm;
   pointer-events: none;
   z-index: -1;
+  opacity: 0;
+  overflow: visible;
+}
+.diploma-export-slot.is-exporting {
+  visibility: visible;
 }
 .home-tab-cert {
   font-size: 15px;
@@ -1622,85 +1626,79 @@ input[type=range].chunky::-moz-range-thumb {
   box-shadow: 0 2px 0 rgba(45, 50, 80, 0.1);
 }
 
-/* A4 retrato — área útil 190×257 mm (margens ~2 cm sup/inf, 1 cm laterais) */
+/* A4 retrato — exportação PDF (altura automática, escala no JS) */
 .diploma-v2.diploma-exporting {
   width: 190mm;
-  height: 257mm;
   max-width: 190mm;
-  max-height: 257mm;
   margin: 0;
+  height: auto;
   page-break-inside: avoid;
   break-inside: avoid;
   box-sizing: border-box;
 }
 .diploma-v2.diploma-exporting .diploma-v2-frame {
   width: 100%;
-  height: 100%;
-  min-height: 257mm;
-  max-height: 257mm;
-  padding: 10mm 11mm 9mm;
+  height: auto;
+  min-height: 0;
+  max-height: none;
+  padding: 8mm 10mm 7mm;
   border-width: 4px;
   border-radius: 16px;
   box-shadow: none;
   box-sizing: border-box;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
+  display: block;
+  overflow: visible !important;
   page-break-inside: avoid;
   break-inside: avoid;
 }
-.diploma-v2.diploma-exporting .diploma-v2-head { margin-bottom: 0; flex-shrink: 0; }
-.diploma-v2.diploma-exporting .diploma-v2-seal { margin-bottom: 6px; }
-.diploma-v2.diploma-exporting .diploma-v2-seal svg { width: 68px; height: 80px; }
-.diploma-v2.diploma-exporting .diploma-v2-kicker { font-size: 11px; }
-.diploma-v2.diploma-exporting .diploma-v2-title { font-size: 32px; }
-.diploma-v2.diploma-exporting .diploma-v2-sub { font-size: 17px; margin-top: 4px; }
-.diploma-v2.diploma-exporting .diploma-v2-rule { margin-top: 10px; max-width: 100%; }
-.diploma-v2.diploma-exporting .diploma-v2-rule-star { font-size: 16px; }
+.diploma-v2.diploma-exporting .diploma-v2-head { margin-bottom: 6px; }
+.diploma-v2.diploma-exporting .diploma-v2-seal { margin-bottom: 4px; }
+.diploma-v2.diploma-exporting .diploma-v2-seal svg { width: 60px; height: 70px; }
+.diploma-v2.diploma-exporting .diploma-v2-kicker { font-size: 10px; }
+.diploma-v2.diploma-exporting .diploma-v2-title { font-size: 26px; }
+.diploma-v2.diploma-exporting .diploma-v2-sub { font-size: 15px; margin-top: 3px; }
+.diploma-v2.diploma-exporting .diploma-v2-rule { margin-top: 8px; max-width: 100%; }
+.diploma-v2.diploma-exporting .diploma-v2-rule-star { font-size: 14px; }
 .diploma-v2.diploma-exporting .diploma-v2-body {
-  flex: 1 1 auto;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
+  display: block;
   max-width: none;
-  padding: 4mm 0;
+  padding: 2mm 0 3mm;
 }
-.diploma-v2.diploma-exporting .diploma-v2-lead { font-size: 14px; }
+.diploma-v2.diploma-exporting .diploma-v2-lead { font-size: 13px; }
 .diploma-v2.diploma-exporting .diploma-v2-name {
-  font-size: 36px;
-  margin: 8px 0 14px;
-  padding-bottom: 8px;
+  font-size: 30px;
+  margin: 6px 0 10px;
+  padding-bottom: 6px;
   word-break: break-word;
 }
 .diploma-v2.diploma-exporting .diploma-v2-desc {
-  font-size: 15px;
-  line-height: 1.5;
-  margin-bottom: 16px;
+  font-size: 13px;
+  line-height: 1.45;
+  margin-bottom: 12px;
 }
-.diploma-v2.diploma-exporting .diploma-v2-progress { gap: 28px; margin-bottom: 14px; }
-.diploma-v2.diploma-exporting .diploma-v2-badge { width: 96px; gap: 8px; }
+.diploma-v2.diploma-exporting .diploma-v2-progress { gap: 20px; margin-bottom: 10px; }
+.diploma-v2.diploma-exporting .diploma-v2-badge { width: 84px; gap: 6px; }
 .diploma-v2.diploma-exporting .diploma-v2-badge svg[viewBox="0 0 48 48"] {
-  width: 44px;
-  height: 44px;
-  padding: 6px;
+  width: 38px;
+  height: 38px;
+  padding: 5px;
 }
 .diploma-v2.diploma-exporting .diploma-v2-stars .star {
-  width: 22px !important;
-  height: 22px !important;
+  width: 18px !important;
+  height: 18px !important;
 }
 .diploma-v2.diploma-exporting .diploma-v2-level {
-  font-size: 15px;
-  padding: 10px 22px;
-  margin-bottom: 0;
+  font-size: 13px;
+  padding: 7px 18px;
+  margin-bottom: 8px;
 }
 .diploma-v2.diploma-exporting .diploma-v2-foot {
   display: grid !important;
   grid-template-columns: 1fr 1fr !important;
   align-items: end;
-  gap: 12px;
-  margin-top: 0;
-  padding-top: 10px;
-  flex-shrink: 0;
+  gap: 10px;
+  margin-top: 4px;
+  padding-top: 8px;
 }
 .diploma-v2.diploma-exporting .diploma-v2-sign { justify-self: start; }
 .diploma-v2.diploma-exporting .diploma-v2-date { justify-self: end; }
@@ -1724,82 +1722,74 @@ input[type=range].chunky::-moz-range-thumb {
   }
   .diploma-v2 {
     width: 190mm;
-    height: 257mm;
     max-width: 190mm;
-    max-height: 257mm;
     margin: 0 auto;
+    height: auto;
     page-break-inside: avoid;
     break-inside: avoid;
     box-sizing: border-box;
   }
   .diploma-v2 .diploma-v2-frame {
     width: 100%;
-    height: 100%;
-    min-height: 257mm;
-    max-height: 257mm;
-    padding: 10mm 11mm 9mm;
+    height: auto;
+    min-height: 0;
+    max-height: none;
+    padding: 8mm 10mm 7mm;
     border-width: 4px;
     border-radius: 16px;
     box-shadow: none;
     box-sizing: border-box;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
+    display: block;
+    overflow: visible !important;
     page-break-inside: avoid;
     break-inside: avoid;
   }
-  .diploma-v2 .diploma-v2-head { margin-bottom: 0; flex-shrink: 0; }
-  .diploma-v2 .diploma-v2-seal { margin-bottom: 6px; }
-  .diploma-v2 .diploma-v2-seal svg { width: 68px; height: 80px; }
-  .diploma-v2 .diploma-v2-kicker { font-size: 11px; }
-  .diploma-v2 .diploma-v2-title { font-size: 32px; }
-  .diploma-v2 .diploma-v2-sub { font-size: 17px; margin-top: 4px; }
-  .diploma-v2 .diploma-v2-rule { margin-top: 10px; max-width: 100%; }
-  .diploma-v2 .diploma-v2-rule-star { font-size: 16px; }
+  .diploma-v2 .diploma-v2-head { margin-bottom: 6px; }
+  .diploma-v2 .diploma-v2-seal svg { width: 60px; height: 70px; }
+  .diploma-v2 .diploma-v2-kicker { font-size: 10px; }
+  .diploma-v2 .diploma-v2-title { font-size: 26px; }
+  .diploma-v2 .diploma-v2-sub { font-size: 15px; margin-top: 3px; }
+  .diploma-v2 .diploma-v2-rule { margin-top: 8px; max-width: 100%; }
   .diploma-v2 .diploma-v2-body {
-    flex: 1 1 auto;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
+    display: block;
     max-width: none;
-    padding: 4mm 0;
+    padding: 2mm 0 3mm;
   }
-  .diploma-v2 .diploma-v2-lead { font-size: 14px; }
+  .diploma-v2 .diploma-v2-lead { font-size: 13px; }
   .diploma-v2 .diploma-v2-name {
-    font-size: 36px;
-    margin: 8px 0 14px;
-    padding-bottom: 8px;
+    font-size: 30px;
+    margin: 6px 0 10px;
+    padding-bottom: 6px;
     word-break: break-word;
   }
   .diploma-v2 .diploma-v2-desc {
-    font-size: 15px;
-    line-height: 1.5;
-    margin-bottom: 16px;
+    font-size: 13px;
+    line-height: 1.45;
+    margin-bottom: 12px;
   }
-  .diploma-v2 .diploma-v2-progress { gap: 28px; margin-bottom: 14px; }
-  .diploma-v2 .diploma-v2-badge { width: 96px; gap: 8px; }
+  .diploma-v2 .diploma-v2-progress { gap: 20px; margin-bottom: 10px; }
+  .diploma-v2 .diploma-v2-badge { width: 84px; gap: 6px; }
   .diploma-v2 .diploma-v2-badge svg[viewBox="0 0 48 48"] {
-    width: 44px;
-    height: 44px;
-    padding: 6px;
+    width: 38px;
+    height: 38px;
+    padding: 5px;
   }
   .diploma-v2 .diploma-v2-stars .star {
-    width: 22px !important;
-    height: 22px !important;
+    width: 18px !important;
+    height: 18px !important;
   }
   .diploma-v2 .diploma-v2-level {
-    font-size: 15px;
-    padding: 10px 22px;
-    margin-bottom: 0;
+    font-size: 13px;
+    padding: 7px 18px;
+    margin-bottom: 8px;
   }
   .diploma-v2 .diploma-v2-foot {
     display: grid !important;
     grid-template-columns: 1fr 1fr !important;
     align-items: end;
-    gap: 12px;
-    margin-top: 0;
-    padding-top: 10px;
-    flex-shrink: 0;
+    gap: 10px;
+    margin-top: 4px;
+    padding-top: 8px;
   }
   .diploma-v2 .diploma-v2-sign { justify-self: start; }
   .diploma-v2 .diploma-v2-date { justify-self: end; }
