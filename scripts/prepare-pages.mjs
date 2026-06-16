@@ -3,7 +3,7 @@
  * Copia apenas os ficheiros servidos pelo Pages para ./dist
  * (evita publicar node_modules, scripts, etc.).
  */
-import { copyFileSync, mkdirSync, rmSync, existsSync } from "fs";
+import { copyFileSync, mkdirSync, rmSync, existsSync, readdirSync } from "fs";
 import { join, dirname } from "path";
 import { fileURLToPath } from "url";
 
@@ -31,6 +31,15 @@ for (const f of files) {
     continue;
   }
   copyFileSync(src, join(dist, f));
+}
+
+const vendorDir = join(root, "vendor");
+const vendorDist = join(dist, "vendor");
+if (existsSync(vendorDir)) {
+  mkdirSync(vendorDist, { recursive: true });
+  for (const f of readdirSync(vendorDir)) {
+    copyFileSync(join(vendorDir, f), join(vendorDist, f));
+  }
 }
 
 console.log("Pages bundle ready:", dist);

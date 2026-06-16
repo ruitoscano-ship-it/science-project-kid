@@ -439,6 +439,7 @@ const diplomaExportPx = () => ({
 
 const getJsPDF = () => {
   if (typeof jspdf !== 'undefined' && jspdf.jsPDF) return jspdf.jsPDF;
+  if (typeof window !== 'undefined' && typeof window.jsPDF !== 'undefined') return window.jsPDF;
   return null;
 };
 
