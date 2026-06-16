@@ -532,157 +532,127 @@ window.RESULT_POST_TIPS = {
   ]
 };
 
-// Textos longos para a aba "Aprender mais" (4.º ano · pt-PT)
+// Textos para a aba "Aprender mais" (4.º ano · pt-PT) — resumo visível + detalhe ao expandir
 window.LEARN_MORE = [
   {
     id: 'cheias',
     emoji: '🌊',
     title: 'Cheias',
-    oQueE:
-      'Uma cheia acontece quando chove muito e o rio não consegue levar toda a água de uma vez. A água sobe, sai das margens e pode entrar em campos, estradas e casas. Não é culpa de ninguém na escola — é um fenómeno natural — mas dá para preparar a comunidade.',
+    resumo: 'Chove muito → o rio enche → a água pode invadir casas e estradas.',
+    oQueE: 'O rio leva a água da chuva. Se chover demasiado depressa, transborda.',
     prevenir: [
-      'Ouvir avisos da proteção civil e da meteorologia quando está tudo molhado durante muitos dias.',
-      'Não brincar nem andar de bicicleta em zonas baixas perto do rio quando o aviso diz que pode subir água.',
-      'Em casa, subir objetos importantes do chão e saber para onde ir se a água entrar.',
-      'Plantar e cuidar de árvores e ribeiras ajuda a terra a “beber” a chuva com calma, em vez de a mandar toda de uma vez para o rio.'
+      'Ouve avisos da meteorologia e da proteção civil.',
+      'Não brinques perto do rio quando há aviso de cheias.'
     ],
     tecnologia: [
-      'Estações meteorológicas e satélites que “fotografam” nuvens e medem a chuva em tempo real.',
-      'Computadores que fazem mapas de risco e avisos automáticos no telemóvel.',
-      'Barragens e comportas que guardam ou libertam água com controlo de engenheiros.',
-      'Pontes e muros desenhados para aguentar picos de água sem partir de repente.'
+      'Estações que medem chuva e satélites que veem as nuvens.',
+      'Barragens e alertas no telemóvel.'
     ],
     ciencia: [
-      'Meteorologia: perceber quanto vai chover e para onde a água costuma ir na tua região.',
-      'Hidrologia: estudar leitos dos rios, vales e solos para saber onde a água corre mais depressa.',
-      'Modelos matemáticos que simulam “e se chuver o dobro?” antes da tempestade chegar.'
+      'Meteorologia: saber quanto vai chover.',
+      'Estudar rios e solos para perceber onde a água corre.'
     ],
-    lembrar: 'Prevenir cheias junta ciência, tecnologia e boas decisões de toda a gente — pequenos gestos em casa somam-se com grandes obras na comunidade.'
+    lembrar: 'Prevenir cheias junta ciência, tecnologia e cuidado de todos.'
   },
   {
     id: 'incendios',
     emoji: '🔥',
     title: 'Incêndios florestais',
-    oQueE:
-      'Um incêndio florestal é fogo que se alastra pelas árvores, mato e tocos secos. Com vento forte e calor, as chamas correm muito depressa. O fogo liberta fumo que faz mal à saúde e destrói casas e habitat de animais. Por isso a prevenção começa muito antes do verão.',
+    resumo: 'Fogo na floresta espalha-se depressa com vento e calor.',
+    oQueE: 'Mato seco e vento ajudam o fogo a correr. O fumo faz mal à saúde.',
     prevenir: [
-      'Limpar mato e ramos secos junto de casas, escolas e estradas (com ajuda de adultos e ferramentas seguras).',
-      'Nunca brincar com fósforos nem fazer fogueiras quando está vento e seco.',
-      'Chamar de imediato o 112 se vires fumo — quanto mais cedo, mais pequeno fica o fogo.',
-      'Aceiros e faixas sem vegetação cortam o caminho das chamas, como uma “parede vazia” que o fogo não gosta de saltar.'
+      'Nunca brinques com fogo nem fósforos.',
+      'Liga 112 se vires fumo — avisa depressa!'
     ],
     tecnologia: [
-      'Torres de vigia, câmaras e satélites que detetam fumo e calor de longe.',
-      'Aviões e helicópteros bombeiros que largam água ou espuma em sítios difíceis.',
-      'Drones que ajudam a ver o fogo de cima sem pôr pilotos em perigo.',
-      'Veículos e mangueiras potentes usados pelos bombeiros e equipas florestais.'
+      'Torres, câmaras e satélites detetam fumo.',
+      'Aviões e helicópteros largam água no fogo.'
     ],
     ciencia: [
-      'Estudar o vento, a humidade do ar e o tipo de plantas para saber onde o fogo corre mais rápido.',
-      'Perceber o triângulo do fogo: calor, oxigénio e combustível — se tirarmos um deles, o fogo enfraquece.',
-      'Planeamento do território: saber onde plantar, onde limpar e onde construir com mais segurança.'
+      'Triângulo do fogo: calor + oxigénio + combustível.',
+      'Estudar vento e plantas secas.'
     ],
-    lembrar: 'O melhor “extintor” muitas vezes é a prevenção: menos mato seco perto das pessoas e mais olhos atentos na floresta.'
+    lembrar: 'Menos mato seco perto das casas = mais segurança.'
   },
   {
     id: 'terramotos',
     emoji: '🌍',
     title: 'Terramotos',
-    oQueE:
-      'Um terramoto é um abanão forte da crosta da Terra. Não dá para prever o dia exato como a chuva, mas dá para estudar zonas de risco e preparar edifícios e pessoas. As ondas propagam-se como ripples numa poça — só que na rocha.',
+    resumo: 'A Terra abana — não dá para prever o dia, mas dá para treinar.',
+    oQueE: 'Placas da crosta mexem-se. O abanão pode ser forte e rápido.',
     prevenir: [
-      'Fazer simulacros na escola: saber onde nos agachamos, como protegemos a cabeça e por onde saímos com calma.',
-      'Em casa, fixar estantes altas à parede (com adultos) para não caírem em cima de ninguém.',
-      'Ter uma mochila simples com água, apito e lanterna — coisas que ajudam se a luz falhar.',
-      'Respeitar regras de construção: casas e pontes feitas “a pensar no abanão” aguentam melhor.'
+      'Faz simulacros na escola: agachar e proteger a cabeça.',
+      'Fixa móveis altos à parede (com adultos).'
     ],
     tecnologia: [
-      'Sensores sísmicos ligados a redes que avisam em segundos antes da onda mais forte chegar a certas cidades.',
-      'Telemóveis com alertas oficiais e aplicações da proteção civil.',
-      'Amortecedores e apoios especiais em pontes e edifícios modernos.',
-      'Ferramentas de engenharia que testam materiais e formas mais seguras.'
+      'Sensores avisam em segundos.',
+      'Edifícios com estruturas mais seguras.'
     ],
     ciencia: [
-      'Geologia: perceber falhas na rocha e histórico de abanões na região.',
-      'Física das ondas: algumas viajam mais depressa e avisam sensores antes de outras.',
-      'Estudos sobre solos moles ou rochosos — o mesmo abanão não “sente-se” igual em todo o lado.'
+      'Geologia: estudar zonas com mais abanões.',
+      'Perceber como as ondas se propagam na rocha.'
     ],
-    lembrar: 'Treinar o cérebro e o corpo com simulacros vale tanto como betão novo: na hora do susto, sabemos o que fazer.'
+    lembrar: 'Treinar na escola ajuda a saber o que fazer no susto.'
   },
   {
     id: 'tempestades',
     emoji: '⛈️',
     title: 'Tempestades',
-    oQueE:
-      'Tempestade forte mistura vento muito intenso, chuva torrencial, trovoada e por vezes granizo. O vento pode arrancar telhas; o relâmpago pode danificar redes elétricas; a chuva enche ruas depressa. Tudo isto junto assusta — mas há formas de nos protegermos.',
+    resumo: 'Vento forte, chuva, trovões — às vezes granizo.',
+    oQueE: 'Tudo junto pode arrancar telhas e encher ruas depressa.',
     prevenir: [
-      'Ouvir avisos com cores (amarelo, laranja, vermelho) e seguir o que a escola e os adultos explicam.',
-      'Guardar bicicletas, baldes e brinquedos de jardim quando o vento vai subir — não voarem como projéteis.',
-      'Ficar longe de árvores muito altas, mastros e relva aberta durante relâmpagos.',
-      'Ter um sítio seguro em casa (sem vidros grandes por perto) para esperar a pior parte passar.'
+      'Ouve avisos (amarelo, laranja, vermelho).',
+      'Fica em casa, longe de janelas, durante relâmpagos.'
     ],
     tecnologia: [
-      'Radares e satélites que “desenham” a tempestade horas antes.',
-      'Para-raios e boas ligações à terra nas escolas e edifícios públicos.',
-      'Telhados e janelas pensados por engenheiros para aguentar rajadas de vento.',
-      'Sirenes, redes sociais oficiais e SMS automáticos para avisar muita gente ao mesmo tempo.'
+      'Radares veem a tempestade antes de chegar.',
+      'Para-raios e avisos no telemóvel.'
     ],
     ciencia: [
-      'Meteorologia: perceber frentes quentes e frias, nuvens carregadas e vento em cima das montanhas.',
-      'Estudos de danos antigos para saber quais ruas enchem primeiro na tua cidade.',
-      'Mapas de evacuação feitos com dados reais — ciência e geografia a trabalharem juntas.'
+      'Meteorologia: nuvens carregadas e vento.',
+      'Mapas mostram ruas que enchem primeiro.'
     ],
-    lembrar: 'Uma tempestade é espetacular na Natureza, mas perigosa para quem não está preparado — por isso aviso e calma andam de mãos dadas.'
+    lembrar: 'Aviso + calma = mais proteção para todos.'
   },
   {
     id: 'secas',
     emoji: '☀️',
     title: 'Secas',
-    oQueE:
-      'Seca é quando falta chuva durante muito tempo. Os rios baixam, o solo resseca, as plantas sofrem e até a água dos poços pode diminuir. Em climas quentes isto acontece com mais frequência — e todos podemos ajudar a gastar menos água potável.',
+    resumo: 'Falta chuva durante muito tempo — água escassa.',
+    oQueE: 'Rios baixam, plantas sofrem, há menos água para todos.',
     prevenir: [
-      'Fechar torneiras depressa: ao escovar os dentes, ao lavar as mãos, ao regar só o necessário.',
-      'Reutilizar água limpinha (por exemplo de lavar legumes) para regar plantas, com supervisão de adultos.',
-      'Plantar árvores adequadas e proteger o solo com menos escavação desnecessária.',
-      'Apoiar regras da autarquia sobre regas e piscinas em períodos difíceis — são para todos terem água.'
+      'Fecha a torneira depressa.',
+      'Gasta só a água que precisas.'
     ],
     tecnologia: [
-      'Sensores que medem o nível dos rios, barragens e poços.',
-      'Contadores inteligentes e torneiras que gastam menos litros por minuto.',
-      'Estações que tratam água para a tornar segura noutros usos (como regar espaços verdes).',
-      'Painéis solares em bombas de água — energia limpa para tirar água do subsolo com mais cuidado.'
+      'Sensores medem nível dos rios e poços.',
+      'Torneiras e contadores que poupam água.'
     ],
     ciencia: [
-      'Climatologia: perceber ciclos de chuva e alterações a médio prazo na região.',
-      'Estudo dos lençóis freáticos — “lagoas escondidas” debaixo dos nossos pés.',
-      'Agricultura de precisão: regar só a planta certa, na hora certa, com menos desperdício.'
+      'Climatologia: ciclos de chuva.',
+      'Estudar aquíferos debaixo do solo.'
     ],
-    lembrar: 'Cada gota poupada é um presente para o futuro — a água doce no planeta é finita e partilhada por humanos, animais e plantas.'
+    lembrar: 'Cada gota poupada conta — a água doce é preciosa.'
   },
   {
     id: 'deslizamentos',
     emoji: '⛰️',
     title: 'Deslizamentos de terras',
-    oQueE:
-      'Às vezes, depois de muita chuva, o solo na encosta fica pesado e escorrega como lama com pedras. Chama-se deslizamento ou corrida de lama. Pode cobrir estradas e casas muito depressa. Encostas íngremes e terrenos mal drenados são sítios onde os geólogos prestam mais atenção.',
+    resumo: 'Chuva forte + encosta → o solo escorrega como lama.',
+    oQueE: 'Pedras e terra podem cobrir estradas e casas muito depressa.',
     prevenir: [
-      'Não construir casas em sítios que os mapas dizem perigosos — parece óbvio, mas salva vidas.',
-      'Manter drenagens e sarjetas desentupidas para a água da chuva ter caminho certo.',
-      'Plantar vegetação com raízes fortes nas encostas estáveis (espécies indicadas por especialistas).',
-      'Em dias de temporal forte, seguir rotas seguras e não insistir em estradas com aviso de queda de pedras.'
+      'Não vás a sítios com aviso de perigo.',
+      'Mantém drenagens desentupidas.'
     ],
     tecnologia: [
-      'Sensores de chuva e, nalguns sítios, instrumentos que sentem pequenos movimentos da encosta.',
-      'Mapas em 3D feitos com laser de avião ou drones para ver a forma do terreno ao milímetro.',
-      'Muros de contenção, estacas e tubos de drenagem desenhados por engenheiros.',
-      'Alertas no telemóvel ligados a estações meteorológicas e equipas de emergência.'
+      'Sensores medem chuva e movimento da encosta.',
+      'Mapas 3D e alertas no telemóvel.'
     ],
     ciencia: [
-      'Geologia: saber que tipo de rocha e solo existe — alguns transformam-se em lama mais depressa.',
-      'Estudo de encostas antigas que já deslizaram no passado (a história da Terra ensina-nos).',
-      'Modelos que calculam “quanto de chuva é demais” para aquela encosta em particular.'
+      'Geologia: que tipo de solo existe na encosta.',
+      'Estudar deslizamentos antigos.'
     ],
-    lembrar: 'Água + gravidade + encosta íngreme pedem respeito: a ciência mostra o risco e a tecnologia ajuda a avisar e a conter.'
+    lembrar: 'Encosta íngreme + muita chuva = cuidado redobrado.'
   }
 ];
 

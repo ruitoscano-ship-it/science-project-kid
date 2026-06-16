@@ -164,35 +164,108 @@ const ComicChips = ({ items }) => (
 );
 
 // ---------- Aprender mais (conteúdo da aba na página inicial) ----------
+const LearnMoreArticle = ({ article, accent, initialOpen = false }) => {
+  const [open, setOpen] = useState(initialOpen);
+  const panelId = `learn-panel-${article.id}`;
+
+  return (
+    <article
+      className={`learn-card ${open ? 'is-open' : ''}`}
+      style={{ '--learn-accent': accent }}
+    >
+      <header className="learn-card-head">
+        <span className="learn-card-emoji" aria-hidden="true">{article.emoji}</span>
+        <div className="learn-card-head-text">
+          <h3 className="learn-card-title">{article.title}</h3>
+          <p className="learn-card-resumo">{article.resumo || article.oQueE}</p>
+        </div>
+        <button
+          type="button"
+          className="learn-card-toggle btn-press"
+          aria-expanded={open}
+          aria-controls={panelId}
+          onClick={() => setOpen(v => !v)}
+        >
+          {open ? 'Esconder ▲' : 'Ver mais ▼'}
+        </button>
+      </header>
+
+      {open && (
+        <div id={panelId} className="learn-card-body tab-enter">
+          {article.oQueE && article.resumo && (
+            <p className="learn-card-intro">{article.oQueE}</p>
+          )}
+          <div className="learn-card-grid">
+            <div className="learn-card-block prevent">
+              <h4 className="learn-card-block-title">🛡️ Prevenir</h4>
+              <ul className="learn-card-list">
+                {(article.prevenir || []).map((line, i) => (
+                  <li key={i}>{line}</li>
+                ))}
+              </ul>
+            </div>
+            <div className="learn-card-block tech">
+              <h4 className="learn-card-block-title">🛠️ Tecnologia</h4>
+              <ul className="learn-card-list">
+                {(article.tecnologia || []).map((line, i) => (
+                  <li key={i}>{line}</li>
+                ))}
+              </ul>
+            </div>
+            <div className="learn-card-block science">
+              <h4 className="learn-card-block-title">🔬 Ciência</h4>
+              <ul className="learn-card-list">
+                {(article.ciencia || []).map((line, i) => (
+                  <li key={i}>{line}</li>
+                ))}
+              </ul>
+            </div>
+          </div>
+          {article.lembrar && (
+            <p className="learn-card-tip">💡 {article.lembrar}</p>
+          )}
+        </div>
+      )}
+    </article>
+  );
+};
+
 const LearnMorePanel = () => {
   const articles = typeof LEARN_MORE !== 'undefined' ? LEARN_MORE : [];
+  const [expandAll, setExpandAll] = useState(false);
+  const [expandKey, setExpandKey] = useState(0);
+
+  const toggleAll = () => {
+    setExpandAll(v => !v);
+    setExpandKey(k => k + 1);
+  };
+
   return (
     <section className="learn-more comic-page" aria-labelledby="learn-main-title">
       <h2 id="learn-main-title" className="learn-more-title comic-title">📚 Revista da escola</h2>
-      <ComicBubble className="comic-bubble-center">Cada página é uma catástrofe — lê os quadrinhos!</ComicBubble>
+      <ComicBubble className="comic-bubble-center">
+        Lê o resumo de cada catástrofe. Clica <strong>Ver mais</strong> só quando quiseres saber mais!
+      </ComicBubble>
+
+      {articles.length > 1 && (
+        <div className="learn-more-toolbar">
+          <button type="button" className="learn-more-all btn-press" onClick={toggleAll}>
+            {expandAll ? '📕 Esconder tudo' : '📖 Abrir tudo'}
+          </button>
+        </div>
+      )}
+
       <div className="learn-more-stack">
         {articles.map((a) => {
           const meta = DISASTERS.find(d => d.id === a.id);
           const accent = meta?.accent || '#2C2A4A';
           return (
-            <ComicPanel key={a.id} icon={a.emoji} title={a.title} accent={accent}>
-              <p className="comic-intro">{a.oQueE}</p>
-              <div className="comic-trio">
-                <div className="comic-tile prevent">
-                  <span className="comic-tile-label">🛡️ Prevenir</span>
-                  <ComicChips items={a.prevenir} />
-                </div>
-                <div className="comic-tile tech">
-                  <span className="comic-tile-label">🛠️ Tecnologia</span>
-                  <ComicChips items={a.tecnologia} />
-                </div>
-                <div className="comic-tile science">
-                  <span className="comic-tile-label">🔬 Ciência</span>
-                  <ComicChips items={a.ciencia} />
-                </div>
-              </div>
-              <p className="comic-punchline">💡 {a.lembrar}</p>
-            </ComicPanel>
+            <LearnMoreArticle
+              key={`${a.id}-${expandKey}`}
+              article={a}
+              accent={accent}
+              initialOpen={expandAll}
+            />
           );
         })}
       </div>
@@ -359,9 +432,34 @@ const DIPLOMA_PAGE = {
   heightMm: 257
 };
 
-const canExportPdf = () =>
-  typeof jspdf !== 'undefined'
-  && (typeof html2canvas !== 'undefined' || typeof html2pdf !== 'undefined');
+const applyDiplomaExportNameStyle = (nameEl, studentName) => {
+  if (!nameEl) return;
+  nameEl.textContent = studentName;
+  if (studentName.length > 30) nameEl.style.fontSize = '20px';
+  else if (studentName.length > 22) nameEl.style.fontSize = '24px';
+  else nameEl.style.fontSize = '';
+};
+
+const prepareDiplomaExportClone = (clone, studentName) => {
+  clone.classList.add('diploma-exporting');
+  clone.style.width = `${DIPLOMA_PAGE.widthMm}mm`;
+  clone.style.height = `${DIPLOMA_PAGE.heightMm}mm`;
+  clone.style.maxWidth = `${DIPLOMA_PAGE.widthMm}mm`;
+  clone.style.maxHeight = `${DIPLOMA_PAGE.heightMm}mm`;
+  clone.style.margin = '0';
+  clone.style.boxSizing = 'border-box';
+  const frame = clone.querySelector('.diploma-v2-frame');
+  if (frame) {
+    frame.style.height = '100%';
+    frame.style.minHeight = `${DIPLOMA_PAGE.heightMm}mm`;
+    frame.style.maxHeight = `${DIPLOMA_PAGE.heightMm}mm`;
+    frame.style.overflow = 'hidden';
+    frame.style.display = 'flex';
+    frame.style.flexDirection = 'column';
+    frame.style.justifyContent = 'space-between';
+  }
+  applyDiplomaExportNameStyle(clone.querySelector('.diploma-v2-name'), studentName);
+};
 
 const diplomaHtml2CanvasOpts = (studentName) => ({
   scale: 2,
@@ -370,33 +468,20 @@ const diplomaHtml2CanvasOpts = (studentName) => ({
   backgroundColor: '#FDF8EE',
   scrollX: 0,
   scrollY: 0,
-  onclone: (_doc, clone) => {
-    clone.classList.add('diploma-exporting');
-    clone.style.width = `${DIPLOMA_PAGE.widthMm}mm`;
-    clone.style.maxWidth = `${DIPLOMA_PAGE.widthMm}mm`;
-    clone.style.height = 'auto';
-    clone.style.margin = '0';
-    clone.style.boxSizing = 'border-box';
-    const frame = clone.querySelector('.diploma-v2-frame');
-    if (frame) {
-      frame.style.overflow = 'visible';
-      frame.style.height = 'auto';
-      frame.style.maxHeight = 'none';
-    }
-    const nameEl = clone.querySelector('.diploma-v2-name');
-    if (nameEl && studentName) nameEl.textContent = studentName;
-  }
+  onclone: (_doc, clone) => prepareDiplomaExportClone(clone, studentName)
 });
 
 const captureDiplomaCanvas = async (element, studentName) => {
   const opts = diplomaHtml2CanvasOpts(studentName);
+  const w = element.offsetWidth;
+  const h = element.offsetHeight;
   if (typeof html2canvas !== 'undefined') {
     return html2canvas(element, {
       ...opts,
-      width: element.scrollWidth,
-      height: element.scrollHeight,
-      windowWidth: element.scrollWidth,
-      windowHeight: element.scrollHeight
+      width: w,
+      height: h,
+      windowWidth: w,
+      windowHeight: h
     });
   }
   if (typeof html2pdf === 'undefined') {
@@ -414,23 +499,23 @@ const writeDiplomaCanvasToPdf = (canvas, filename) => {
   if (!jsPdfLib?.jsPDF) throw new Error('jsPDF unavailable');
 
   const pdf = new jsPdfLib.jsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait' });
-  const availW = DIPLOMA_PAGE.widthMm;
-  const availH = DIPLOMA_PAGE.heightMm;
   const imgData = canvas.toDataURL('image/jpeg', 0.96);
-  const ratio = canvas.height / canvas.width;
-
-  let drawW = availW;
-  let drawH = drawW * ratio;
-  if (drawH > availH) {
-    drawH = availH;
-    drawW = drawH / ratio;
-  }
-
-  const x = DIPLOMA_PAGE.marginSideMm + (availW - drawW) / 2;
-  const y = DIPLOMA_PAGE.marginTopMm + (availH - drawH) / 2;
-  pdf.addImage(imgData, 'JPEG', x, y, drawW, drawH, undefined, 'FAST');
+  pdf.addImage(
+    imgData,
+    'JPEG',
+    DIPLOMA_PAGE.marginSideMm,
+    DIPLOMA_PAGE.marginTopMm,
+    DIPLOMA_PAGE.widthMm,
+    DIPLOMA_PAGE.heightMm,
+    undefined,
+    'FAST'
+  );
   pdf.save(filename);
 };
+
+const canExportPdf = () =>
+  typeof jspdf !== 'undefined'
+  && (typeof html2canvas !== 'undefined' || typeof html2pdf !== 'undefined');
 
 const saveDiplomaPdfFile = async (element, studentName, filename) => {
   const canvas = await captureDiplomaCanvas(element, studentName);
@@ -545,8 +630,7 @@ const CertificatePanel = () => {
   const applyExportStudentName = (studentName) => {
     const syncDom = (el) => {
       if (!el) return;
-      const nameEl = el.querySelector('.diploma-v2-name');
-      if (nameEl) nameEl.textContent = studentName;
+      applyDiplomaExportNameStyle(el.querySelector('.diploma-v2-name'), studentName);
     };
     if (typeof ReactDOM !== 'undefined' && typeof ReactDOM.flushSync === 'function') {
       ReactDOM.flushSync(() => setPdfExportName(studentName));
@@ -560,16 +644,19 @@ const CertificatePanel = () => {
     if (!diplomaRef.current || !studentName) return false;
     const el = diplomaRef.current;
     const slot = el.closest('.diploma-export-slot');
+    const nameEl = el.querySelector('.diploma-v2-name');
 
     applyExportStudentName(studentName);
     el.classList.add('diploma-exporting');
     if (slot) slot.classList.add('is-exporting');
     el.style.width = `${DIPLOMA_PAGE.widthMm}mm`;
+    el.style.height = `${DIPLOMA_PAGE.heightMm}mm`;
     el.style.maxWidth = `${DIPLOMA_PAGE.widthMm}mm`;
+    el.style.maxHeight = `${DIPLOMA_PAGE.heightMm}mm`;
 
     try {
       await flushRender();
-      await new Promise((resolve) => setTimeout(resolve, 150));
+      await new Promise((resolve) => setTimeout(resolve, 180));
       await saveDiplomaPdfFile(
         el,
         studentName,
@@ -579,7 +666,10 @@ const CertificatePanel = () => {
     } finally {
       el.classList.remove('diploma-exporting');
       el.style.width = '';
+      el.style.height = '';
       el.style.maxWidth = '';
+      el.style.maxHeight = '';
+      if (nameEl) nameEl.style.fontSize = '';
       if (slot) slot.classList.remove('is-exporting');
     }
   };
