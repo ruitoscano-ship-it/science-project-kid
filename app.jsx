@@ -493,6 +493,9 @@ const captureDiplomaCanvas = async (element, studentName) => {
   if (typeof html2canvas === 'undefined') {
     throw new Error('html2canvas unavailable');
   }
+  if (document.fonts?.ready) {
+    await document.fonts.ready;
+  }
   const { w, h } = diplomaExportPx();
   const opts = diplomaHtml2CanvasOpts(studentName);
   return html2canvas(element, {
@@ -504,12 +507,12 @@ const captureDiplomaCanvas = async (element, studentName) => {
   });
 };
 
-const writeDiplomaCanvasToPdf = (canvas, filename) => {
+const buildDiplomaPdfBlob = (canvas) => {
   const JsPDF = getJsPDF();
   if (!JsPDF) throw new Error('jsPDF unavailable');
 
   const pdf = new JsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait' });
-  const imgData = canvas.toDataURL('image/jpeg', 0.96);
+  const imgData = canvas.toDataURL('image/jpeg', 0.92);
   pdf.addImage(
     imgData,
     'JPEG',
@@ -520,12 +523,19 @@ const writeDiplomaCanvasToPdf = (canvas, filename) => {
     undefined,
     'FAST'
   );
-  pdf.save(filename);
+  return pdf.output('blob');
 };
 
-const saveDiplomaPdfFile = async (element, studentName, filename) => {
-  const canvas = await captureDiplomaCanvas(element, studentName);
-  writeDiplomaCanvasToPdf(canvas, filename);
+const downloadBlob = (blob, filename) => {
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = filename;
+  link.style.display = 'none';
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  window.setTimeout(() => URL.revokeObjectURL(url), 3000);
 };
 
 const DiplomaCard = React.forwardRef(({ studentName, groups, totalStars, level }, ref) => (
@@ -633,27 +643,31 @@ const CertificatePanel = () => {
     setDisplayName(n);
   };
 
-  const applyExportStudentName = (studentName) => {
+  const applyExportStudentName = (studentName, syncReact = true) => {
     const syncDom = (el) => {
       if (!el) return;
       applyDiplomaExportNameStyle(el.querySelector('.diploma-v2-name'), studentName);
     };
-    if (typeof ReactDOM !== 'undefined' && typeof ReactDOM.flushSync === 'function') {
-      ReactDOM.flushSync(() => setPdfExportName(studentName));
-    } else {
-      setPdfExportName(studentName);
+    if (syncReact) {
+      if (typeof ReactDOM !== 'undefined' && typeof ReactDOM.flushSync === 'function') {
+        ReactDOM.flushSync(() => setPdfExportName(studentName));
+      } else {
+        setPdfExportName(studentName);
+      }
     }
     syncDom(diplomaRef.current);
   };
 
-  const saveDiplomaPdf = async (studentName) => {
-    if (!diplomaRef.current || !studentName) return false;
+  const captureDiplomaBlob = async (studentName, syncReact = true) => {
+    if (!diplomaRef.current || !studentName) {
+      throw new Error('Diploma element unavailable');
+    }
     const el = diplomaRef.current;
     const slot = el.closest('.diploma-export-slot');
     const nameEl = el.querySelector('.diploma-v2-name');
     const { w, h } = diplomaExportPx();
 
-    applyExportStudentName(studentName);
+    applyExportStudentName(studentName, syncReact);
     el.classList.add('diploma-exporting');
     if (slot) slot.classList.add('is-exporting');
     el.style.width = `${w}px`;
@@ -663,13 +677,9 @@ const CertificatePanel = () => {
 
     try {
       await flushRender();
-      await new Promise((resolve) => setTimeout(resolve, 250));
-      await saveDiplomaPdfFile(
-        el,
-        studentName,
-        `diploma-${safePdfFilename(studentName)}.pdf`
-      );
-      return true;
+      await new Promise((resolve) => setTimeout(resolve, 300));
+      const canvas = await captureDiplomaCanvas(el, studentName);
+      return buildDiplomaPdfBlob(canvas);
     } finally {
       el.classList.remove('diploma-exporting');
       el.style.width = '';
@@ -679,6 +689,12 @@ const CertificatePanel = () => {
       if (nameEl) nameEl.style.fontSize = '';
       if (slot) slot.classList.remove('is-exporting');
     }
+  };
+
+  const saveDiplomaPdf = async (studentName) => {
+    const blob = await captureDiplomaBlob(studentName, true);
+    downloadBlob(blob, `diploma-${safePdfFilename(studentName)}.pdf`);
+    return true;
   };
 
   const exportPdf = async () => {
@@ -708,18 +724,42 @@ const CertificatePanel = () => {
     setPdfBusy(true);
     setBulkProgress({ current: 0, total: classNames.length });
     try {
+      const entries = [];
       for (let i = 0; i < classNames.length; i++) {
         const name = classNames[i];
+        const blob = await captureDiplomaBlob(name, false);
+        entries.push({ name, blob });
         setBulkProgress({ current: i + 1, total: classNames.length });
-        await saveDiplomaPdf(name);
         if (i < classNames.length - 1) {
-          await new Promise((resolve) => setTimeout(resolve, 450));
+          await new Promise((resolve) => setTimeout(resolve, 150));
+        }
+      }
+
+      if (entries.length === 1) {
+        downloadBlob(entries[0].blob, `diploma-${safePdfFilename(entries[0].name)}.pdf`);
+      } else if (typeof JSZip !== 'undefined') {
+        const zip = new JSZip();
+        entries.forEach(({ name, blob }) => {
+          zip.file(`diploma-${safePdfFilename(name)}.pdf`, blob);
+        });
+        const zipBlob = await zip.generateAsync({ type: 'blob' });
+        downloadBlob(zipBlob, 'diplomas-turma.zip');
+      } else {
+        for (let i = 0; i < entries.length; i++) {
+          downloadBlob(
+            entries[i].blob,
+            `diploma-${safePdfFilename(entries[i].name)}.pdf`
+          );
+          if (i < entries.length - 1) {
+            await new Promise((resolve) => setTimeout(resolve, 700));
+          }
         }
       }
     } catch (err) {
       console.error(err);
       window.alert(PDF_EXPORT_ERROR);
     } finally {
+      setPdfExportName('');
       setPdfBusy(false);
       setBulkProgress(null);
     }
@@ -753,6 +793,7 @@ const CertificatePanel = () => {
         <h3 className="cert-class-title">Entrega à turma</h3>
         <p className="cert-class-hint">
           Cola a lista de nomes — um aluno por linha (também podes separar por vírgula).
+          Vários alunos são guardados num ficheiro ZIP.
         </p>
         <label className="cert-label" htmlFor="class-list">Lista de alunos</label>
         <textarea
@@ -777,8 +818,10 @@ const CertificatePanel = () => {
           disabled={pdfBusy || classNames.length === 0}
         >
           {pdfBusy && bulkProgress
-            ? `A guardar ${bulkProgress.current}/${bulkProgress.total}…`
-            : `📄 Exportar ${classNames.length} diploma${classNames.length === 1 ? '' : 's'}`}
+            ? `A preparar ${bulkProgress.current}/${bulkProgress.total}…`
+            : classNames.length > 1
+              ? `📦 Exportar ${classNames.length} diplomas (ZIP)`
+              : `📄 Exportar ${classNames.length} diploma${classNames.length === 1 ? '' : 's'}`}
         </button>
       </div>
 
