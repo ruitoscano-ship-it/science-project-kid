@@ -685,3 +685,151 @@ window.LEARN_MORE = [
     lembrar: 'Água + gravidade + encosta íngreme pedem respeito: a ciência mostra o risco e a tecnologia ajuda a avisar e a conter.'
   }
 ];
+
+// Quiz Surpresa — perguntas de escolha múltipla (4.º ano · pt-PT)
+window.QUIZ_SURPRISA = [
+  {
+    id: 'cheias_meteo',
+    emoji: '🌊',
+    topic: 'Cheias',
+    question: 'Para que servem as estações meteorológicas?',
+    options: ['Medem chuva e vento em tempo real', 'Fazem eletricidade nas barragens', 'Plantam árvores nos rios'],
+    answerIndex: 0,
+    hint: 'Avisam-nos quando está a chover muito!'
+  },
+  {
+    id: 'cheias_barragem',
+    emoji: '🌊',
+    topic: 'Cheias',
+    question: 'Uma barragem pode ajudar a prevenir cheias porque…',
+    options: ['Guarda ou liberta água com controlo', 'Seca o rio completamente', 'Torna o rio mais fundo para sempre'],
+    answerIndex: 0,
+    hint: 'Engenheiros decidem quando abrir as comportas.'
+  },
+  {
+    id: 'incendio_triangulo',
+    emoji: '🔥',
+    topic: 'Incêndios',
+    question: 'O “triângulo do fogo” precisa de três coisas. Qual destas NÃO faz parte?',
+    options: ['Calor', 'Oxigénio', 'Água'],
+    answerIndex: 2,
+    hint: 'Sem calor, oxigénio ou combustível, o fogo apaga.'
+  },
+  {
+    id: 'incendio_vigia',
+    emoji: '🔥',
+    topic: 'Incêndios',
+    question: 'Como é que satélites e torres de vigia ajudam?',
+    options: ['Detetam fumo e calor de longe', 'Apagam o fogo sozinhos', 'Fazem chover em cima das chamas'],
+    answerIndex: 0,
+    hint: 'Quanto mais cedo avisamos, mais pequeno fica o fogo.'
+  },
+  {
+    id: 'terra_sismo',
+    emoji: '🌍',
+    topic: 'Terramotos',
+    question: 'O que fazem os sensores sísmicos?',
+    options: ['Detetam abanões na Terra', 'Preveem o dia exato do terramoto', 'Impedem que a Terra trema'],
+    answerIndex: 0,
+    hint: 'Não dá para prever o dia, mas dá para medir e avisar.'
+  },
+  {
+    id: 'terra_simulacro',
+    emoji: '🌍',
+    topic: 'Terramotos',
+    question: 'Num simulacro de terramoto na escola, o que devemos fazer primeiro?',
+    options: ['Agachar-nos e proteger a cabeça', 'Correr para a rua a gritar', 'Ficar de pé junto à janela'],
+    answerIndex: 0,
+    hint: 'Treinar ajuda a reagir bem no susto.'
+  },
+  {
+    id: 'tempestade_radar',
+    emoji: '⛈️',
+    topic: 'Tempestades',
+    question: 'Radares e satélites ajudam a prever tempestades porque…',
+    options: ['“Veem” nuvens e vento antes de chegarem', 'Aumentam a temperatura do ar', 'Tiram trovões das nuvens'],
+    answerIndex: 0,
+    hint: 'Meteorologistas leem estes mapas todos os dias.'
+  },
+  {
+    id: 'tempestade_relampago',
+    emoji: '⛈️',
+    topic: 'Tempestades',
+    question: 'Durante um relâmpago, o sítio mais seguro é…',
+    options: ['Dentro de casa, longe de janelas', 'Debaixo de uma árvore alta', 'No meio do campo aberto'],
+    answerIndex: 0,
+    hint: 'Árvores altas e metal atraem raios.'
+  },
+  {
+    id: 'seca_agua',
+    emoji: '☀️',
+    topic: 'Secas',
+    question: 'Numa seca, uma boa atitude em casa é…',
+    options: ['Gastar menos água potável', 'Deixar a torneira aberta', 'Regar o jardim ao meio-dia'],
+    answerIndex: 0,
+    hint: 'Cada gota conta quando chove pouco.'
+  },
+  {
+    id: 'seca_medicao',
+    emoji: '☀️',
+    topic: 'Secas',
+    question: 'Sensores que medem humidade do solo ajudam a…',
+    options: ['Saber quando falta água nas plantas', 'Fazer nevar no verão', 'Encher rios instantaneamente'],
+    answerIndex: 0,
+    hint: 'Ciência + tecnologia poupam água.'
+  },
+  {
+    id: 'desliz_chuva',
+    emoji: '⛰️',
+    topic: 'Deslizamentos',
+    question: 'Deslizamentos de terra acontecem sobretudo quando…',
+    options: ['Chove muito e o solo fica encharcado', 'Faz sol durante semanas', 'Nevar nas montanhas'],
+    answerIndex: 0,
+    hint: 'Água + encosta íngreme = perigo.'
+  },
+  {
+    id: 'desliz_drenagem',
+    emoji: '⛰️',
+    topic: 'Deslizamentos',
+    question: 'Boas drenagens nas estradas ajudam porque…',
+    options: ['Levam a água da chuva para sítios seguros', 'Deixam a água parada na estrada', 'Aumentam o peso da encosta'],
+    answerIndex: 0,
+    hint: 'Água parada enfraquece o solo.'
+  },
+  {
+    id: 'geral_112',
+    emoji: '📱',
+    topic: 'Prevenção',
+    question: 'Se vires fumo de incêndio ou perigo grave, deves…',
+    options: ['Ligar 112 e avisar um adulto', 'Gravar vídeo e partilhar só', 'Esconder-te e não dizer nada'],
+    answerIndex: 0,
+    hint: 'Avisar cedo salva vidas.'
+  },
+  {
+    id: 'geral_ciencia_tech',
+    emoji: '🔬',
+    topic: 'Ciência e Tecnologia',
+    question: 'Prevenir catástrofes naturais junta…',
+    options: ['Ciência, tecnologia e boas decisões', 'Só sorte e adivinhação', 'Apenas obras gigantes sozinhos'],
+    answerIndex: 0,
+    hint: 'Todos podemos ajudar — até na escola!'
+  },
+  {
+    id: 'geral_alertas',
+    emoji: '📲',
+    topic: 'Tecnologia',
+    question: 'Alertas no telemóvel da proteção civil servem para…',
+    options: ['Avisar muitas pessoas ao mesmo tempo', 'Jogar videojogos', 'Medir a temperatura do corpo'],
+    answerIndex: 0,
+    hint: 'Tecnologia que protege a comunidade.'
+  },
+  {
+    id: 'cheias_arvores',
+    emoji: '🌳',
+    topic: 'Cheias',
+    question: 'Árvores junto aos rios ajudam a prevenir cheias porque…',
+    options: ['As raízes absorvem água como uma esponja', 'Bloqueiam o rio para sempre', 'Fazem o rio desaparecer'],
+    answerIndex: 0,
+    hint: 'A Natureza também é uma defesa.'
+  }
+];

@@ -319,6 +319,32 @@ const parseStudentNames = (text) =>
       arr.findIndex(n => n.toLowerCase() === name.toLowerCase()) === i
     );
 
+const shuffleArray = (items) => {
+  const arr = [...items];
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+};
+
+const pickQuizQuestions = (pool, count = 10) => {
+  const source = pool?.length ? pool : [];
+  if (source.length >= count) return shuffleArray(source).slice(0, count);
+  const out = [];
+  while (out.length < count) out.push(...shuffleArray(source));
+  return out.slice(0, count);
+};
+
+const pickStudentForQuestion = (students) =>
+  students[Math.floor(Math.random() * students.length)];
+
+const buildQuizSession = (students, pool) => {
+  const questions = pickQuizQuestions(pool, 10);
+  const assignees = questions.map(() => pickStudentForQuestion(students));
+  return { questions, assignees };
+};
+
 const safePdfFilename = (name) =>
   (name || '')
     .replace(/[^\p{L}\p{N}\s-]/gu, '')
@@ -657,6 +683,237 @@ const CertificatePanel = () => {
   );
 };
 
+// ---------- Quiz Surpresa ----------
+const QUIZ_SPIN_TICKS = 22;
+const QUIZ_SPIN_MS = 75;
+
+const SurpriseQuizPanel = () => {
+  const questionPool = typeof QUIZ_SURPRISA !== 'undefined' ? QUIZ_SURPRISA : [];
+  const [classList, setClassList] = useState('');
+  const [phase, setPhase] = useState('setup');
+  const [students, setStudents] = useState([]);
+  const [questions, setQuestions] = useState([]);
+  const [assignees, setAssignees] = useState([]);
+  const [qIndex, setQIndex] = useState(0);
+  const [spinning, setSpinning] = useState(false);
+  const [spinLabel, setSpinLabel] = useState('');
+  const [revealed, setRevealed] = useState(false);
+  const [showAnswer, setShowAnswer] = useState(false);
+  const spinTimerRef = useRef(null);
+
+  const parsedNames = useMemo(() => parseStudentNames(classList), [classList]);
+  const currentQ = questions[qIndex];
+  const currentStudent = assignees[qIndex];
+  const totalQ = questions.length;
+
+  useEffect(() => () => {
+    if (spinTimerRef.current) clearInterval(spinTimerRef.current);
+  }, []);
+
+  const startQuiz = (e) => {
+    e.preventDefault();
+    if (parsedNames.length < 2 || questionPool.length < 1) return;
+    const session = buildQuizSession(parsedNames, questionPool);
+    setStudents(parsedNames);
+    setQuestions(session.questions);
+    setAssignees(session.assignees);
+    setQIndex(0);
+    setRevealed(false);
+    setShowAnswer(false);
+    setSpinLabel('');
+    setPhase('playing');
+  };
+
+  const runSpin = () => {
+    if (spinning || revealed || !students.length || !currentStudent) return;
+    setSpinning(true);
+    setShowAnswer(false);
+    let tick = 0;
+    if (spinTimerRef.current) clearInterval(spinTimerRef.current);
+    spinTimerRef.current = setInterval(() => {
+      tick += 1;
+      if (tick >= QUIZ_SPIN_TICKS) {
+        clearInterval(spinTimerRef.current);
+        spinTimerRef.current = null;
+        setSpinLabel(currentStudent);
+        setSpinning(false);
+        setRevealed(true);
+        return;
+      }
+      setSpinLabel(students[Math.floor(Math.random() * students.length)]);
+    }, QUIZ_SPIN_MS);
+  };
+
+  const nextQuestion = () => {
+    if (qIndex + 1 >= totalQ) {
+      setPhase('done');
+      return;
+    }
+    setQIndex(i => i + 1);
+    setRevealed(false);
+    setShowAnswer(false);
+    setSpinLabel('');
+  };
+
+  const restart = () => {
+    setPhase('setup');
+    setQIndex(0);
+    setRevealed(false);
+    setShowAnswer(false);
+    setSpinLabel('');
+  };
+
+  return (
+    <section className="quiz-page comic-page" aria-labelledby="quiz-title">
+      <h2 id="quiz-title" className="learn-more-title comic-title">🎲 Quiz Surpresa</h2>
+      <ComicBubble className="comic-bubble-center">
+        Carrega a turma, sorteia quem responde — 10 perguntas sobre catástrofes, ciência e tecnologia!
+      </ComicBubble>
+
+      {phase === 'setup' && (
+        <form className="quiz-setup cert-class-block" onSubmit={startQuiz}>
+          <h3 className="cert-class-title">A tua turma</h3>
+          <p className="cert-class-hint">
+            Escreve os nomes dos alunos — um por linha. Precisas de pelo menos <strong>2 alunos</strong>.
+          </p>
+          <label className="cert-label" htmlFor="quiz-class-list">Lista de alunos</label>
+          <textarea
+            id="quiz-class-list"
+            className="cert-textarea"
+            rows={8}
+            maxLength={4000}
+            placeholder={'Maria Silva\nJoão Santos\nAna Costa\nPedro Lima'}
+            value={classList}
+            onChange={e => setClassList(e.target.value)}
+          />
+          <p className="cert-class-count" aria-live="polite">
+            {parsedNames.length < 2
+              ? `${parsedNames.length} aluno${parsedNames.length === 1 ? '' : 's'} — faltam mais nomes!`
+              : `${parsedNames.length} alunos prontos para o sorteio 🎉`}
+          </p>
+          <button
+            type="submit"
+            className="cta btn-press green quiz-start-btn"
+            disabled={parsedNames.length < 2 || questionPool.length < 1}
+          >
+            🚀 Começar o Quiz Surpresa!
+          </button>
+        </form>
+      )}
+
+      {phase === 'playing' && currentQ && (
+        <div className="quiz-play tab-enter">
+          <div className="quiz-progress" aria-label={`Pergunta ${qIndex + 1} de ${totalQ}`}>
+            {questions.map((q, i) => (
+              <span
+                key={q.id}
+                className={`quiz-dot ${i < qIndex ? 'done' : ''} ${i === qIndex ? 'on' : ''}`}
+                aria-hidden="true"
+              />
+            ))}
+            <span className="quiz-progress-label">Pergunta {qIndex + 1} / {totalQ}</span>
+          </div>
+
+          <article key={qIndex} className="quiz-q-card comic-panel">
+            <header className="quiz-q-head">
+              <span className="quiz-q-emoji" aria-hidden="true">{currentQ.emoji}</span>
+              <span className="quiz-q-topic">{currentQ.topic}</span>
+            </header>
+            <h3 className="quiz-q-text">{currentQ.question}</h3>
+            <ul className="quiz-options">
+              {currentQ.options.map((opt, i) => (
+                <li
+                  key={i}
+                  className={`quiz-option ${showAnswer && i === currentQ.answerIndex ? 'correct' : ''} ${showAnswer && i !== currentQ.answerIndex ? 'dim' : ''}`}
+                >
+                  <span className="quiz-option-letter">{String.fromCharCode(65 + i)}</span>
+                  <span>{opt}</span>
+                </li>
+              ))}
+            </ul>
+            {!showAnswer && (
+              <button
+                type="button"
+                className="quiz-reveal-answer cta btn-press"
+                onClick={() => setShowAnswer(true)}
+              >
+                💡 Mostrar resposta certa
+              </button>
+            )}
+            {showAnswer && (
+              <ComicBubble className="quiz-hint-bubble">{currentQ.hint}</ComicBubble>
+            )}
+          </article>
+
+          <div className={`quiz-picker ${spinning ? 'is-spinning' : ''} ${revealed ? 'is-revealed' : ''}`}>
+            <p className="quiz-picker-label">Quem responde?</p>
+            <div className="quiz-picker-stage" aria-live="polite">
+              {revealed ? (
+                <>
+                  <div className="quiz-picker-burst" aria-hidden="true">✨</div>
+                  <p className="quiz-picker-name">{currentStudent}</p>
+                  <p className="quiz-picker-cheer">A vez é tua! 🙋</p>
+                </>
+              ) : (
+                <p className={`quiz-picker-name ${spinning ? 'blur-spin' : 'waiting'}`}>
+                  {spinning ? spinLabel : '🎲 Clica para sortear!'}
+                </p>
+              )}
+            </div>
+            {!revealed && (
+              <button
+                type="button"
+                className="cta btn-press green quiz-spin-btn"
+                onClick={runSpin}
+                disabled={spinning}
+              >
+                {spinning ? '🎰 A sortear…' : '🎲 Sortear aluno!'}
+              </button>
+            )}
+            {revealed && (
+              <button type="button" className="cta btn-press quiz-next-btn" onClick={nextQuestion}>
+                {qIndex + 1 >= totalQ ? '🏁 Ver resultados' : '➡️ Próxima pergunta'}
+              </button>
+            )}
+          </div>
+
+          <div className="quiz-mascot-row" aria-hidden="true">
+            <MascotMini size={64} mood={revealed ? 'happy' : 'happy'} />
+            <ComicBubble className="quiz-mascot-bubble">
+              {revealed ? 'Boa sorte, cientista!' : 'Prof. Eureka está atento…'}
+            </ComicBubble>
+          </div>
+        </div>
+      )}
+
+      {phase === 'done' && (
+        <div className="quiz-done tab-enter">
+          <div className="quiz-done-hero">
+            <span className="quiz-done-trophy" aria-hidden="true">🏆</span>
+            <h3 className="quiz-done-title">Quiz terminado!</h3>
+            <p className="quiz-done-sub">10 perguntas · turma em grande</p>
+          </div>
+          <ul className="quiz-recap">
+            {questions.map((q, i) => (
+              <li key={q.id} className="quiz-recap-item">
+                <span className="quiz-recap-num">{i + 1}</span>
+                <span className="quiz-recap-emoji" aria-hidden="true">{q.emoji}</span>
+                <div className="quiz-recap-body">
+                  <strong>{assignees[i]}</strong>
+                  <span>{q.topic} — {q.question}</span>
+                </div>
+              </li>
+            ))}
+          </ul>
+          <button type="button" className="cta btn-press green" onClick={restart}>
+            🔄 Novo Quiz Surpresa
+          </button>
+        </div>
+      )}
+    </section>
+  );
+};
+
 // ---------- Home screen ----------
 const Home = ({ onPick }) => {
   const edu = typeof HOME_EDUCATION !== 'undefined' ? HOME_EDUCATION : null;
@@ -716,7 +973,18 @@ const Home = ({ onPick }) => {
           className={`home-tab btn-press home-tab-cert ${homeTab === 'certificado' ? 'on' : ''}`}
           onClick={() => setHomeTab('certificado')}
         >
-          🏅 Diploma de Especialista
+          🏅 Diploma
+        </button>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={homeTab === 'quiz'}
+          aria-controls="panel-quiz"
+          id="tab-quiz"
+          className={`home-tab btn-press home-tab-quiz ${homeTab === 'quiz' ? 'on' : ''}`}
+          onClick={() => setHomeTab('quiz')}
+        >
+          🎲 Quiz Surpresa
         </button>
       </nav>
 
@@ -782,6 +1050,12 @@ const Home = ({ onPick }) => {
       {homeTab === 'certificado' && (
         <div id="panel-certificado" role="tabpanel" aria-labelledby="tab-certificado" className="home-tab-panel tab-enter" key="tab-certificado">
           <CertificatePanel />
+        </div>
+      )}
+
+      {homeTab === 'quiz' && (
+        <div id="panel-quiz" role="tabpanel" aria-labelledby="tab-quiz" className="home-tab-panel tab-enter" key="tab-quiz">
+          <SurpriseQuizPanel />
         </div>
       )}
 
