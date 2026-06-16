@@ -200,7 +200,52 @@ const LearnMorePanel = () => {
   );
 };
 
-// ---------- Certificado de participação ----------
+// ---------- Diploma de Especialista ----------
+const DIPLOMA_STORAGE_KEY = 'cvc-diploma-stars';
+const DIPLOMA_MAX_STARS = 9;
+
+const DIPLOMA_GROUPS = [
+  { id: 'agua', disasters: ['cheias', 'tempestades', 'secas', 'deslizamentos'], tone: 'water' },
+  { id: 'fogo', disasters: ['incendios'], tone: 'fire' },
+  { id: 'terra', disasters: ['terramotos'], tone: 'earth' }
+];
+
+const loadDiplomaStars = () => {
+  try {
+    const raw = localStorage.getItem(DIPLOMA_STORAGE_KEY);
+    return raw ? JSON.parse(raw) : {};
+  } catch {
+    return {};
+  }
+};
+
+const saveDiplomaStar = (disasterId, stars) => {
+  const cur = Math.max(0, Math.min(3, Number(stars) || 0));
+  const prev = loadDiplomaStars();
+  const best = Math.max(Number(prev[disasterId]) || 0, cur);
+  if (best === (Number(prev[disasterId]) || 0)) return;
+  const next = { ...prev, [disasterId]: best };
+  try {
+    localStorage.setItem(DIPLOMA_STORAGE_KEY, JSON.stringify(next));
+  } catch { /* ignore */ }
+};
+
+const buildDiplomaGroups = (stored) =>
+  DIPLOMA_GROUPS.map(g => ({
+    ...g,
+    stars: Math.min(
+      3,
+      g.disasters.reduce((max, id) => Math.max(max, Number(stored[id]) || 0), 0)
+    )
+  }));
+
+const diplomaLevelLabel = (total) => {
+  if (total >= 8) return 'Mini-Cientista de Topo';
+  if (total >= 5) return 'Bom Cientista';
+  if (total >= 2) return 'Cientista em Formação';
+  return 'Aprendiz de Cientista';
+};
+
 const formatCertDate = () => {
   try {
     return new Date().toLocaleDateString('pt-PT', { day: 'numeric', month: 'long', year: 'numeric' });
@@ -209,16 +254,84 @@ const formatCertDate = () => {
   }
 };
 
+const DiplomaMicroscope = ({ size = 28 }) => (
+  <svg viewBox="0 0 32 32" width={size} height={size} aria-hidden="true">
+    <circle cx="14" cy="14" r="9" fill="#E8EEF5" stroke="#2D3250" strokeWidth="2" />
+    <rect x="20" y="18" width="4" height="10" rx="1" fill="#2D3250" transform="rotate(35 22 23)" />
+    <circle cx="14" cy="14" r="4" fill="#fff" stroke="#2D3250" strokeWidth="1.5" />
+    <line x1="8" y1="8" x2="5" y2="5" stroke="#2D3250" strokeWidth="2" strokeLinecap="round" />
+  </svg>
+);
+
+const DiplomaSeal = () => (
+  <div className="diploma-v2-seal" aria-hidden="true">
+    <svg viewBox="0 0 88 104" width="72" height="85">
+      <circle cx="44" cy="38" r="30" fill="#E8EEF5" stroke="#2D3250" strokeWidth="3" />
+      <circle cx="44" cy="38" r="14" fill="#fff" stroke="#2D3250" strokeWidth="2" />
+      <rect x="52" y="48" width="5" height="22" rx="2" fill="#2D3250" transform="rotate(32 54 59)" />
+      <line x1="28" y1="22" x2="20" y2="14" stroke="#2D3250" strokeWidth="2.5" strokeLinecap="round" />
+      <path d="M30 66 L38 92 L44 78 L50 92 L58 66 Z" fill="#F39C6B" stroke="#2D3250" strokeWidth="2" strokeLinejoin="round" />
+      <path d="M34 78 L54 78" stroke="#2D3250" strokeWidth="1.5" strokeLinecap="round" />
+    </svg>
+  </div>
+);
+
+const DiplomaDisasterIcon = ({ tone }) => {
+  if (tone === 'water') {
+    return (
+      <svg viewBox="0 0 48 48" width="40" height="40" aria-hidden="true">
+        <path d="M24 8 C18 20 10 24 10 32 C10 38 16 42 24 42 C32 42 38 38 38 32 C38 24 30 20 24 8Z" fill="#4A9FD9" stroke="#2D3250" strokeWidth="2" strokeLinejoin="round" />
+        <path d="M18 34 C20 30 24 28 28 32" stroke="#fff" strokeWidth="2" strokeLinecap="round" fill="none" opacity="0.7" />
+      </svg>
+    );
+  }
+  if (tone === 'fire') {
+    return (
+      <svg viewBox="0 0 48 48" width="40" height="40" aria-hidden="true">
+        <path d="M24 6 C24 18 14 22 14 32 C14 40 20 44 24 44 C28 44 34 40 34 32 C34 22 24 18 24 6Z" fill="#FF6B3D" stroke="#2D3250" strokeWidth="2" strokeLinejoin="round" />
+        <path d="M24 16 C24 24 20 26 20 32 C20 36 22 38 24 38 C26 38 28 36 28 32 C28 26 24 24 24 16Z" fill="#FFD23F" stroke="#2D3250" strokeWidth="1.5" strokeLinejoin="round" />
+      </svg>
+    );
+  }
+  return (
+    <svg viewBox="0 0 48 48" width="40" height="40" aria-hidden="true">
+      <circle cx="24" cy="24" r="16" fill="#6BBE5E" stroke="#2D3250" strokeWidth="2" />
+      <ellipse cx="24" cy="24" rx="16" ry="6" fill="none" stroke="#2D3250" strokeWidth="1.5" />
+      <path d="M8 24 H40" stroke="#2D3250" strokeWidth="1.5" />
+      <path d="M12 16 C18 20 30 20 36 16" stroke="#2D3250" strokeWidth="1.5" fill="none" />
+      <path d="M12 32 C18 28 30 28 36 32" stroke="#2D3250" strokeWidth="1.5" fill="none" />
+    </svg>
+  );
+};
+
+const DiplomaStarRow = ({ count }) => (
+  <div className="diploma-v2-stars" aria-hidden="true">
+    {[1, 2, 3].map(i => <Star key={i} filled={count >= i} size={20} />)}
+  </div>
+);
+
 const CertificatePanel = () => {
   const [kidName, setKidName] = useState('');
   const [displayName, setDisplayName] = useState('');
   const [pdfBusy, setPdfBusy] = useState(false);
+  const [starData, setStarData] = useState(() => loadDiplomaStars());
   const diplomaRef = useRef(null);
+
+  useEffect(() => {
+    const refresh = () => setStarData(loadDiplomaStars());
+    window.addEventListener('focus', refresh);
+    return () => window.removeEventListener('focus', refresh);
+  }, []);
+
+  const groups = useMemo(() => buildDiplomaGroups(starData), [starData]);
+  const totalStars = useMemo(() => groups.reduce((s, g) => s + g.stars, 0), [groups]);
+  const level = diplomaLevelLabel(totalStars);
 
   const generate = (e) => {
     e.preventDefault();
     const n = kidName.trim();
     if (n.length < 2) return;
+    setStarData(loadDiplomaStars());
     setDisplayName(n);
   };
 
@@ -237,7 +350,7 @@ const CertificatePanel = () => {
       await html2pdf()
         .set({
           margin: 0.35,
-          filename: `certificado-${safe}.pdf`,
+          filename: `diploma-${safe}.pdf`,
           image: { type: 'jpeg', quality: 0.96 },
           html2canvas: { scale: 2, useCORS: true, logging: false, backgroundColor: '#FFFDF7' },
           jsPDF: { unit: 'in', format: 'a4', orientation: 'landscape' }
@@ -251,9 +364,9 @@ const CertificatePanel = () => {
 
   return (
     <section className="cert-page comic-page" aria-labelledby="cert-title">
-      <h2 id="cert-title" className="learn-more-title comic-title">🏅 Certificado de Participação</h2>
+      <h2 id="cert-title" className="learn-more-title comic-title">🏅 Diploma de Especialista</h2>
       <ComicBubble className="comic-bubble-center">
-        Escreve o teu nome e recebe um diploma de cientista preparado para prevenir catástrofes!
+        Escreve o teu nome e recebe o diploma oficial — com estrelas das simulações que já fizeste!
       </ComicBubble>
 
       <form className="cert-form" onSubmit={generate}>
@@ -286,46 +399,75 @@ const CertificatePanel = () => {
             </button>
           </div>
 
-          <article ref={diplomaRef} className="diploma" aria-label={`Diploma de ${displayName}`}>
-            <div className="diploma-frame">
-              <div className="diploma-corner tl" aria-hidden="true">★</div>
-              <div className="diploma-corner tr" aria-hidden="true">★</div>
-              <div className="diploma-corner bl" aria-hidden="true">★</div>
-              <div className="diploma-corner br" aria-hidden="true">★</div>
+          <article ref={diplomaRef} className="diploma diploma-v2" aria-label={`Diploma de ${displayName}`}>
+            <div className="diploma-v2-frame">
+              <span className="diploma-v2-corner tl" aria-hidden="true" />
+              <span className="diploma-v2-corner tr" aria-hidden="true" />
+              <span className="diploma-v2-corner bl" aria-hidden="true" />
+              <span className="diploma-v2-corner br" aria-hidden="true" />
 
-              <header className="diploma-head">
-                <span className="diploma-badge">4.º Ano · Ciência e Tecnologia</span>
-                <h3 className="diploma-title">Certificado de Participação</h3>
-                <p className="diploma-sub">Ciência vs. Catástrofes</p>
+              <header className="diploma-v2-head">
+                <DiplomaSeal />
+                <p className="diploma-v2-kicker">Diploma oficial de</p>
+                <h3 className="diploma-v2-title">Mini-Cientista da Prevenção</h3>
+                <p className="diploma-v2-sub">Ciência e Tecnologia contra as Catástrofes Naturais</p>
+                <div className="diploma-v2-rule" aria-hidden="true">
+                  <span className="diploma-v2-rule-star">★</span>
+                  <span className="diploma-v2-rule-line" />
+                  <span className="diploma-v2-rule-star">★</span>
+                </div>
               </header>
 
-              <div className="diploma-body">
-                <div className="diploma-mascot" aria-hidden="true">
-                  <Mascot size={120} />
+              <div className="diploma-v2-body">
+                <p className="diploma-v2-lead">Este diploma é orgulhosamente atribuído a</p>
+                <p className="diploma-v2-name">{displayName}</p>
+                <p className="diploma-v2-desc">
+                  por ter aprendido a usar a{' '}
+                  <span className="diploma-v2-hl">ciência</span> e a{' '}
+                  <span className="diploma-v2-hl">tecnologia</span> — estações meteorológicas,
+                  barragens, sensores, satélites e muito mais — para proteger pessoas, casas e
+                  florestas das catástrofes naturais. 🌍
+                </p>
+
+                <div className="diploma-v2-progress" aria-label={`${totalStars} de ${DIPLOMA_MAX_STARS} estrelas`}>
+                  {groups.map(g => (
+                    <div key={g.id} className={`diploma-v2-badge diploma-v2-badge--${g.tone}`}>
+                      <DiplomaDisasterIcon tone={g.tone} />
+                      <DiplomaStarRow count={g.stars} />
+                    </div>
+                  ))}
                 </div>
-                <div className="diploma-text">
-                  <p className="diploma-lead">Certifica-se que</p>
-                  <p className="diploma-name">{displayName}</p>
-                  <p className="diploma-desc">
-                    participou no simulador <strong>Ciência vs. Catástrofes</strong> e demonstrou estar
-                    preparado(a) para usar a <strong>Ciência</strong> e a <strong>Tecnologia</strong> na
-                    prevenção de desastres naturais — protegendo pessoas, comunidades e o planeta.
-                  </p>
-                  <ul className="diploma-skills" aria-label="Competências">
-                    <li>🔬 Observar e perceber a Natureza</li>
-                    <li>🛠️ Usar ferramentas que avisam e protegem</li>
-                    <li>🛡️ Escolher defesas em equipa</li>
-                  </ul>
-                </div>
+
+                <p className="diploma-v2-level">
+                  Nível alcançado: <strong>{level}</strong>
+                </p>
               </div>
 
-              <footer className="diploma-foot">
-                <div className="diploma-date">{formatCertDate()}</div>
-                <div className="diploma-sign">
-                  <span className="diploma-sign-line" />
-                  <span className="diploma-sign-label">Professor Eureka · Simulador escolar</span>
+              <footer className="diploma-v2-foot">
+                <div className="diploma-v2-sign">
+                  <div className="diploma-v2-avatar" aria-hidden="true">
+                    <MascotMini size={52} />
+                  </div>
+                  <p className="diploma-v2-sign-name">Prof. Eureka</p>
+                  <span className="diploma-v2-sign-line" />
+                  <p className="diploma-v2-sign-role">Diretor do Laboratório</p>
+                </div>
+
+                <div className="diploma-v2-score" aria-label={`${totalStars} estrelas conquistadas`}>
+                  <span className="diploma-v2-score-num">{totalStars}/{DIPLOMA_MAX_STARS}</span>
+                  <span className="diploma-v2-score-label">Estrelas conquistadas</span>
+                </div>
+
+                <div className="diploma-v2-date">
+                  <p className="diploma-v2-date-val">{formatCertDate()}</p>
+                  <span className="diploma-v2-sign-line" />
+                  <p className="diploma-v2-sign-role">Data de atribuição</p>
                 </div>
               </footer>
+
+              <div className="diploma-v2-micro-badge" aria-hidden="true">
+                <DiplomaMicroscope size={22} />
+              </div>
             </div>
           </article>
         </div>
@@ -393,7 +535,7 @@ const Home = ({ onPick }) => {
           className={`home-tab btn-press home-tab-cert ${homeTab === 'certificado' ? 'on' : ''}`}
           onClick={() => setHomeTab('certificado')}
         >
-          🏅 Certificado de Participação
+          🏅 Diploma de Especialista
         </button>
       </nav>
 
@@ -568,6 +710,7 @@ const Simulator = ({ disasterId, onBack }) => {
   };
 
   const closeResult = () => {
+    saveDiplomaStar(disaster.id, outcome.stars);
     setShowResult(false);
     if (mode === 'missao') {
       setMissionState('idle');
